@@ -1,4 +1,4 @@
-module github.com/Cinnazeyy/Esefex
+module github.com/Cinnazeyy/Esefex/test_bot
 
 go 1.21.3
 
