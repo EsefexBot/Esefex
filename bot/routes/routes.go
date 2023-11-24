@@ -6,6 +6,7 @@ import (
 	"esefexbot/filedb"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -20,7 +21,7 @@ func GetSounds(w http.ResponseWriter, r *http.Request, c appcontext.Context) {
 
 	jsonResponse, err := json.Marshal(sounds)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

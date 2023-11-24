@@ -5,6 +5,7 @@ import (
 	"esefexbot/util"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"os"
 	"slices"
@@ -24,7 +25,7 @@ func GetSound(serverId string, soundId string) SoundMeta {
 	metaFile, err := os.Open(path)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	var sound SoundMeta
@@ -73,9 +74,8 @@ func GetSoundIDs(serverId string) []string {
 	}
 
 	files, err := os.ReadDir(path)
-
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	ids := make([]string, 0)
@@ -107,15 +107,13 @@ func AddSound(serverId string, name string, image string, file []byte) string {
 	// write meta file
 	path = fmt.Sprintf("sounds/%s/%s_meta.json", serverId, sound.Id)
 	metaFile, err := os.Create(path)
-
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	metaJson, err := json.Marshal(sound)
-
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	metaFile.Write(metaJson)
@@ -128,7 +126,7 @@ func AddSound(serverId string, name string, image string, file []byte) string {
 	soundFile, err := os.Create(path)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	soundFile.Write(file)
@@ -141,12 +139,12 @@ func DeleteSound(serverId string, sound_id string) {
 	path := fmt.Sprintf("sounds/%s/%s_meta.json", serverId, sound_id)
 	err := os.Remove(path)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	path = fmt.Sprintf("sounds/%s/%s_sound.mp3", serverId, sound_id)
 	err = os.Remove(path)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 }
