@@ -2,6 +2,7 @@ package filedb
 
 import (
 	"encoding/json"
+	"esefexbot/util"
 	"fmt"
 	"io"
 	"math/rand"
@@ -41,15 +42,13 @@ func GenerateSoundID(serverId string) string {
 	min := 100000000
 	max := 999999999
 
-	for true {
+	for {
 		id := strconv.FormatInt(int64(rand.Intn(max-min)+min), 10)
 
 		if !SoundExists(serverId, id) {
 			return id
 		}
 	}
-
-	panic("Could not generate sound id, all ids are taken!!!! Thats like almost a billion sounds! How long have you been running this server?!?!?!")
 }
 
 func SoundExists(serverId string, soundId string) bool {
@@ -69,6 +68,10 @@ func GetSounds(serverId string) []SoundMeta {
 
 func GetSoundIDs(serverId string) []string {
 	path := fmt.Sprintf("sounds/%s", serverId)
+	if !util.PathExists(path) {
+		return make([]string, 0)
+	}
+
 	files, err := os.ReadDir(path)
 
 	if err != nil {

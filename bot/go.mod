@@ -1,4 +1,4 @@
-module webserver
+module esefexbot
 
 go 1.21.3
 

@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"encoding/json"
+	"esefexbot/appcontext"
+	"esefexbot/filedb"
 	"fmt"
 	"io"
 	"net/http"
-	"webserver/appcontext"
 
 	"github.com/gorilla/mux"
 )
@@ -14,10 +16,17 @@ func GetSounds(w http.ResponseWriter, r *http.Request, c appcontext.Context) {
 	vars := mux.Vars(r)
 	server_id := vars["server_id"]
 
-	response := fmt.Sprintf("Get sounds for server %s", server_id)
+	sounds := filedb.GetSounds(server_id)
 
-	fmt.Println(response)
-	io.WriteString(w, response)
+	jsonResponse, err := json.Marshal(sounds)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
+
+	fmt.Println("got /sounds request")
 }
 
 // api/playsound/<server_id>/<sound_id>
