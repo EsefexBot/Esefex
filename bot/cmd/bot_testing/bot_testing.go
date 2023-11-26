@@ -1,34 +1,38 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+
+	_ "github.com/joho/godotenv/autoload"
 )
-
-// Variables used for command line parameters
-var (
-	Token string
-)
-
-func init() {
-
-	flag.StringVar(&Token, "t", "", "Bot Token")
-	flag.Parse()
-}
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + Token)
+	token := os.Getenv("TOKEN")
+	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
-		fmt.Println("error creating Discord session,", err)
-		return
+		log.Println("error creating Discord session,", err)
 	}
+
+	applicationCommand := discordgo.ApplicationCommand{
+		Name:        "ping",
+		Description: "ping pong",
+	}
+
+	cmd, err := dg.ApplicationCommandCreate(dg.State.User.ID, "", &applicationCommand)
+	if err != nil {
+		log.Println("error creating ApplicationCommand,", err)
+	}
+
+	log.Println(cmd.ID)
+
+	// append(registeredCommands, a)
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(messageCreate)
@@ -39,14 +43,14 @@ func main() {
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
 	if err != nil {
-		fmt.Println("error opening connection,", err)
+		log.Println("error opening connection,", err)
 		return
 	}
 
 	// dg.ChannelMessageSend("777344211828604950", "https://media.tenor.com/sAhYu4Wd7IcAAAAd/blm.gif")
 
 	// Wait here until CTRL-C or other term signal is received.
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	log.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
