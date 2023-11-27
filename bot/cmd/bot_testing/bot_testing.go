@@ -20,6 +20,10 @@ func main() {
 		log.Fatalf("Invalid bot parameters: %v", err)
 	}
 
+	if token == "" {
+		log.Fatal("BOT_TOKEN is not set")
+	}
+
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})

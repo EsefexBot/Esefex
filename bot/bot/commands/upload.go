@@ -2,6 +2,8 @@ package commands
 
 import (
 	// "esefexbot/util"
+	"esefexbot/filedb"
+	"esefexbot/util"
 	"fmt"
 	"log"
 
@@ -44,16 +46,18 @@ func Upload(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 
 	icon := optionMap["icon"]
-	log.Println(icon.Value)
-
-	// iconURL := util.GetIconURL(icon)
-
-	// println(iconURL)
+	iconURL := util.ExtractIconUrl(icon)
 
 	soundFile := optionMap["sound-file"]
-	// println(soundFile.Value)
 	soundFileUrl := i.ApplicationCommandData().Resolved.Attachments[fmt.Sprint(soundFile.Value)].URL
-	println(soundFileUrl)
+	log.Println(soundFileUrl)
+
+	f, err := util.DownloadSound(soundFileUrl)
+	if err != nil {
+		log.Println(err)
+	}
+
+	filedb.AddSound(i.GuildID, fmt.Sprint(optionMap["name"].Value), iconURL, f)
 
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
