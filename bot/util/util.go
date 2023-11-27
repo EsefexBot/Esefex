@@ -2,7 +2,7 @@ package util
 
 import (
 	"fmt"
-	"log"
+	"io"
 	"net/http"
 	"os"
 	"regexp"
@@ -37,19 +37,27 @@ func GetSoundURL(guildID, name string) string {
 	return fmt.Sprintf("https://cdn.discordapp.com/attachments/%v/%v.mp3", guildID, name)
 }
 
-func DownloadSound(url string) ([]byte, error) {
-	req, err := http.Get(url)
+func DownloadSound(url string, path string) error {
+	out, err := os.Create(path)
 	if err != nil {
-		log.Fatal(err)
+		return err
+	}
+	defer out.Close()
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "audio/mpeg" {
+		return fmt.Errorf("status code error: %v", resp.StatusCode)
 	}
 
-	if req.Header.Get("Content-Type") != "audio/mpeg" {
-		return nil, fmt.Errorf("invalid content type: %v", req.Header.Get("Content-Type"))
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
 	}
 
-	len := req.ContentLength
-	buf := make([]byte, len)
-	req.Body.Read(buf)
-
-	return buf, nil
+	return nil
 }

@@ -92,7 +92,7 @@ func GetSoundIDs(serverId string) []string {
 	return ids
 }
 
-func AddSound(serverId string, name string, image string, file []byte) string {
+func AddSound(serverId string, name string, image string, soundUrl string) string {
 	sound := SoundMeta{
 		Id:       GenerateSoundID(serverId),
 		ServerId: serverId,
@@ -123,14 +123,10 @@ func AddSound(serverId string, name string, image string, file []byte) string {
 
 	path = fmt.Sprintf("sounds/%s/%s_sound.mp3", serverId, sound.Id)
 
-	soundFile, err := os.Create(path)
-
+	err = util.DownloadSound(soundUrl, path)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	soundFile.Write(file)
-	soundFile.Close()
 
 	return sound.Id
 }

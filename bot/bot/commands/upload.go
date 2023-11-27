@@ -50,15 +50,10 @@ func Upload(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	soundFile := optionMap["sound-file"]
 	soundFileUrl := i.ApplicationCommandData().Resolved.Attachments[fmt.Sprint(soundFile.Value)].URL
-	log.Println(soundFileUrl)
 
-	f, err := util.DownloadSound(soundFileUrl)
-	if err != nil {
-		log.Println(err)
-	}
+	filedb.AddSound(i.GuildID, fmt.Sprint(optionMap["name"].Value), iconURL, soundFileUrl)
 
-	filedb.AddSound(i.GuildID, fmt.Sprint(optionMap["name"].Value), iconURL, f)
-
+	log.Printf("Uploaded sound effect %v to server %v", optionMap["name"].Value, i.GuildID)
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

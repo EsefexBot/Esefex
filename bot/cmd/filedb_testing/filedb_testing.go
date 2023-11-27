@@ -1,10 +1,10 @@
 package main
 
 import (
-	"esefexbot/filedb"
-	"log"
-	"os"
-	"time"
+// "esefexbot/filedb"
+// "log"
+// "os"
+// "time"
 )
 
 func main() {
@@ -17,20 +17,20 @@ func main() {
 	// 	println(sound.Icon)
 	// }
 
-	serverId := "7657"
+	// serverId := "7657"
 
-	f2uPath := "upload_sound.mp3"
+	// f2uPath := "upload_sound.mp3"
 
-	f2u, err := os.ReadFile(f2uPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// f2u, err := os.ReadFile(f2uPath)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	id := filedb.AddSound(serverId, "mogus", "https://image.com/123", f2u)
+	// id := filedb.AddSound(serverId, "mogus", "https://image.com/123", f2u)
 
-	time.Sleep(time.Duration(2500) * time.Millisecond)
+	// time.Sleep(time.Duration(2500) * time.Millisecond)
 
-	println(filedb.SoundExists(serverId, id))
+	// println(filedb.SoundExists(serverId, id))
 
 	// time.Sleep(time.Duration(2500) * time.Millisecond)
 
