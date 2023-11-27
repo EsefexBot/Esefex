@@ -5,10 +5,7 @@ import (
 )
 
 type Context struct {
-}
-
-func NewContext() Context {
-	return Context{}
+	CustomProtocol string
 }
 
 func Wrap(fn func(http.ResponseWriter, *http.Request, Context), c Context) func(http.ResponseWriter, *http.Request) {

@@ -12,12 +12,16 @@ import (
 func main() {
 	println("Starting webserver...")
 
-	context := c.NewContext()
+	context := c.Context{
+		CustomProtocol: "esefex",
+	}
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/sounds/{server_id}", c.Wrap(r.GetSounds, context))
 	router.HandleFunc("/api/playsound/{server_id}/{sound_id}", c.Wrap(r.PlaySound, context))
+
+	router.HandleFunc("/joinsession/{server_id}", c.Wrap(r.JoinSession, context))
 
 	router.HandleFunc("/dump", c.Wrap(r.Dump, context))
 
