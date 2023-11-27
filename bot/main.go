@@ -2,39 +2,28 @@ package main
 
 import (
 	"esefexbot/bot"
-	"flag"
 	"log"
 	"os"
 	"os/signal"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
 	// "github.com/samber/lo"
 )
 
-// Bot parameters
-var (
-	GuildID        = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
-	BotToken       = flag.String("token", "", "Bot access token")
-	RemoveCommands = flag.Bool("rmcmd", true, "Remove all commands after shutdowning or not")
-)
+func main() {
+	godotenv.Load()
+	token := os.Getenv("BOT_TOKEN")
 
-var s *discordgo.Session
-
-func init() { flag.Parse() }
-
-func init() {
-	var err error
-	s, err = discordgo.New("Bot " + *BotToken)
+	s, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Fatalf("Invalid bot parameters: %v", err)
 	}
-}
 
-func main() {
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
-	err := s.Open()
+	err = s.Open()
 	if err != nil {
 		log.Fatalf("Cannot open the session: %v", err)
 	}
