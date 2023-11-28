@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"esefexbot/appcontext"
 	"esefexbot/filedb"
+	"esefexbot/msg"
 	"fmt"
 	"io"
 	"log"
@@ -13,7 +14,7 @@ import (
 )
 
 // api/sounds/<server_id>
-func GetSounds(w http.ResponseWriter, r *http.Request, c appcontext.Context) {
+func GetSounds(w http.ResponseWriter, r *http.Request, c *appcontext.Context) {
 	vars := mux.Vars(r)
 	server_id := vars["server_id"]
 
@@ -31,13 +32,15 @@ func GetSounds(w http.ResponseWriter, r *http.Request, c appcontext.Context) {
 }
 
 // api/playsound/<server_id>/<sound_id>
-func PlaySound(w http.ResponseWriter, r *http.Request, c appcontext.Context) {
+func PlaySound(w http.ResponseWriter, r *http.Request, c *appcontext.Context) {
+	c.Channels.A2B <- msg.MessageA2B{}
+
 	fmt.Printf("got /playsound request\n")
 	io.WriteString(w, "Play sound!\n")
 }
 
 // joinsession/<server_id>
-func JoinSession(w http.ResponseWriter, r *http.Request, c appcontext.Context) {
+func JoinSession(w http.ResponseWriter, r *http.Request, c *appcontext.Context) {
 	vars := mux.Vars(r)
 	server_id := vars["server_id"]
 
@@ -46,11 +49,11 @@ func JoinSession(w http.ResponseWriter, r *http.Request, c appcontext.Context) {
 
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprint(w, response)
-	
+
 	fmt.Printf("got /joinsession request\n")
 }
 
-func Dump(w http.ResponseWriter, r *http.Request, c appcontext.Context) {
+func Dump(w http.ResponseWriter, r *http.Request, c *appcontext.Context) {
 	fmt.Printf("%+v\n", c)
 	fmt.Printf("%+v\n", r)
 

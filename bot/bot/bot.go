@@ -1,51 +1,44 @@
 package bot
 
 import (
-	"esefexbot/bot/commands"
+	"esefexbot/appcontext"
+	"esefexbot/bot/actions"
+	"esefexbot/msg"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func RegisterComands(s *discordgo.Session) {
-	log.Println("Registering commands...")
+func Run(c *appcontext.Context) {
+	log.Println("Starting bot...")
 
-	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commands.Handlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
-		}
+	s := c.DiscordSession
+
+	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
 
-	for _, v := range commands.Commands {
-		_, err := s.ApplicationCommandCreate(s.State.User.ID, "", v)
-		if err != nil {
-			log.Printf("Cannot create '%v' command: %v", v.Name, err)
-		}
-
-		log.Printf("Registered '%v' command", v.Name)
-	}
-}
-
-func DeleteAllCommands(s *discordgo.Session) {
-	log.Println("Deleting all commands...")
-
-	for _, g := range s.State.Guilds {
-		DeleteGuildCommands(s, g.ID)
-	}
-
-	DeleteGuildCommands(s, "")
-
-	log.Println("Deleted all commands")
-}
-
-func DeleteGuildCommands(s *discordgo.Session, guildID string) {
-	cmds, err := s.ApplicationCommands(s.State.User.ID, guildID)
+	err := s.Open()
 	if err != nil {
-		log.Println(err)
+		log.Fatalf("Cannot open the session: %v", err)
 	}
+	defer s.Close()
 
-	for _, v := range cmds {
-		s.ApplicationCommandDelete(s.State.User.ID, guildID, v.ID)
-		log.Printf("Deleted '%v' command", v.Name)
+	log.Println("Adding commands...")
+	RegisterComands(s)
+
+	go ListenForApiRequests(s, c.Channels.A2B)
+
+	log.Println("Bot Ready.")
+	<-c.Channels.Stop
+
+	defer DeleteAllCommands(s)
+}
+
+func ListenForApiRequests(s *discordgo.Session, c chan msg.MessageA2B) {
+	for {
+		msg := <-c
+		actions.UnprovokedMessage(s)
+		log.Printf("Received message: %v", msg)
 	}
 }

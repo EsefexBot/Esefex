@@ -1,47 +1,37 @@
 package main
 
 import (
+	"esefexbot/appcontext"
 	"esefexbot/bot"
+	"esefexbot/msg"
 	"log"
 	"os"
-	"os/signal"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
-	// "github.com/samber/lo"
 )
 
 func main() {
 	godotenv.Load()
 	token := os.Getenv("BOT_TOKEN")
 
+	if token == "" {
+		log.Fatal("BOT_TOKEN is not set")
+		return
+	}
+
 	s, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Fatalf("Invalid bot parameters: %v", err)
 	}
 
-	if token == "" {
-		log.Fatal("BOT_TOKEN is not set")
+	context := appcontext.Context{
+		Channels: appcontext.Channels{
+			A2B: make(chan msg.MessageA2B),
+			B2A: make(chan msg.MessageB2A),
+		},
+		DiscordSession: s,
 	}
 
-	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
-	})
-	err = s.Open()
-	if err != nil {
-		log.Fatalf("Cannot open the session: %v", err)
-	}
-	defer s.Close()
-
-	log.Println("Adding commands...")
-	bot.RegisterComands(s)
-
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-	log.Println("Press Ctrl+C to exit")
-	<-stop
-
-	bot.DeleteAllCommands(s)
-
-	log.Println("Gracefully shutting down.")
+	bot.Run(&context)
 }

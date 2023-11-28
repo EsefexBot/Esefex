@@ -1,12 +1,8 @@
 package main
 
 import (
-	"net/http"
-
+	"esefexbot/api"
 	c "esefexbot/appcontext"
-	r "esefexbot/routes"
-
-	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -14,19 +10,8 @@ func main() {
 
 	context := c.Context{
 		CustomProtocol: "esefex",
+		ApiPort:        "8080",
 	}
 
-	router := mux.NewRouter()
-
-	router.HandleFunc("/api/sounds/{server_id}", c.Wrap(r.GetSounds, context))
-	router.HandleFunc("/api/playsound/{server_id}/{sound_id}", c.Wrap(r.PlaySound, context))
-
-	router.HandleFunc("/joinsession/{server_id}", c.Wrap(r.JoinSession, context))
-
-	router.HandleFunc("/dump", c.Wrap(r.Dump, context))
-
-	// http.Handle("/", router)
-	println("Webserver started!")
-	http.ListenAndServe(":8080", router)
-
+	api.Run(&context)
 }
