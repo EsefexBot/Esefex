@@ -1,9 +1,12 @@
 package commands
 
 import (
+	"esefexbot/bot/actions"
 	"fmt"
+	"log"
 
 	"github.com/bwmarrin/discordgo"
+	// "github.com/samber/lo"
 )
 
 var (
@@ -14,6 +17,29 @@ var (
 )
 
 func Session(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	g, err := s.State.Guild(i.GuildID)
+	if err != nil {
+		log.Printf("Cannot get guild: %v", err)
+	}
+
+	var userChannel string
+	userConnected := false
+	for _, vs := range g.VoiceStates {
+		if vs.UserID == i.Member.User.ID {
+			userConnected = true
+			userChannel = vs.ChannelID
+		}
+	}
+	if !userConnected {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: "You must be connected to a voice channel to get the session link.",
+			},
+		})
+		return
+	}
+
 	protocol := "esefex"
 	route := "joinsession"
 
@@ -25,4 +51,6 @@ func Session(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			Content: url,
 		},
 	})
+
+	actions.JoinChannelVoice(s, i.GuildID, userChannel)
 }

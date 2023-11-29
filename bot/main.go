@@ -18,6 +18,8 @@ func init() {
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	c := appcontext.Context{
 		Channels: appcontext.Channels{
 			A2B:  make(chan msg.MessageA2B),

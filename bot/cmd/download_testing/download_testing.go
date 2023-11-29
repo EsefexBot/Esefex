@@ -15,6 +15,8 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	url := "https://cdn.discordapp.com/attachments/777344211828604950/1178474445673869404/y2mate.com_-_heheheha_Bass_boosted.mp3"
 	// url := "https://cdn.discordapp.com/attachments/777344211828604950/1178752698552700978/test.txt"
 

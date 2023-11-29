@@ -28,14 +28,14 @@ func GetSounds(w http.ResponseWriter, r *http.Request, c *appcontext.Context) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonResponse)
 
-	fmt.Println("got /sounds request")
+	log.Println("got /sounds request")
 }
 
 // api/playsound/<server_id>/<sound_id>
 func PlaySound(w http.ResponseWriter, r *http.Request, c *appcontext.Context) {
 	c.Channels.A2B <- msg.MessageA2B{}
 
-	fmt.Printf("got /playsound request\n")
+	log.Printf("got /playsound request\n")
 	io.WriteString(w, "Play sound!\n")
 }
 
@@ -50,12 +50,12 @@ func JoinSession(w http.ResponseWriter, r *http.Request, c *appcontext.Context) 
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprint(w, response)
 
-	fmt.Printf("got /joinsession request\n")
+	log.Printf("got /joinsession request\n")
 }
 
 func Dump(w http.ResponseWriter, r *http.Request, c *appcontext.Context) {
-	fmt.Printf("%+v\n", c)
-	fmt.Printf("%+v\n", r)
+	log.Printf("%+v\n", c)
+	log.Printf("%+v\n", r)
 
 	io.WriteString(w, "Dump!\n")
 }

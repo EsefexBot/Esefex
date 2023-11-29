@@ -32,6 +32,7 @@ func Run(c *appcontext.Context) {
 	log.Println("Bot Ready.")
 	<-c.Channels.Stop
 
+	// defer actions.LeaveAllChannels(s)
 	defer DeleteAllCommands(s)
 }
 
