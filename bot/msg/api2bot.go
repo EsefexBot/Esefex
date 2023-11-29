@@ -1,3 +1,7 @@
 package msg
 
-type MessageA2B struct{}
+// import "esefexbot/appcontext"
+
+type MessageA2B interface {
+	Execute()
+}

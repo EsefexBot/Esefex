@@ -3,7 +3,7 @@ package main
 import (
 	"esefexbot/appcontext"
 	"esefexbot/bot"
-	"esefexbot/msg"
+	// "esefexbot/msg"
 	"log"
 	"os"
 	"os/signal"
@@ -31,8 +31,8 @@ func main() {
 
 	c := appcontext.Context{
 		Channels: appcontext.Channels{
-			A2B:  make(chan msg.MessageA2B),
-			B2A:  make(chan msg.MessageB2A),
+			// A2B:  make(chan msg.MessageA2B),
+			// B2A:  make(chan msg.MessageB2A),
 			Stop: make(chan bool, 1),
 		},
 		DiscordSession: s,

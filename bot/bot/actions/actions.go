@@ -36,7 +36,3 @@ func JoinChannelVoice(s *discordgo.Session, gID string, cID string) {
 // 		LeaveChannelVoice(s, g.ID)
 // 	}
 // }
-
-func PlaySound(s *discordgo.Session, gID string, cID string) {
-
-}

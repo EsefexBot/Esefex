@@ -3,7 +3,6 @@ package bot
 import (
 	"esefexbot/appcontext"
 	"esefexbot/bot/actions"
-	"esefexbot/msg"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
@@ -27,19 +26,11 @@ func Run(c *appcontext.Context) {
 	log.Println("Adding commands...")
 	RegisterComands(s)
 
-	go ListenForApiRequests(s, c.Channels.A2B)
+	go actions.ListenForApiRequests(s, c)
 
 	log.Println("Bot Ready.")
 	<-c.Channels.Stop
 
 	// defer actions.LeaveAllChannels(s)
 	defer DeleteAllCommands(s)
-}
-
-func ListenForApiRequests(s *discordgo.Session, c chan msg.MessageA2B) {
-	for {
-		msg := <-c
-		actions.UnprovokedMessage(s)
-		log.Printf("Received message: %v", msg)
-	}
 }

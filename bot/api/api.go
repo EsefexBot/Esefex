@@ -13,14 +13,16 @@ import (
 func Run(c *appcontext.Context) {
 	log.Println("Starting webserver...")
 
+	routes := routes.Routes{C: c}
+
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/sounds/{server_id}", appcontext.Wrap(routes.GetSounds, c))
-	router.HandleFunc("/api/playsound/{server_id}/{sound_id}", appcontext.Wrap(routes.PlaySound, c))
+	router.HandleFunc("/api/sounds/{server_id}", routes.GetSounds)
+	router.HandleFunc("/api/playsound/{server_id}/{sound_id}", routes.PlaySound)
 
-	router.HandleFunc("/joinsession/{server_id}", appcontext.Wrap(routes.JoinSession, c))
+	router.HandleFunc("/joinsession/{server_id}", routes.JoinSession)
 
-	router.HandleFunc("/dump", appcontext.Wrap(routes.Dump, c))
+	router.HandleFunc("/dump", routes.Dump)
 
 	// http.Handle("/", router)
 	log.Printf("Webserver started on port %s\n", c.ApiPort)

@@ -1,3 +1,3 @@
 package msg
 
-type MessageB2A struct{}
+// type MessageB2A interface{}
