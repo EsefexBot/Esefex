@@ -1,3 +1,5 @@
+github.com/bwmarrin/dca v0.0.0-20221003192631-e7cc179f7b56 h1:PZ3XGsKharZVOQkePCjImk7zsLe2k90Bo/8mkBnS7TA=
+github.com/bwmarrin/dca v0.0.0-20221003192631-e7cc179f7b56/go.mod h1:bmq4mKUZ9IMhyjgzrsNMhufv6DkXja+JPyYNl5QTvfg=
 github.com/bwmarrin/discordgo v0.27.1 h1:ib9AIc/dom1E/fSIulrBwnez0CToJE113ZGt4HoliGY=
 github.com/bwmarrin/discordgo v0.27.1/go.mod h1:NJZpH+1AfhIcyQsPeuBKsUtYrRnjkyu0kIVMCHkZtRY=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
