@@ -2,31 +2,33 @@ package main
 
 import (
 	"esefexbot/audioprocessing"
+	"io"
 	"os"
 )
 
 func main() {
-	// load data from file
-	f, err := os.Open("test.s16le")
+	sounds := []string{"test1.s16le", "test2.s16le", "test3.s16le", "goofy_ahh.s16le", "oh_mah_gawd.s16le", "ohio_ahh.s16le"}
+
+	mixReader := audioprocessing.S16leMixReader{}
+
+	for _, sound := range sounds {
+		file, err := os.Open(sound)
+		if err != nil {
+			panic(err)
+		}
+
+		cacheReader := audioprocessing.S16leCacheReader{}
+		cacheReader.LoadFromReader(file)
+		mixReader.AddSource(&cacheReader)
+	}
+
+	fileOut, err := os.Create("out.s16le")
 	if err != nil {
 		panic(err)
 	}
-	defer f.Close()
 
-	stat, err := f.Stat()
+	_, err = io.Copy(fileOut, &mixReader)
 	if err != nil {
 		panic(err)
 	}
-
-	// read data to byte slice
-	bytes := make([]byte, stat.Size())
-	_, err = f.Read(bytes)
-	if err != nil {
-		panic(err)
-	}
-
-	// convert byte slice to int16 slice
-	var shorts []int16
-	shorts = audioprocessing.AsPCMs16le(bytes)
-
 }
