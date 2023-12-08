@@ -113,11 +113,11 @@ func LoadDcaSound(path string) ([][]byte, error) {
 	}
 }
 
-func HallucinateDcaData(len int, width int) [][]byte {
+func HallucinateDcaData(len int, opuslen int) [][]byte {
 	var sound [][]byte
 
 	for i := 0; i < len; i++ {
-		buf := make([]byte, width)
+		buf := make([]byte, opuslen)
 		rand.Read(buf)
 		sound = append(sound, buf)
 	}
@@ -125,12 +125,12 @@ func HallucinateDcaData(len int, width int) [][]byte {
 	return sound
 }
 
-func ConstantDcaData(len int, width int, val byte) [][]byte {
+func ConstantDcaData(len int, opuslen int, val byte) [][]byte {
 	var sound [][]byte
 
 	for i := 0; i < len; i++ {
-		buf := make([]byte, width)
-		for j := 0; j < width; j++ {
+		buf := make([]byte, opuslen)
+		for j := 0; j < opuslen; j++ {
 			buf[j] = val
 		}
 		sound = append(sound, buf)
