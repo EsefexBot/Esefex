@@ -3,6 +3,7 @@ package audioprocessing
 import (
 	"encoding/binary"
 	"io"
+	"os"
 )
 
 type S16leCacheReader struct {
@@ -45,4 +46,16 @@ func (s *S16leCacheReader) LoadFromReader(reader io.Reader) (err error) {
 
 	s.Load(bytes)
 	return nil
+}
+
+func S16leFromFile(p string) *S16leCacheReader {
+	f, err := os.Open(p)
+	if err != nil {
+		panic(err)
+	}
+
+	reader := &S16leCacheReader{}
+	reader.LoadFromReader(f)
+
+	return reader
 }

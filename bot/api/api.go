@@ -23,6 +23,7 @@ func Run(c *appcontext.Context) {
 	router.HandleFunc("/joinsession/{server_id}", routes.JoinSession)
 
 	router.HandleFunc("/dump", routes.Dump)
+	router.HandleFunc("/", routes.Index)
 
 	// http.Handle("/", router)
 	log.Printf("Webserver started on port %s\n", c.ApiPort)

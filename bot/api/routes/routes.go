@@ -67,9 +67,15 @@ func (routes *Routes) JoinSession(w http.ResponseWriter, r *http.Request) {
 	log.Printf("got /joinsession request\n")
 }
 
+// /dump
 func (routes *Routes) Dump(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%+v\n", routes.C)
 	log.Printf("%+v\n", r)
 
 	io.WriteString(w, "Dump!\n")
+}
+
+// /
+func (routes *Routes) Index(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Index!\n")
 }
