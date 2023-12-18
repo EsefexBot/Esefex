@@ -24,7 +24,7 @@ func (routes *Routes) GetSounds(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	server_id := vars["server_id"]
 
-	sounds := filedb.GetSounds(server_id)
+	sounds := filedb.GetSoundMetas(server_id)
 
 	jsonResponse, err := json.Marshal(sounds)
 	if err != nil {

@@ -33,7 +33,7 @@ func main() {
 		Channels: appcontext.Channels{
 			// A2B:  make(chan msg.MessageA2B),
 			// B2A:  make(chan msg.MessageB2A),
-			Stop: make(chan bool, 1),
+			Stop: make(chan struct{}, 1),
 		},
 		DiscordSession: s,
 	}

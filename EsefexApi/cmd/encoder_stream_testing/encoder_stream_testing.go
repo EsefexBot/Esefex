@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	src := audioprocessing.S16leFromFile("testsounds/test1.s16le")
-	enc, err := audioprocessing.NewOpusEncoder(src)
+	src := audioprocessing.NewS16leCacheReaderFromFile("testsounds/test1.s16le")
+	enc, err := audioprocessing.NewOpusCliEncoder(src)
 	if err != nil {
 		panic(err)
 	}

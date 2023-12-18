@@ -3,18 +3,18 @@ package audioprocessing
 import (
 	"encoding/binary"
 	"io"
-	"sync"
+	// "sync"
 )
 
 type S16leMixReader struct {
-	sources      []*io.Reader
-	sourcesMutex sync.Mutex
+	sources []*io.Reader
+}
+
+func NewS16leMixReader() *S16leMixReader {
+	return &S16leMixReader{}
 }
 
 func (s *S16leMixReader) Read(p []byte) (n int, err error) {
-	// s.sourcesMutex.Lock()
-	// defer s.sourcesMutex.Unlock()
-
 	if s.sources == nil {
 		return 0, io.EOF
 	}
@@ -56,9 +56,6 @@ func (s *S16leMixReader) Read(p []byte) (n int, err error) {
 }
 
 func (s *S16leMixReader) RemoveSources(rs []io.Reader) {
-	// s.sourcesMutex.Lock()
-	// defer s.sourcesMutex.Unlock()
-
 	for _, r := range rs {
 		for i, source := range s.sources {
 			if *source == r {
@@ -70,8 +67,13 @@ func (s *S16leMixReader) RemoveSources(rs []io.Reader) {
 }
 
 func (s *S16leMixReader) AddSource(source io.Reader) {
-	// s.sourcesMutex.Lock()
-	// defer s.sourcesMutex.Unlock()
-
 	s.sources = append(s.sources, &source)
+}
+
+func (s *S16leMixReader) SourceCount() int {
+	return len(s.sources)
+}
+
+func (s *S16leMixReader) Empty() bool {
+	return len(s.sources) == 0
 }

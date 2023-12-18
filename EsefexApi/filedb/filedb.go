@@ -13,15 +13,27 @@ import (
 	"strings"
 )
 
+type SoundUid struct {
+	ServerId string
+	SoundId  string
+}
+
 type SoundMeta struct {
-	Id       string `json:"id"`
+	SoundId  string `json:"id"`
 	ServerId string `json:"serverId"`
 	Name     string `json:"name"`
 	Icon     string `json:"icon"`
 }
 
-func GetSound(serverId string, soundId string) SoundMeta {
-	path := fmt.Sprintf("sounds/%s/%s_meta.json", serverId, soundId)
+func SuidFromStrings(serverId string, soundId string) SoundUid {
+	return SoundUid{
+		ServerId: serverId,
+		SoundId:  soundId,
+	}
+}
+
+func GetSoundMeta(suid SoundUid) SoundMeta {
+	path := fmt.Sprintf("sounds/%s/%s_meta.json", suid.ServerId, suid.SoundId)
 	metaFile, err := os.Open(path)
 
 	if err != nil {
@@ -56,12 +68,12 @@ func SoundExists(serverId string, soundId string) bool {
 	return slices.Contains(GetSoundIDs(serverId), soundId)
 }
 
-func GetSounds(serverId string) []SoundMeta {
+func GetSoundMetas(serverId string) []SoundMeta {
 	ids := GetSoundIDs(serverId)
 	sounds := make([]SoundMeta, 0)
 
 	for _, id := range ids {
-		sounds = append(sounds, GetSound(serverId, id))
+		sounds = append(sounds, GetSoundMeta(SuidFromStrings(serverId, id)))
 	}
 
 	return sounds
@@ -92,9 +104,40 @@ func GetSoundIDs(serverId string) []string {
 	return ids
 }
 
+func GetAllServerIds() []string {
+	files, err := os.ReadDir("sounds")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ids := make([]string, 0)
+
+	for _, file := range files {
+		if file.IsDir() {
+			ids = append(ids, file.Name())
+		}
+	}
+
+	return ids
+}
+
+func GetAllSoundUids() []SoundUid {
+	servers := GetAllServerIds()
+	suids := make([]SoundUid, 0)
+
+	for _, server := range servers {
+		ids := GetSoundIDs(server)
+		for _, id := range ids {
+			suids = append(suids, SuidFromStrings(server, id))
+		}
+	}
+
+	return suids
+}
+
 func AddSound(serverId string, name string, image string, soundUrl string) string {
 	sound := SoundMeta{
-		Id:       GenerateSoundID(serverId),
+		SoundId:  GenerateSoundID(serverId),
 		ServerId: serverId,
 		Name:     name,
 		Icon:     image,
@@ -105,7 +148,7 @@ func AddSound(serverId string, name string, image string, soundUrl string) strin
 	os.MkdirAll(path, os.ModePerm)
 
 	// write meta file
-	path = fmt.Sprintf("sounds/%s/%s_meta.json", serverId, sound.Id)
+	path = fmt.Sprintf("sounds/%s/%s_meta.json", serverId, sound.SoundId)
 	metaFile, err := os.Create(path)
 	if err != nil {
 		log.Fatal(err)
@@ -121,14 +164,14 @@ func AddSound(serverId string, name string, image string, soundUrl string) strin
 
 	// write sound file
 
-	path = fmt.Sprintf("sounds/%s/%s_sound.mp3", serverId, sound.Id)
+	path = fmt.Sprintf("sounds/%s/%s_sound.mp3", serverId, sound.SoundId)
 
 	err = util.DownloadSound(soundUrl, path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return sound.Id
+	return sound.SoundId
 }
 
 func DeleteSound(serverId string, sound_id string) {
@@ -143,4 +186,19 @@ func DeleteSound(serverId string, sound_id string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func LoadSoundBytes(suid SoundUid) ([]byte, error) {
+	path := fmt.Sprintf("sounds/%s/%s_sound.s16le", suid.ServerId, suid.SoundId)
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	bytes, err := io.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
 }

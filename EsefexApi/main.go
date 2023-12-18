@@ -3,6 +3,7 @@ package main
 import (
 	"esefexapi/api"
 	"esefexapi/appcontext"
+	"esefexapi/audioprocessing"
 	"esefexapi/bot"
 	"esefexapi/msg"
 
@@ -27,11 +28,12 @@ func main() {
 			// A2B:  make(chan msg.MessageA2B),
 			// B2A:  make(chan msg.MessageB2A),
 			PlaySound: make(chan msg.PlaySound),
-			Stop:      make(chan bool, 1),
+			Stop:      make(chan struct{}, 1),
 		},
 		DiscordSession: bot.CreateSession(),
 		CustomProtocol: "esefexapi",
 		ApiPort:        "8080",
+		AudioCache:     audioprocessing.NewAudioCache(),
 	}
 
 	var wg sync.WaitGroup
@@ -51,6 +53,9 @@ func main() {
 	signal.Notify(stop, os.Interrupt)
 	log.Println("Press Ctrl+C to exit")
 	<-stop
+
+	print("\n")
+	log.Println("Stopping...")
 
 	close(c.Channels.Stop)
 	wg.Wait()

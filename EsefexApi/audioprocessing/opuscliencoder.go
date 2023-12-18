@@ -6,14 +6,14 @@ import (
 	"os/exec"
 )
 
-type OpusEncoder struct {
+type OpusCliEncoder struct {
 	source *io.Reader
 	cmd    *exec.Cmd
 	stdin  *io.WriteCloser
 	stdout *io.ReadCloser
 }
 
-func NewOpusEncoder(s io.Reader) (*OpusEncoder, error) {
+func NewOpusCliEncoder(s io.Reader) (*OpusCliEncoder, error) {
 	cmd := exec.Command("opusenc", "--raw", "--raw-bits=16", "--raw-rate=48000", "--raw-chan=2", "--quiet", "-", "-")
 
 	stdin, err := cmd.StdinPipe()
@@ -31,7 +31,7 @@ func NewOpusEncoder(s io.Reader) (*OpusEncoder, error) {
 		return nil, err
 	}
 
-	return &OpusEncoder{
+	return &OpusCliEncoder{
 		source: &s,
 		cmd:    cmd,
 		stdin:  &stdin,
@@ -42,7 +42,7 @@ func NewOpusEncoder(s io.Reader) (*OpusEncoder, error) {
 // Returns the next encoded opus frame (20ms)
 // this function is called 50 times per second
 // and therefore needs to be fast
-func (e *OpusEncoder) EncodeNext() ([]byte, error) {
+func (e *OpusCliEncoder) EncodeNext() ([]byte, error) {
 	buf := make([]byte, 960*2*2)
 
 	// Read from the source
@@ -84,7 +84,7 @@ func (e *OpusEncoder) EncodeNext() ([]byte, error) {
 	return bytes[:n], nil
 }
 
-func (e *OpusEncoder) Close() error {
+func (e *OpusCliEncoder) Close() error {
 	(*e.stdin).Close()
 	(*e.stdout).Close()
 	return e.cmd.Wait()

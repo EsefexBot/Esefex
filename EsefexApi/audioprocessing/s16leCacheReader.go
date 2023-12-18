@@ -48,7 +48,18 @@ func (s *S16leCacheReader) LoadFromReader(reader io.Reader) (err error) {
 	return nil
 }
 
-func S16leFromFile(p string) *S16leCacheReader {
+func NewS16leCacheReader() *S16leCacheReader {
+	return &S16leCacheReader{}
+}
+
+func NewS16leCacheReaderFromBytes(b []byte) *S16leCacheReader {
+	reader := &S16leCacheReader{}
+	reader.Load(b)
+
+	return reader
+}
+
+func NewS16leCacheReaderFromFile(p string) *S16leCacheReader {
 	f, err := os.Open(p)
 	if err != nil {
 		panic(err)
