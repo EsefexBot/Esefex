@@ -2,7 +2,7 @@ package commands
 
 import (
 	// "esefexapi/util"
-	"esefexapi/filedb"
+	"esefexapi/db/filedb"
 	"esefexapi/util"
 	"fmt"
 	"log"

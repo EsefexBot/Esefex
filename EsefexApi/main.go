@@ -5,6 +5,8 @@ import (
 	"esefexapi/audioprocessing"
 	"esefexapi/bot"
 	"esefexapi/ctx"
+	"esefexapi/db"
+	"esefexapi/db/filedb"
 	"esefexapi/msg"
 
 	// "esefexapi/msg"
@@ -18,10 +20,11 @@ import (
 
 func init() {
 	godotenv.Load()
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	var db db.SoundDB = filedb.NewFileDb()
 
 	c := ctx.Ctx{
 		Channels: ctx.Channels{

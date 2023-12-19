@@ -1,23 +1,24 @@
 package audioprocessing
 
 import (
-	"esefexapi/filedb"
+	"esefexapi/db"
+	"esefexapi/db/filedb"
 	"log"
 	"sync"
 )
 
 type AudioCache struct {
-	sounds map[filedb.SoundUid][]byte
+	sounds map[db.SoundUID][]byte
 	rw     sync.RWMutex
 }
 
 func NewAudioCache() *AudioCache {
 	return &AudioCache{
-		sounds: make(map[filedb.SoundUid][]byte),
+		sounds: make(map[db.SoundUID][]byte),
 	}
 }
 
-func (a *AudioCache) GetSound(uid filedb.SoundUid) ([]byte, error) {
+func (a *AudioCache) GetSound(uid db.SoundUID) ([]byte, error) {
 	a.rw.RLock()
 	defer a.rw.RUnlock()
 
@@ -33,7 +34,7 @@ func (a *AudioCache) GetSound(uid filedb.SoundUid) ([]byte, error) {
 	return a.sounds[uid], nil
 }
 
-func (a *AudioCache) LoadSound(uid filedb.SoundUid) error {
+func (a *AudioCache) LoadSound(uid db.SoundUID) error {
 	a.rw.Lock()
 	defer a.rw.Unlock()
 

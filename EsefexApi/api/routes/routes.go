@@ -3,10 +3,8 @@ package routes
 import (
 	"encoding/json"
 	"esefexapi/ctx"
-	"esefexapi/filedb"
+	"esefexapi/db/filedb"
 	"esefexapi/msg"
-
-	// "esefexapi/msg"
 	"fmt"
 	"io"
 	"log"

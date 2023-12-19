@@ -2,6 +2,7 @@ package appctx
 
 import (
 	"esefexapi/audioprocessing"
+	"esefexapi/db"
 	"esefexapi/msg"
 	"esefexapi/vchandler"
 	"log"
@@ -17,6 +18,7 @@ type Context struct {
 	DiscordSession    *discordgo.Session
 	AudioCache        *audioprocessing.AudioCache
 	ConnectionHandler *vchandler.ConnectionHandler
+	DB                *db.SoundDB
 }
 
 type Channels struct {
