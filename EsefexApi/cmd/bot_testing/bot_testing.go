@@ -1,8 +1,8 @@
 package main
 
 import (
-	"esefexapi/appcontext"
 	"esefexapi/bot"
+	"esefexapi/ctx"
 	// "esefexapi/msg"
 	"log"
 	"os"
@@ -29,8 +29,8 @@ func main() {
 		log.Fatalf("Invalid bot parameters: %v", err)
 	}
 
-	c := appcontext.Context{
-		Channels: appcontext.Channels{
+	c := ctx.Ctx{
+		Channels: ctx.Channels{
 			// A2B:  make(chan msg.MessageA2B),
 			// B2A:  make(chan msg.MessageB2A),
 			Stop: make(chan struct{}, 1),

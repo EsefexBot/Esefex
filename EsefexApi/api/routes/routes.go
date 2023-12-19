@@ -2,7 +2,7 @@ package routes
 
 import (
 	"encoding/json"
-	"esefexapi/appcontext"
+	"esefexapi/ctx"
 	"esefexapi/filedb"
 	"esefexapi/msg"
 
@@ -16,7 +16,7 @@ import (
 )
 
 type Routes struct {
-	C *appcontext.Context
+	C *ctx.Ctx
 }
 
 // api/sounds/<server_id>

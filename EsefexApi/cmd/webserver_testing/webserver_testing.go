@@ -2,7 +2,7 @@ package main
 
 import (
 	"esefexapi/api"
-	c "esefexapi/appcontext"
+	c "esefexapi/ctx"
 	"log"
 )
 
@@ -11,7 +11,7 @@ func main() {
 
 	println("Starting webserver...")
 
-	context := c.Context{
+	context := c.Ctx{
 		CustomProtocol: "esefex",
 		ApiPort:        "8080",
 	}

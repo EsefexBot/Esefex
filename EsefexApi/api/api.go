@@ -2,7 +2,7 @@ package api
 
 import (
 	"esefexapi/api/routes"
-	"esefexapi/appcontext"
+	"esefexapi/ctx"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Run(c *appcontext.Context) {
+func Run(c *ctx.Ctx) {
 	log.Println("Starting webserver...")
 
 	routes := routes.Routes{C: c}

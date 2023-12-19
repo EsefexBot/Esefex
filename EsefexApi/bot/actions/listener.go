@@ -1,13 +1,13 @@
 package actions
 
 import (
-	"esefexapi/appcontext"
+	"esefexapi/ctx"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func ListenForApiRequests(s *discordgo.Session, c *appcontext.Context) {
+func ListenForApiRequests(s *discordgo.Session, c *ctx.Ctx) {
 	for {
 		msg := <-c.Channels.PlaySound
 		PlaySound(s, msg)

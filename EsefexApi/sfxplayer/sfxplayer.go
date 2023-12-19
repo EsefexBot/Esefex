@@ -1,7 +1,6 @@
-package audioqueue
+package sfxplayer
 
 import (
-	"esefexapi/appcontext"
 	"esefexapi/audioprocessing"
 	"esefexapi/filedb"
 	"log"
@@ -10,18 +9,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type AudioQueue struct {
+type SfxPlayer struct {
 	playSound chan filedb.SoundUid
 	stop      chan struct{}
 	mixer     *audioprocessing.S16leMixReader
 	enc       *audioprocessing.GopusEncoder
 	vc        *discordgo.VoiceConnection
-	ds        *discordgo.Session
-	ctx       *appcontext.Context
 }
 
-func NewAudioQueue(ctx *appcontext.Context, guildID string, channelID string) (*AudioQueue, error) {
-	vc, err := ctx.DiscordSession.ChannelVoiceJoin(guildID, channelID, false, true)
+func NewSfxPlayer(guildID string, channelID string) (*SfxPlayer, error) {
+
+	vc, err := appctx.GetInstance().DiscordSession.ChannelVoiceJoin(guildID, channelID, false, true)
 	if err != nil {
 		return nil, err
 	}
@@ -30,25 +28,24 @@ func NewAudioQueue(ctx *appcontext.Context, guildID string, channelID string) (*
 
 	enc, err := audioprocessing.NewGopusEncoder(mixer)
 
-	return &AudioQueue{
+	return &SfxPlayer{
 		playSound: make(chan filedb.SoundUid),
 		stop:      make(chan struct{}),
 		mixer:     mixer,
 		enc:       enc,
 		vc:        vc,
-		ctx:       ctx,
 	}, nil
 }
 
 // this is the main loop of the audio queue
-func (a *AudioQueue) Run() {
+func (a *SfxPlayer) Run() {
 	a.vc.Speaking(true)
 
 	go func() {
 		for {
 			select {
 			case sound := <-a.playSound:
-				b, err := a.ctx.AudioCache.GetSound(sound)
+				b, err := appctx.ctx.AudioCache.GetSound(sound)
 				if err != nil {
 					log.Println(err)
 					continue
@@ -76,7 +73,7 @@ func (a *AudioQueue) Run() {
 	}()
 }
 
-func (a *AudioQueue) Close() {
+func (a *SfxPlayer) Close() {
 	close(a.stop)
 	a.vc.Speaking(false)
 	a.vc.Disconnect()

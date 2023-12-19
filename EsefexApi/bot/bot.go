@@ -1,14 +1,14 @@
 package bot
 
 import (
-	"esefexapi/appcontext"
 	"esefexapi/bot/actions"
+	"esefexapi/ctx"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func Run(c *appcontext.Context) {
+func Run(c *ctx.Ctx) {
 	log.Println("Starting bot...")
 
 	s := c.DiscordSession

@@ -2,9 +2,9 @@ package main
 
 import (
 	"esefexapi/api"
-	"esefexapi/appcontext"
 	"esefexapi/audioprocessing"
 	"esefexapi/bot"
+	"esefexapi/ctx"
 	"esefexapi/msg"
 
 	// "esefexapi/msg"
@@ -23,8 +23,8 @@ func init() {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	c := appcontext.Context{
-		Channels: appcontext.Channels{
+	c := ctx.Ctx{
+		Channels: ctx.Channels{
 			// A2B:  make(chan msg.MessageA2B),
 			// B2A:  make(chan msg.MessageB2A),
 			PlaySound: make(chan msg.PlaySound),
