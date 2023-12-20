@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// GetServerIDs implements sounddb.SoundDB.
 func (f *FileDB) GetServerIDs() ([]string, error) {
 	files, err := os.ReadDir("sounds")
 	if err != nil {

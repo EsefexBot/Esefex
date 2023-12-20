@@ -1,17 +1,27 @@
 package bot
 
 import (
-	"esefexapi/bot/actions"
-	"esefexapi/ctx"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func Run(c *ctx.Ctx) {
+type DiscordBot struct {
+	Session *discordgo.Session
+	stop    chan struct{}
+}
+
+func NewDiscordBot(s *discordgo.Session) *DiscordBot {
+	return &DiscordBot{
+		Session: s,
+		stop:    make(chan struct{}, 1),
+	}
+}
+
+func (b *DiscordBot) run() {
 	log.Println("Starting bot...")
 
-	s := c.DiscordSession
+	s := b.Session
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
@@ -26,11 +36,17 @@ func Run(c *ctx.Ctx) {
 	log.Println("Adding commands...")
 	RegisterComands(s)
 
-	go actions.ListenForApiRequests(s, c)
-
 	log.Println("Bot Ready.")
-	<-c.Channels.Stop
+	<-b.stop
 
 	// defer actions.LeaveAllChannels(s)
 	defer DeleteAllCommands(s)
+}
+
+func (b *DiscordBot) Start() {
+	go b.run()
+}
+
+func (b *DiscordBot) Stop() {
+	close(b.stop)
 }

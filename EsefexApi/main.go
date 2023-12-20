@@ -4,10 +4,10 @@ import (
 	"esefexapi/api"
 	"esefexapi/audioprocessing"
 	"esefexapi/bot"
-	"esefexapi/ctx"
-	"esefexapi/db"
-	"esefexapi/db/filedb"
 	"esefexapi/msg"
+	"esefexapi/sounddb"
+	"esefexapi/sounddb/dbcache"
+	"esefexapi/sounddb/filedb"
 
 	// "esefexapi/msg"
 	"log"
@@ -24,20 +24,20 @@ func init() {
 }
 
 func main() {
-	var db db.SoundDB = filedb.NewFileDb()
+	var db sounddb.ISoundDB = dbcache.NewDBCache(filedb.NewFileDB())
 
-	c := ctx.Ctx{
-		Channels: ctx.Channels{
-			// A2B:  make(chan msg.MessageA2B),
-			// B2A:  make(chan msg.MessageB2A),
-			PlaySound: make(chan msg.PlaySound),
-			Stop:      make(chan struct{}, 1),
-		},
-		DiscordSession: bot.CreateSession(),
-		CustomProtocol: "esefexapi",
-		ApiPort:        "8080",
-		AudioCache:     audioprocessing.NewAudioCache(),
-	}
+	// c := ctx.Ctx{
+	// 	Channels: ctx.Channels{
+	// 		// A2B:  make(chan msg.MessageA2B),
+	// 		// B2A:  make(chan msg.MessageB2A),
+	// 		PlaySound: make(chan msg.PlaySound),
+	// 		Stop:      make(chan struct{}, 1),
+	// 	},
+	// 	DiscordSession: bot.CreateSession(),
+	// 	CustomProtocol: "esefexapi",
+	// 	ApiPort:        "8080",
+	// 	AudioCache:     audioprocessing.NewAudioCache(),
+	// }
 
 	var wg sync.WaitGroup
 	wg.Add(2)

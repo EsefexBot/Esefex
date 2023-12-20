@@ -2,19 +2,21 @@ package main
 
 import (
 	"esefexapi/api"
-	c "esefexapi/ctx"
+	"esefexapi/audioplayer"
+	"esefexapi/audioplayer/mockplayer"
+	"esefexapi/sounddb"
+	"esefexapi/sounddb/dbcache"
+	"esefexapi/sounddb/filedb"
 	"log"
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	println("Starting webserver...")
+	var db sounddb.ISoundDB = dbcache.NewDBCache(filedb.NewFileDB())
+	var player audioplayer.IAudioPlayer = mockplayer.NewMockPlayer()
 
-	context := c.Ctx{
-		CustomProtocol: "esefex",
-		ApiPort:        "8080",
-	}
+	api := api.NewHttpApi(db, player, 8080, "esefexapi")
 
-	api.Run(&context)
+	api.Start()
 }

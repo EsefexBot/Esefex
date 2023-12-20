@@ -1,6 +1,6 @@
-package db
+package sounddb
 
-type SoundDB interface {
+type ISoundDB interface {
 	AddSound(serverID string, name string, icon string, pcm []int16) (SoundUID, error)
 	DeleteSound(uid SoundUID) error
 	GetSoundMeta(uid SoundUID) (SoundMeta, error)

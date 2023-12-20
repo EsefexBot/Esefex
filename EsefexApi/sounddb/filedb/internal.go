@@ -1,7 +1,7 @@
 package filedb
 
 import (
-	"esefexapi/db"
+	"esefexapi/sounddb"
 	"math/rand"
 	"slices"
 	"strconv"
@@ -15,7 +15,7 @@ func (f *FileDB) generateSoundID(serverId string) (string, error) {
 	for {
 		id := strconv.FormatInt(int64(rand.Intn(max-min)+min), 10)
 
-		exists, err := f.soundExists(db.SuidFromStrings(serverId, id))
+		exists, err := f.soundExists(sounddb.SuidFromStrings(serverId, id))
 		if err != nil {
 			return "", err
 		}
@@ -26,7 +26,7 @@ func (f *FileDB) generateSoundID(serverId string) (string, error) {
 	}
 }
 
-func (f *FileDB) soundExists(uid db.SoundUID) (bool, error) {
+func (f *FileDB) soundExists(uid sounddb.SoundUID) (bool, error) {
 	uids, err := f.GetSoundUIDs(uid.ServerID)
 	if err != nil {
 		return false, err

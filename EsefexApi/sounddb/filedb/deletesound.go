@@ -1,13 +1,14 @@
 package filedb
 
 import (
-	"esefexapi/db"
+	"esefexapi/sounddb"
 	"fmt"
 	"log"
 	"os"
 )
 
-func (f *FileDB) DeleteSound(uid db.SoundUID) error {
+// DeleteSound implements sounddb.SoundDB.
+func (f *FileDB) DeleteSound(uid sounddb.SoundUID) error {
 	path := fmt.Sprintf("sounds/%s/%s_meta.json", uid.ServerID, uid.SoundID)
 	err := os.Remove(path)
 	if err != nil {

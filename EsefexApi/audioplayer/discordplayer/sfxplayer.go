@@ -1,9 +1,8 @@
-package sfxplayer
+package discordplayer
 
 import (
 	"esefexapi/audioprocessing"
-	"esefexapi/db"
-	// "esefexapi/db/filedb"
+	"esefexapi/sounddb"
 	"log"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 )
 
 type SfxPlayer struct {
-	playSound chan db.SoundUID
+	playSound chan sounddb.SoundUID
 	stop      chan struct{}
 	mixer     *audioprocessing.S16leMixReader
 	enc       *audioprocessing.GopusEncoder
@@ -30,7 +29,7 @@ func NewSfxPlayer(guildID string, channelID string) (*SfxPlayer, error) {
 	enc, err := audioprocessing.NewGopusEncoder(mixer)
 
 	return &SfxPlayer{
-		playSound: make(chan db.SoundUID),
+		playSound: make(chan sounddb.SoundUID),
 		stop:      make(chan struct{}),
 		mixer:     mixer,
 		enc:       enc,

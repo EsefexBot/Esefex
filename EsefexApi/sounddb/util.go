@@ -1,4 +1,4 @@
-package db
+package sounddb
 
 func SuidFromStrings(serverId string, soundId string) SoundUID {
 	return SoundUID{

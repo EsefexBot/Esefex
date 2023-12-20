@@ -2,13 +2,14 @@ package filedb
 
 import (
 	"encoding/binary"
-	"esefexapi/db"
+	"esefexapi/sounddb"
 	"fmt"
 	"io"
 	"os"
 )
 
-func (f *FileDB) GetSoundPcm(uid db.SoundUID) ([]int16, error) {
+// GetSoundPcm implements sounddb.SoundDB.
+func (f *FileDB) GetSoundPcm(uid sounddb.SoundUID) ([]int16, error) {
 	path := fmt.Sprintf("sounds/%s/%s_sound.s16le", uid.ServerID, uid.SoundID)
 	sf, err := os.Open(path)
 	if err != nil {
