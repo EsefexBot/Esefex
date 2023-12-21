@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
-	// "github.com/samber/lo"
 )
 
 var (
@@ -16,7 +15,7 @@ var (
 	}
 )
 
-func Session(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *CommandHandlers) Session(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	g, err := s.State.Guild(i.GuildID)
 	if err != nil {
 		log.Printf("Cannot get guild: %v", err)

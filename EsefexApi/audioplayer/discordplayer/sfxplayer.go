@@ -15,11 +15,12 @@ type SfxPlayer struct {
 	mixer     *audioprocessing.S16leMixReader
 	enc       *audioprocessing.GopusEncoder
 	vc        *discordgo.VoiceConnection
+	dc        *discordgo.Session
+	db        sounddb.ISoundDB
 }
 
-func NewSfxPlayer(guildID string, channelID string) (*SfxPlayer, error) {
-
-	vc, err := appctx.GetInstance().DiscordSession.ChannelVoiceJoin(guildID, channelID, false, true)
+func NewSfxPlayer(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, channelID string) (*SfxPlayer, error) {
+	vc, err := dc.ChannelVoiceJoin(guildID, channelID, false, true)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +35,8 @@ func NewSfxPlayer(guildID string, channelID string) (*SfxPlayer, error) {
 		mixer:     mixer,
 		enc:       enc,
 		vc:        vc,
+		dc:        dc,
+		db:        db,
 	}, nil
 }
 
@@ -45,13 +48,13 @@ func (a *SfxPlayer) Run() {
 		for {
 			select {
 			case sound := <-a.playSound:
-				b, err := appctx.ctx.AudioCache.GetSound(sound)
+				pcm, err := a.db.GetSoundPcm(sound)
 				if err != nil {
 					log.Println(err)
 					continue
 				}
 
-				s := audioprocessing.NewS16leCacheReaderFromBytes(b)
+				s := audioprocessing.NewS16leCacheReaderFromPCM(pcm)
 				a.mixer.AddSource(s)
 			case <-a.stop:
 				return

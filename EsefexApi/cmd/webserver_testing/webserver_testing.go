@@ -8,6 +8,8 @@ import (
 	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filedb"
 	"log"
+	"os"
+	"os/signal"
 )
 
 func main() {
@@ -18,5 +20,12 @@ func main() {
 
 	api := api.NewHttpApi(db, player, 8080, "esefexapi")
 
-	api.Start()
+	<-api.Start()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+	log.Println("Press Ctrl+C to exit")
+	<-stop
+
+	<-api.Stop()
 }

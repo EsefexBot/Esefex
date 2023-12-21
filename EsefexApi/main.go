@@ -2,18 +2,13 @@ package main
 
 import (
 	"esefexapi/api"
-	"esefexapi/audioprocessing"
+	"esefexapi/audioplayer/discordplayer"
 	"esefexapi/bot"
-	"esefexapi/msg"
-	"esefexapi/sounddb"
 	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filedb"
 
 	// "esefexapi/msg"
 	"log"
-	"os"
-	"os/signal"
-	"sync"
 
 	"github.com/joho/godotenv"
 )
@@ -24,42 +19,21 @@ func init() {
 }
 
 func main() {
-	var db sounddb.ISoundDB = dbcache.NewDBCache(filedb.NewFileDB())
+	ds, err := bot.CreateSession()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// c := ctx.Ctx{
-	// 	Channels: ctx.Channels{
-	// 		// A2B:  make(chan msg.MessageA2B),
-	// 		// B2A:  make(chan msg.MessageB2A),
-	// 		PlaySound: make(chan msg.PlaySound),
-	// 		Stop:      make(chan struct{}, 1),
-	// 	},
-	// 	DiscordSession: bot.CreateSession(),
-	// 	CustomProtocol: "esefexapi",
-	// 	ApiPort:        "8080",
-	// 	AudioCache:     audioprocessing.NewAudioCache(),
-	// }
+	db := dbcache.NewDBCache(filedb.NewFileDB())
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+	a := discordplayer.NewDiscordPlayer(ds, db)
 
-	go func() {
-		defer wg.Done()
-		bot.Run(&c)
-	}()
+	api := api.NewHttpApi(db, a, 8080, "http")
+	bot := bot.NewDiscordBot(ds, db)
 
-	go func() {
-		defer wg.Done()
-		api.Run(&c)
-	}()
+	<-api.Start()
+	<-bot.Start()
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-	log.Println("Press Ctrl+C to exit")
-	<-stop
-
-	print("\n")
-	log.Println("Stopping...")
-
-	close(c.Channels.Stop)
-	wg.Wait()
+	<-api.Stop()
+	<-api.Stop()
 }
