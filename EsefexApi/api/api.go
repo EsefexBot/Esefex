@@ -56,10 +56,9 @@ func (api *HttpApi) run() {
 	// http.Handle("/", router)
 	log.Printf("Webserver started on port %d\n", api.apiPort)
 
-	close(api.ready)
-
 	go http.ListenAndServe(fmt.Sprintf(":%d", api.apiPort), router)
 
+	close(api.ready)
 	<-api.stop
 }
 

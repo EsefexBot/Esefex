@@ -7,8 +7,9 @@ import (
 	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filedb"
 
-	// "esefexapi/msg"
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/joho/godotenv"
 )
@@ -34,6 +35,11 @@ func main() {
 	<-api.Start()
 	<-bot.Start()
 
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+	log.Println("Press Ctrl+C to exit")
+	<-stop
+
 	<-api.Stop()
-	<-api.Stop()
+	<-bot.Stop()
 }
