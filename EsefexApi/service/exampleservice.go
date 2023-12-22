@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var _ Service = &ExampleService{}
+var _ IService = &ExampleService{}
 
 // Service is the interface that all services must implement
 type ExampleService struct {

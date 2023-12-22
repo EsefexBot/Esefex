@@ -1,7 +1,10 @@
 package discordplayer
 
 import (
+	"esefexapi/audioplayer/discordplayer/vcon"
+
 	"esefexapi/audioplayer"
+	"esefexapi/service"
 	"esefexapi/sounddb"
 
 	"time"
@@ -14,24 +17,24 @@ var (
 	sessionTimeout = 5 * time.Minute
 )
 
+var _ service.IService = &DiscordPlayer{}
 var _ audioplayer.IAudioPlayer = &DiscordPlayer{}
 
 // DiscordPlayer implements PlaybackManager
 type DiscordPlayer struct {
-	s  map[string]*SfxPlayer
-	ds *discordgo.Session
-	db sounddb.ISoundDB
+	vcs   map[string]*vcon.VCon
+	ds    *discordgo.Session
+	db    sounddb.ISoundDB
+	stop  chan struct{}
+	ready chan struct{}
 }
 
 func NewDiscordPlayer(ds *discordgo.Session, db sounddb.ISoundDB) *DiscordPlayer {
 	return &DiscordPlayer{
-		s:  make(map[string]*SfxPlayer),
-		ds: ds,
-		db: db,
+		vcs:   make(map[string]*vcon.VCon),
+		ds:    ds,
+		db:    db,
+		stop:  make(chan struct{}),
+		ready: make(chan struct{}),
 	}
-}
-
-func (c *DiscordPlayer) PlaySound(uid sounddb.SoundUID, userID string) error {
-	panic("not implemented")
-	return nil
 }

@@ -1,4 +1,4 @@
-package discordplayer
+package vcon
 
 import (
 	"esefexapi/audioprocessing"
@@ -9,7 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type SfxPlayer struct {
+type VCon struct {
 	playSound chan sounddb.SoundUID
 	stop      chan struct{}
 	mixer     *audioprocessing.S16leMixReader
@@ -19,7 +19,7 @@ type SfxPlayer struct {
 	db        sounddb.ISoundDB
 }
 
-func NewSfxPlayer(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, channelID string) (*SfxPlayer, error) {
+func NewSfxPlayer(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, channelID string) (*VCon, error) {
 	vc, err := dc.ChannelVoiceJoin(guildID, channelID, false, true)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func NewSfxPlayer(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, ch
 
 	enc, err := audioprocessing.NewGopusEncoder(mixer)
 
-	return &SfxPlayer{
+	return &VCon{
 		playSound: make(chan sounddb.SoundUID),
 		stop:      make(chan struct{}),
 		mixer:     mixer,
@@ -41,7 +41,7 @@ func NewSfxPlayer(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, ch
 }
 
 // this is the main loop of the audio queue
-func (a *SfxPlayer) Run() {
+func (a *VCon) Run() {
 	a.vc.Speaking(true)
 
 	go func() {
@@ -76,7 +76,7 @@ func (a *SfxPlayer) Run() {
 	}()
 }
 
-func (a *SfxPlayer) Close() {
+func (a *VCon) Close() {
 	close(a.stop)
 	a.vc.Speaking(false)
 	a.vc.Disconnect()

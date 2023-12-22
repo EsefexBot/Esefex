@@ -11,6 +11,15 @@ import (
 var validExt = []string{"mp3", "wav", "ogg", "flac", "m4a", "aac"}
 
 func Download2PCM(url string) ([]int16, error) {
+	ext, err := ExtFromUrl(url)
+	if err != nil {
+		return nil, err
+	}
+
+	if !slices.Contains(validExt, ext) {
+		return nil, fmt.Errorf("invalid file extension: %v", ext)
+	}
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -19,15 +28,6 @@ func Download2PCM(url string) ([]int16, error) {
 
 	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "audio/mpeg" {
 		return nil, fmt.Errorf("status code error: %v", resp.StatusCode)
-	}
-
-	ext, err := ExtFromDisposition(resp.Header.Get("Content-Disposition"))
-	if err != nil {
-		return nil, err
-	}
-
-	if !slices.Contains(validExt, ext) {
-		return nil, fmt.Errorf("invalid file extension: %v", ext)
 	}
 
 	cmd := exec.Command("ffmpeg", "-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-f", "s16le", "-ac", "2", "-ar", "48000", "-")
@@ -55,6 +55,20 @@ func ExtFromDisposition(disposition string) (string, error) {
 	m := r.FindStringSubmatch(disposition)
 	if len(m) != 2 {
 		return "", fmt.Errorf("no extension found in disposition")
+	}
+
+	return m[1], nil
+}
+
+func ExtFromUrl(url string) (string, error) {
+	r, err := regexp.Compile(`^.+\.(.+)\?.+$`)
+	if err != nil {
+		return "", err
+	}
+
+	m := r.FindStringSubmatch(url)
+	if len(m) != 2 {
+		return "", fmt.Errorf("no extension found in url")
 	}
 
 	return m[1], nil

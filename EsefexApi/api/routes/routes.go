@@ -75,7 +75,7 @@ func (routes *RouteHandlers) PlaySound(w http.ResponseWriter, r *http.Request) {
 	server_id := vars["server_id"]
 	sound_id := vars["sound_id"]
 
-	err := routes.a.PlaySound(sounddb.SuidFromStrings(server_id, sound_id), user_id)
+	err := routes.a.PlaySound(sounddb.SuidFromStrings(server_id, sound_id), server_id, user_id)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)

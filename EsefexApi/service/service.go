@@ -1,6 +1,6 @@
 package service
 
-type Service interface {
+type IService interface {
 	Start() <-chan struct{}
 	Stop() <-chan struct{}
 }

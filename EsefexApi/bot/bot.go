@@ -10,7 +10,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var _ service.Service = &DiscordBot{}
+var _ service.IService = &DiscordBot{}
 
 // DiscordBot implements Service
 type DiscordBot struct {

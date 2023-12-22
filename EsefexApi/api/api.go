@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var _ service.Service = &HttpApi{}
+var _ service.IService = &HttpApi{}
 
 // HttpApi implements Service
 type HttpApi struct {
@@ -25,10 +25,10 @@ type HttpApi struct {
 	ready   chan struct{}
 }
 
-func NewHttpApi(db sounddb.ISoundDB, a audioplayer.IAudioPlayer, apiPort int, cProto string) *HttpApi {
+func NewHttpApi(db sounddb.ISoundDB, plr audioplayer.IAudioPlayer, apiPort int, cProto string) *HttpApi {
 	return &HttpApi{
 		db:      db,
-		a:       a,
+		a:       plr,
 		apiPort: apiPort,
 		cProto:  cProto,
 		stop:    make(chan struct{}, 1),
@@ -54,12 +54,14 @@ func (api *HttpApi) run() {
 	router.HandleFunc("/", routes.Index)
 
 	// http.Handle("/", router)
-	log.Printf("Webserver started on port %d\n", api.apiPort)
+	log.Printf("Webserver started on port %d (http://localhost:%d)\n", api.apiPort, api.apiPort)
 
 	go http.ListenAndServe(fmt.Sprintf(":%d", api.apiPort), router)
 
 	close(api.ready)
 	<-api.stop
+
+	log.Println("Stopping webserver...")
 }
 
 func (api *HttpApi) Start() <-chan struct{} {

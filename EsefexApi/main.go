@@ -6,10 +6,9 @@ import (
 	"esefexapi/bot"
 	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filedb"
+	"esefexapi/util"
 
 	"log"
-	"os"
-	"os/signal"
 
 	"github.com/joho/godotenv"
 )
@@ -27,19 +26,19 @@ func main() {
 
 	db := dbcache.NewDBCache(filedb.NewFileDB())
 
-	a := discordplayer.NewDiscordPlayer(ds, db)
+	plr := discordplayer.NewDiscordPlayer(ds, db)
 
-	api := api.NewHttpApi(db, a, 8080, "http")
+	api := api.NewHttpApi(db, plr, 8080, "http")
 	bot := bot.NewDiscordBot(ds, db)
 
 	<-api.Start()
 	<-bot.Start()
+	<-plr.Start()
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
 	log.Println("Press Ctrl+C to exit")
-	<-stop
+	<-util.OsInterrupt()
 
 	<-api.Stop()
 	<-bot.Stop()
+	<-plr.Stop()
 }
