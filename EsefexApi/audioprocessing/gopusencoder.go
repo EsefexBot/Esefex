@@ -3,6 +3,7 @@ package audioprocessing
 import (
 	"encoding/binary"
 	"io"
+	"log"
 
 	"layeh.com/gopus"
 )
@@ -33,7 +34,8 @@ func (e *GopusEncoder) EncodeNext() ([]byte, error) {
 
 	err := binary.Read(*e.source, binary.LittleEndian, &pcm)
 	// Read from the source
-	if err != nil {
+	if err != nil && err != io.EOF {
+		log.Printf("Error reading from source: %s\n", err)
 		return nil, err
 	}
 
