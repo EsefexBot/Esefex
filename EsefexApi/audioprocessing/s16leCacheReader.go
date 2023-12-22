@@ -59,6 +59,17 @@ func NewS16leCacheReaderFromBytes(b []byte) *S16leCacheReader {
 	return reader
 }
 
+func NewS16leCacheReaderFromPCM(pcm []int16) *S16leCacheReader {
+	reader := &S16leCacheReader{}
+
+	for _, short := range pcm {
+		reader.bytes = append(reader.bytes, byte(short))
+		reader.bytes = append(reader.bytes, byte(short>>8))
+	}
+
+	return reader
+}
+
 func NewS16leCacheReaderFromFile(p string) *S16leCacheReader {
 	f, err := os.Open(p)
 	if err != nil {

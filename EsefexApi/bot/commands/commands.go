@@ -1,16 +1,29 @@
 package commands
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"esefexapi/sounddb"
 
-var (
-	Commands = map[string]*discordgo.ApplicationCommand{}
-	Handlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
+	"github.com/bwmarrin/discordgo"
 )
 
-func init() {
-	Commands["upload"] = UploadCommand
-	Handlers["upload"] = Upload
+type CommandHandlers struct {
+	db       sounddb.ISoundDB
+	Commands map[string]*discordgo.ApplicationCommand
+	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
+}
 
-	Commands["session"] = SessionCommand
-	Handlers["session"] = Session
+func NewCommandHandlers(db sounddb.ISoundDB) *CommandHandlers {
+	ch := &CommandHandlers{
+		db:       db,
+		Commands: map[string]*discordgo.ApplicationCommand{},
+		Handlers: map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
+	}
+
+	ch.Commands["upload"] = UploadCommand
+	ch.Handlers["upload"] = ch.Upload
+
+	ch.Commands["session"] = SessionCommand
+	ch.Handlers["session"] = ch.Session
+
+	return ch
 }

@@ -1,22 +1,23 @@
 package bot
 
 import (
-	"esefexapi/bot/commands"
-	"github.com/bwmarrin/discordgo"
+	"errors"
 	"log"
 	"os"
+
+	"github.com/bwmarrin/discordgo"
 )
 
-func RegisterComands(s *discordgo.Session) {
+func (b *DiscordBot) RegisterComands(s *discordgo.Session) {
 	log.Println("Registering commands...")
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commands.Handlers[i.ApplicationCommandData().Name]; ok {
+		if h, ok := b.cmdh.Handlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)
 		}
 	})
 
-	for _, v := range commands.Commands {
+	for _, v := range b.cmdh.Commands {
 		_, err := s.ApplicationCommandCreate(s.State.User.ID, "", v)
 		if err != nil {
 			log.Printf("Cannot create '%v' command: %v", v.Name, err)
@@ -26,19 +27,19 @@ func RegisterComands(s *discordgo.Session) {
 	}
 }
 
-func DeleteAllCommands(s *discordgo.Session) {
+func (b *DiscordBot) DeleteAllCommands(s *discordgo.Session) {
 	log.Println("Deleting all commands...")
 
 	for _, g := range s.State.Guilds {
-		DeleteGuildCommands(s, g.ID)
+		b.DeleteGuildCommands(s, g.ID)
 	}
 
-	DeleteGuildCommands(s, "")
+	b.DeleteGuildCommands(s, "")
 
 	log.Println("Deleted all commands")
 }
 
-func DeleteGuildCommands(s *discordgo.Session, guildID string) {
+func (b *DiscordBot) DeleteGuildCommands(s *discordgo.Session, guildID string) {
 	cmds, err := s.ApplicationCommands(s.State.User.ID, guildID)
 	if err != nil {
 		log.Println(err)
@@ -50,17 +51,17 @@ func DeleteGuildCommands(s *discordgo.Session, guildID string) {
 	}
 }
 
-func CreateSession() *discordgo.Session {
+func CreateSession() (*discordgo.Session, error) {
 	token := os.Getenv("BOT_TOKEN")
 
 	if token == "" {
-		log.Fatal("BOT_TOKEN is not set")
+		return nil, errors.New("BOT_TOKEN is not set")
 	}
 
 	s, err := discordgo.New("Bot " + token)
 	if err != nil {
-		log.Fatalf("Invalid bot parameters: %v", err)
+		return nil, err
 	}
 
-	return s
+	return s, nil
 }

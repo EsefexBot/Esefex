@@ -1,17 +1,40 @@
 package bot
 
 import (
-	"esefexapi/appcontext"
-	"esefexapi/bot/actions"
+	"esefexapi/bot/commands"
+	"esefexapi/service"
+	"esefexapi/sounddb"
+
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func Run(c *appcontext.Context) {
+var _ service.IService = &DiscordBot{}
+
+// DiscordBot implements Service
+type DiscordBot struct {
+	Session *discordgo.Session
+	cmdh    *commands.CommandHandlers
+	db      sounddb.ISoundDB
+	stop    chan struct{}
+	ready   chan struct{}
+}
+
+func NewDiscordBot(s *discordgo.Session, db sounddb.ISoundDB) *DiscordBot {
+	return &DiscordBot{
+		Session: s,
+		cmdh:    commands.NewCommandHandlers(db),
+		stop:    make(chan struct{}, 1),
+		ready:   make(chan struct{}),
+	}
+}
+
+func (b *DiscordBot) run() {
+	defer close(b.stop)
 	log.Println("Starting bot...")
 
-	s := c.DiscordSession
+	s := b.Session
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
@@ -24,13 +47,21 @@ func Run(c *appcontext.Context) {
 	defer s.Close()
 
 	log.Println("Adding commands...")
-	RegisterComands(s)
-
-	go actions.ListenForApiRequests(s, c)
+	b.RegisterComands(s)
+	defer b.DeleteAllCommands(s)
+	// defer actions.LeaveAllChannels(s)
 
 	log.Println("Bot Ready.")
-	<-c.Channels.Stop
+	close(b.ready)
+	<-b.stop
+}
 
-	// defer actions.LeaveAllChannels(s)
-	defer DeleteAllCommands(s)
+func (b *DiscordBot) Start() <-chan struct{} {
+	go b.run()
+	return b.ready
+}
+
+func (b *DiscordBot) Stop() <-chan struct{} {
+	b.stop <- struct{}{}
+	return b.stop
 }
