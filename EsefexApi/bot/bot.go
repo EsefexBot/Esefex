@@ -32,6 +32,7 @@ func NewDiscordBot(s *discordgo.Session, db sounddb.ISoundDB, domain string) *Di
 func (b *DiscordBot) run() {
 	defer close(b.stop)
 	log.Println("Starting bot...")
+	defer log.Println("Bot stopped")
 
 	s := b.Session
 

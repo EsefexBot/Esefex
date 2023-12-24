@@ -38,8 +38,8 @@ func NewHttpApi(db sounddb.ISoundDB, plr audioplayer.IAudioPlayer, apiPort int, 
 
 func (api *HttpApi) run() {
 	defer close(api.stop)
-
 	log.Println("Starting webserver...")
+	defer log.Println("Webserver stopped")
 
 	routes := routes.NewRouteHandler(api.db, api.a, api.cProto)
 
@@ -60,8 +60,6 @@ func (api *HttpApi) run() {
 
 	close(api.ready)
 	<-api.stop
-
-	log.Println("Stopping webserver...")
 }
 
 func (api *HttpApi) Start() <-chan struct{} {

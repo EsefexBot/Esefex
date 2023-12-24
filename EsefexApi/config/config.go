@@ -2,7 +2,6 @@ package config
 
 import (
 	"io"
-	"log"
 	"os"
 
 	"github.com/pelletier/go-toml"
@@ -43,8 +42,8 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	log.Println("Loaded config from file")
-	log.Println(string(configStr))
+	// log.Println("Loaded config from file")
+	// log.Println(string(configStr))
 
 	var config Config
 	err = toml.Unmarshal(configStr, &config)

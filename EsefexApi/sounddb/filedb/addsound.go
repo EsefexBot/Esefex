@@ -23,7 +23,7 @@ func (f *FileDB) AddSound(serverID string, name string, iconUrl string, pcm []in
 		Icon:     iconUrl,
 	}
 
-	// Make sure the sounds folder exists
+	// Make sure the db folder exists
 	path := fmt.Sprintf("%s/%s", f.location, serverID)
 	os.MkdirAll(path, os.ModePerm)
 

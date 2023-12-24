@@ -10,7 +10,7 @@ import (
 
 // GetSoundPcm implements sounddb.SoundDB.
 func (f *FileDB) GetSoundPcm(uid sounddb.SoundUID) ([]int16, error) {
-	path := fmt.Sprintf("sounds/%s/%s_sound.s16le", uid.ServerID, uid.SoundID)
+	path := fmt.Sprintf("%s/%s/%s_sound.s16le", f.location, uid.ServerID, uid.SoundID)
 	sf, err := os.Open(path)
 	if err != nil {
 		return nil, err
