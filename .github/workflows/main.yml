@@ -1,0 +1,50 @@
+name: Go Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Build Test Docker Image
+        run: docker build -t jokil/esefexapi:test -f Dockerfile.test .
+
+      - name: Run Tests in Docker Container
+        run: doocker run jokil/esefexapi:test go test ./...
+
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Build Prod Docker Image
+        run: docker build -t jokil/esefexapi:latest -f Dockerfile .
+
+      - name: Login to Docker Registry
+        uses: docker/login-action@v1
+        with: 
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker Image
+      - run: docker push jokil/esefexapi:latest
+
+      - name: Deploy to Production
+        run: |
+          # SSH into your production server
+          ssh esefexapi@159.89.111.82 "cd /api && \
+            docker-compose down && \
+            docker-compose pull && \
+            docker-compose up -d"
