@@ -2,6 +2,8 @@ package main
 
 import (
 	"esefexapi/bot"
+	"esefexapi/config"
+	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filedb"
 
 	"log"
@@ -9,15 +11,29 @@ import (
 	"os/signal"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 func main() {
+	cfg, err := config.LoadConfig("config.toml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ds, err := bot.CreateSession()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db := filedb.NewFileDB()
+	fdb, err := filedb.NewFileDB(cfg.FileDatabase.Location)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	bot := bot.NewDiscordBot(ds, db)
+	db := dbcache.NewDBCache(fdb)
+
+	bot := bot.NewDiscordBot(ds, db, cfg.HttpApi.Domain)
 
 	<-bot.Start()
 

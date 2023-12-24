@@ -11,7 +11,7 @@ import (
 
 // GetSoundUIDs implements sounddb.SoundDB.
 func (f *FileDB) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
-	path := fmt.Sprintf("sounds/%s", serverID)
+	path := fmt.Sprintf("%s/%s", f.location, serverID)
 	if !util.PathExists(path) {
 		return make([]sounddb.SoundUID, 0), nil
 	}

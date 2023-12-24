@@ -1,0 +1,9 @@
+[http_api]
+port = 8080
+domain = "esefex.com"
+custom_protocol = "esefex"
+
+[file_database]
+location = "./data"
+
+[bot]

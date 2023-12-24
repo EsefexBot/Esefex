@@ -8,13 +8,15 @@ import (
 
 type CommandHandlers struct {
 	db       sounddb.ISoundDB
+	domain   string
 	Commands map[string]*discordgo.ApplicationCommand
 	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-func NewCommandHandlers(db sounddb.ISoundDB) *CommandHandlers {
+func NewCommandHandlers(db sounddb.ISoundDB, domain string) *CommandHandlers {
 	ch := &CommandHandlers{
 		db:       db,
+		domain:   domain,
 		Commands: map[string]*discordgo.ApplicationCommand{},
 		Handlers: map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
 	}

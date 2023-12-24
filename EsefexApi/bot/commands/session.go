@@ -39,10 +39,10 @@ func (c *CommandHandlers) Session(s *discordgo.Session, i *discordgo.Interaction
 		return
 	}
 
-	protocol := "esefex"
 	route := "joinsession"
 
-	url := fmt.Sprintf("%s://%s/%s", protocol, route, i.GuildID)
+	// https://esefex.com/joinsession/1234567890
+	url := fmt.Sprintf("https://%s/%s/%s", c.domain, route, i.GuildID)
 
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

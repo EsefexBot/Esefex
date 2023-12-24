@@ -24,11 +24,11 @@ func (f *FileDB) AddSound(serverID string, name string, iconUrl string, pcm []in
 	}
 
 	// Make sure the sounds folder exists
-	path := fmt.Sprintf("sounds/%s", serverID)
+	path := fmt.Sprintf("%s/%s", f.location, serverID)
 	os.MkdirAll(path, os.ModePerm)
 
 	// write meta file
-	path = fmt.Sprintf("sounds/%s/%s_meta.json", serverID, sound.SoundID)
+	path = fmt.Sprintf("%s/%s/%s_meta.json", f.location, serverID, sound.SoundID)
 	metaFile, err := os.Create(path)
 	if err != nil {
 		log.Fatal(err)
@@ -46,7 +46,7 @@ func (f *FileDB) AddSound(serverID string, name string, iconUrl string, pcm []in
 
 	// write sound file
 
-	path = fmt.Sprintf("sounds/%s/%s_sound.s16le", serverID, sound.SoundID)
+	path = fmt.Sprintf("%s/%s/%s_sound.s16le", f.location, serverID, sound.SoundID)
 
 	soundFile, err := os.Create(path)
 	if err != nil {

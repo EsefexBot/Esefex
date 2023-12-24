@@ -16,15 +16,14 @@ var _ service.IService = &DiscordBot{}
 type DiscordBot struct {
 	Session *discordgo.Session
 	cmdh    *commands.CommandHandlers
-	db      sounddb.ISoundDB
 	stop    chan struct{}
 	ready   chan struct{}
 }
 
-func NewDiscordBot(s *discordgo.Session, db sounddb.ISoundDB) *DiscordBot {
+func NewDiscordBot(s *discordgo.Session, db sounddb.ISoundDB, domain string) *DiscordBot {
 	return &DiscordBot{
 		Session: s,
-		cmdh:    commands.NewCommandHandlers(db),
+		cmdh:    commands.NewCommandHandlers(db, domain),
 		stop:    make(chan struct{}, 1),
 		ready:   make(chan struct{}),
 	}

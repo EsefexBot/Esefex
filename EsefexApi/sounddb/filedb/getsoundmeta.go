@@ -11,7 +11,7 @@ import (
 
 // GetSoundMeta implements sounddb.SoundDB.
 func (f *FileDB) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
-	path := fmt.Sprintf("sounds/%s/%s_meta.json", uid.ServerID, uid.SoundID)
+	path := fmt.Sprintf("%s/%s/%s_meta.json", f.location, uid.ServerID, uid.SoundID)
 	metaFile, err := os.Open(path)
 
 	if err != nil {

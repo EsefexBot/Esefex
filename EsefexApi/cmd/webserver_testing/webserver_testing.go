@@ -4,6 +4,7 @@ import (
 	"esefexapi/api"
 	"esefexapi/audioplayer"
 	"esefexapi/audioplayer/mockplayer"
+	"esefexapi/config"
 	"esefexapi/sounddb"
 	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filedb"
@@ -12,13 +13,25 @@ import (
 	"os/signal"
 )
 
-func main() {
+func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
-	var db sounddb.ISoundDB = dbcache.NewDBCache(filedb.NewFileDB())
+func main() {
+	cfg, err := config.LoadConfig("config.toml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fdb, err := filedb.NewFileDB(cfg.FileDatabase.Location)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var db sounddb.ISoundDB = dbcache.NewDBCache(fdb)
 	var player audioplayer.IAudioPlayer = mockplayer.NewMockPlayer()
 
-	api := api.NewHttpApi(db, player, 8080, "esefexapi")
+	api := api.NewHttpApi(db, player, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
 
 	<-api.Start()
 

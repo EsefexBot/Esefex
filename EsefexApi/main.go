@@ -4,6 +4,7 @@ import (
 	"esefexapi/api"
 	"esefexapi/audioplayer/discordplayer"
 	"esefexapi/bot"
+	"esefexapi/config"
 	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filedb"
 	"esefexapi/util"
@@ -19,17 +20,27 @@ func init() {
 }
 
 func main() {
+	cfg, err := config.LoadConfig("config.toml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ds, err := bot.CreateSession()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db := dbcache.NewDBCache(filedb.NewFileDB())
+	fdb, err := filedb.NewFileDB(cfg.FileDatabase.Location)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db := dbcache.NewDBCache(fdb)
 
 	plr := discordplayer.NewDiscordPlayer(ds, db)
 
-	api := api.NewHttpApi(db, plr, 8080, "http")
-	bot := bot.NewDiscordBot(ds, db)
+	api := api.NewHttpApi(db, plr, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
+	bot := bot.NewDiscordBot(ds, db, cfg.HttpApi.Domain)
 
 	<-api.Start()
 	<-bot.Start()
