@@ -3,7 +3,7 @@ name: Go Backend CI/CD
 on:
   push:
     branches:
-      - main
+      - deploy
 
 jobs:
   run-tests:
