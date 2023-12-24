@@ -2,9 +2,10 @@ package util
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
 	"os"
 	"regexp"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 func PathExists(path string) bool {

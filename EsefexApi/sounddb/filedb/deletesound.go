@@ -16,7 +16,7 @@ func (f *FileDB) DeleteSound(uid sounddb.SoundUID) error {
 		return err
 	}
 
-	path = fmt.Sprintf("%s/%s/%s_sound.mp3", f.location, uid.ServerID, uid.SoundID)
+	path = fmt.Sprintf("%s/%s/%s_sound.s16le", f.location, uid.ServerID, uid.SoundID)
 	err = os.Remove(path)
 	if err != nil {
 		log.Fatal(err)

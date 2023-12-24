@@ -5,7 +5,6 @@ import (
 	"esefexapi/sounddb"
 	"fmt"
 	"io"
-	"log"
 	"os"
 )
 
@@ -15,7 +14,7 @@ func (f *FileDB) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
 	metaFile, err := os.Open(path)
 
 	if err != nil {
-		log.Fatal(err)
+		return sounddb.SoundMeta{}, err
 	}
 
 	var sound sounddb.SoundMeta

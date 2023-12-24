@@ -15,7 +15,7 @@ func main() {
 
 	<-api.Start()
 
-	<-util.OsInterrupt()
+	<-util.Interrupt()
 
 	<-api.Stop()
 }
