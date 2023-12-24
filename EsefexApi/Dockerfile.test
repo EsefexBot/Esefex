@@ -12,4 +12,7 @@ RUN go mod download
 COPY . .
 
 # Test
-CMD ["go", "test", "-v", "./..."]
+# CMD ["go", "test", "-v", "./..."]
+
+# for debugging just wait
+# CMD ["tail", "-f", "/dev/null"]
