@@ -6,8 +6,7 @@ on:
       - main
 
 jobs:
-  test:
-    name: Run Tests
+  run-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +20,6 @@ jobs:
         run: doocker run jokil/esefexapi:test go test ./...
 
   build-and-deploy:
-    name: Build and Deploy
     runs-on: ubuntu-latest
 
     steps:
