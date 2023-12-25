@@ -32,7 +32,7 @@ jobs:
           username: ${{ vars.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /api
+            cd api
             docker compose down
             docker compose pull
             docker compose up -d
