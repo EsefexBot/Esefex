@@ -9,7 +9,7 @@ import (
 func (f *FileDB) GetServerIDs() ([]string, error) {
 	files, err := os.ReadDir(f.location)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return nil, err
 	}
 

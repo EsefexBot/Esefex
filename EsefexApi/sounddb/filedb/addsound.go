@@ -31,13 +31,13 @@ func (f *FileDB) AddSound(serverID string, name string, iconUrl string, pcm []in
 	path = fmt.Sprintf("%s/%s/%s_meta.json", f.location, serverID, sound.SoundID)
 	metaFile, err := os.Create(path)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return sounddb.SoundUID{}, err
 	}
 
 	metaJson, err := json.Marshal(sound)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return sounddb.SoundUID{}, err
 	}
 
@@ -50,13 +50,13 @@ func (f *FileDB) AddSound(serverID string, name string, iconUrl string, pcm []in
 
 	soundFile, err := os.Create(path)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return sounddb.SoundUID{}, err
 	}
 
 	err = binary.Write(soundFile, binary.LittleEndian, pcm)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return sounddb.SoundUID{}, err
 	}
 

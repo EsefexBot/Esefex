@@ -18,7 +18,8 @@ func (f *FileDB) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
 
 	files, err := os.ReadDir(path)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return nil, err
 	}
 
 	uids := make([]sounddb.SoundUID, 0)
