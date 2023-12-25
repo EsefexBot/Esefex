@@ -39,10 +39,15 @@ jobs:
       - name: Push Docker Image
         run: docker push jokil/esefexapi:latest
 
-      - name: Deploy to Production
-        run: |
-          # SSH into your production server
-          ssh esefexapi@159.89.111.82 "cd /api && \
-            docker-compose down && \
-            docker-compose pull && \
-            docker-compose up -d"
+                    
+      - name: Deploy to production     
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ env.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /api
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
