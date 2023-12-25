@@ -1,0 +1,18 @@
+name: Go Backend Unit Tests
+on: 
+  pull_request:
+    branches: [ "deploy", "main" ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Build Test Docker Image
+        run: docker build -t jokil/esefexapi:test -f EsefexApi/Dockerfile.test EsefexApi
+
+      - name: Run Tests in Docker Container
+        run: docker run jokil/esefexapi:test go test ./...
