@@ -33,7 +33,7 @@ func TestFileDB(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Test that the sound exists
-	exists, err := db.soundExists(uid)
+	exists, err := db.SoundExists(uid)
 	assert.Nil(t, err)
 	assert.True(t, exists)
 
@@ -67,7 +67,7 @@ func TestFileDB(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Test that the sound doesn't exist
-	exists, err = db.soundExists(uid)
+	exists, err = db.SoundExists(uid)
 	assert.Nil(t, err)
 	assert.False(t, exists)
 

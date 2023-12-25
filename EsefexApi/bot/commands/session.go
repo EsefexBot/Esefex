@@ -3,7 +3,6 @@ package commands
 import (
 	"esefexapi/bot/actions"
 	"fmt"
-	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -15,10 +14,10 @@ var (
 	}
 )
 
-func (c *CommandHandlers) Session(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *CommandHandlers) Session(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	g, err := s.State.Guild(i.GuildID)
 	if err != nil {
-		log.Printf("Cannot get guild: %v", err)
+		return nil, err
 	}
 
 	var userChannel string
@@ -29,14 +28,13 @@ func (c *CommandHandlers) Session(s *discordgo.Session, i *discordgo.Interaction
 			userChannel = vs.ChannelID
 		}
 	}
+
 	if !userConnected {
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		return &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
 				Content: "You must be connected to a voice channel to get the session link.",
-			},
-		})
-		return
+			}}, nil
 	}
 
 	route := "joinsession"
@@ -44,12 +42,12 @@ func (c *CommandHandlers) Session(s *discordgo.Session, i *discordgo.Interaction
 	// https://esefex.com/joinsession/1234567890
 	url := fmt.Sprintf("https://%s/%s/%s", c.domain, route, i.GuildID)
 
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	actions.JoinChannelVoice(s, i.GuildID, userChannel)
+
+	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: url,
 		},
-	})
-
-	actions.JoinChannelVoice(s, i.GuildID, userChannel)
+	}, nil
 }

@@ -32,13 +32,13 @@ func NewDBCache(db sounddb.ISoundDB) *DBCache {
 
 // AddSound implements db.SoundDB.
 func (c *DBCache) AddSound(serverID string, name string, icon string, pcm []int16) (sounddb.SoundUID, error) {
+	c.rw.Lock()
+	defer c.rw.Unlock()
+
 	uid, err := c.db.AddSound(serverID, name, icon, pcm)
 	if err != nil {
 		return sounddb.SoundUID{}, err
 	}
-
-	c.rw.Lock()
-	defer c.rw.Unlock()
 
 	c.sounds[uid] = &CachedSound{
 		Data: pcm,
@@ -55,16 +55,13 @@ func (c *DBCache) AddSound(serverID string, name string, icon string, pcm []int1
 
 // DeleteSound implements db.SoundDB.
 func (c *DBCache) DeleteSound(uid sounddb.SoundUID) error {
-	c.rw.RLock()
-	defer c.rw.RUnlock()
+	c.rw.Lock()
+	defer c.rw.Unlock()
 
 	err := c.db.DeleteSound(uid)
 	if err != nil {
 		return err
 	}
-
-	c.rw.Lock()
-	defer c.rw.Unlock()
 
 	delete(c.sounds, uid)
 
@@ -192,4 +189,15 @@ func (c *DBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
 
 	return &s, nil
 
+}
+
+func (c *DBCache) SoundExists(uid sounddb.SoundUID) (bool, error) {
+	c.rw.RLock()
+	defer c.rw.RUnlock()
+
+	if _, ok := c.sounds[uid]; ok {
+		return true, nil
+	}
+
+	return c.db.SoundExists(uid)
 }

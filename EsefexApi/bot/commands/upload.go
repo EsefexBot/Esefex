@@ -35,34 +35,27 @@ var (
 	}
 )
 
-func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	options := i.ApplicationCommandData().Options
+func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
+	options := OptionsMap(i)
 
-	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-	for _, opt := range options {
-		optionMap[opt.Name] = opt
-	}
-
-	icon := optionMap["icon"]
+	icon := options["icon"]
 	iconURL := util.ExtractIconUrl(icon)
 
-	soundFile := optionMap["sound-file"]
+	soundFile := options["sound-file"]
 	soundFileUrl := i.ApplicationCommandData().Resolved.Attachments[fmt.Sprint(soundFile.Value)].URL
 
 	pcm, err := util.Download2PCM(soundFileUrl)
 	if err != nil {
-		log.Printf("Cannot download sound file: %v", err)
-		return
+		return nil, err
 	}
 
-	c.db.AddSound(i.GuildID, fmt.Sprint(optionMap["name"].Value), iconURL, pcm)
+	c.db.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), iconURL, pcm)
 
-	log.Printf("Uploaded sound effect %v to server %v", optionMap["name"].Value, i.GuildID)
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	log.Printf("Uploaded sound effect %v to server %v", options["name"].Value, i.GuildID)
+	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: "Uploaded sound effect",
 		},
-	})
-
+	}, nil
 }

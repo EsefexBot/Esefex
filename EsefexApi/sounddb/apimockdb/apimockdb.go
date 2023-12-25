@@ -82,3 +82,9 @@ func (*ApiMockDB) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
 	}
 	return uids, nil
 }
+
+// SoundExists implements sounddb.ISoundDB.
+func (*ApiMockDB) SoundExists(uid sounddb.SoundUID) (bool, error) {
+	_, ok := mockData[uid.ServerID][uid.SoundID]
+	return ok, nil
+}

@@ -7,6 +7,7 @@ type ISoundDB interface {
 	GetSoundPcm(uid SoundUID) ([]int16, error)
 	GetSoundUIDs(serverID string) ([]SoundUID, error)
 	GetServerIDs() ([]string, error)
+	SoundExists(uid SoundUID) (bool, error)
 }
 
 type SoundUID struct {
