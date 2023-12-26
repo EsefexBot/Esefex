@@ -45,13 +45,13 @@ func (api *HttpApi) run() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/sounds/{server_id}", routes.GetSounds)
-	router.HandleFunc("/api/playsound/{user_id}/{server_id}/{sound_id}", routes.PlaySound)
+	router.HandleFunc("/api/sounds/{server_id}", routes.GetSounds).Methods("GET")
+	router.HandleFunc("/api/playsound/{user_id}/{server_id}/{sound_id}", routes.PostPlaySound).Methods("POST")
 
-	router.HandleFunc("/joinsession/{server_id}", routes.JoinSession)
+	router.HandleFunc("/joinsession/{server_id}", routes.GetJoinSession).Methods("GET")
 
-	router.HandleFunc("/dump", routes.Dump)
-	router.HandleFunc("/", routes.Index)
+	router.HandleFunc("/dump", routes.GetDump)
+	router.HandleFunc("/", routes.GetIndex).Methods("GET")
 
 	// http.Handle("/", router)
 	log.Printf("Webserver started on port %d (http://localhost:%d)\n", api.apiPort, api.apiPort)

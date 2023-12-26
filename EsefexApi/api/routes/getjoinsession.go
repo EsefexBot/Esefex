@@ -9,7 +9,7 @@ import (
 )
 
 // joinsession/<server_id>
-func (routes *RouteHandlers) JoinSession(w http.ResponseWriter, r *http.Request) {
+func (routes *RouteHandlers) GetJoinSession(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	server_id := vars["server_id"]
 

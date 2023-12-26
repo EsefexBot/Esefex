@@ -11,7 +11,7 @@ import (
 )
 
 // api/playsound/<user_id>/<server_id>/<sound_id>
-func (routes *RouteHandlers) PlaySound(w http.ResponseWriter, r *http.Request) {
+func (routes *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request) {
 	log.Printf("got /playsound request\n")
 
 	vars := mux.Vars(r)

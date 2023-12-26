@@ -19,8 +19,8 @@ func main() {
 		Test: "test",
 		HttpApi: config.HttpApi{
 			Port:           8080,
-			Domain:         "localhost",
-			CustomProtocol: "http",
+			Domain:         "http://localhost",
+			CustomProtocol: "esefex",
 		},
 		FileDatabase: config.FileDatabase{
 			Location: "/tmp/esefexapi",
