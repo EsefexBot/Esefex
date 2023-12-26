@@ -14,7 +14,12 @@ import (
 func TestFileDB(t *testing.T) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	iconUrl := "https://github.com/Cinnazeyy/Esefex/raw/main/EsefexApi/test/staticfiles/icon.webp"
+	icon := sounddb.Icon{
+		Name: "icon1",
+		ID:   "icon1",
+		Url:  "https://github.com/Cinnazeyy/Esefex/raw/main/EsefexApi/test/staticfiles/icon.webp",
+	}
+
 	serverID := "server1"
 	soundName := "sound1"
 	soundPcm := []int16{115, 117, 115}
@@ -24,7 +29,7 @@ func TestFileDB(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Test that we can add a sound
-	uid, err := db.AddSound(serverID, soundName, iconUrl, soundPcm)
+	uid, err := db.AddSound(serverID, soundName, icon, soundPcm)
 	assert.Nil(t, err)
 
 	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_meta.json", location, serverID, uid.SoundID))
@@ -44,7 +49,7 @@ func TestFileDB(t *testing.T) {
 		SoundID:  uid.SoundID,
 		ServerID: serverID,
 		Name:     soundName,
-		Icon:     iconUrl,
+		Icon:     icon,
 	})
 
 	// Test that we can get the sound pcm

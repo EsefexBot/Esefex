@@ -1,7 +1,7 @@
 package sounddb
 
 type ISoundDB interface {
-	AddSound(serverID string, name string, icon string, pcm []int16) (SoundUID, error)
+	AddSound(serverID string, name string, icon Icon, pcm []int16) (SoundUID, error)
 	DeleteSound(uid SoundUID) error
 	GetSoundMeta(uid SoundUID) (SoundMeta, error)
 	GetSoundPcm(uid SoundUID) ([]int16, error)
@@ -19,5 +19,5 @@ type SoundMeta struct {
 	SoundID  string `json:"id"`
 	ServerID string `json:"serverId"`
 	Name     string `json:"name"`
-	Icon     string `json:"icon"`
+	Icon     Icon   `json:"icon"`
 }

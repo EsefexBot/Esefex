@@ -31,7 +31,7 @@ func NewDBCache(db sounddb.ISoundDB) *DBCache {
 }
 
 // AddSound implements db.SoundDB.
-func (c *DBCache) AddSound(serverID string, name string, icon string, pcm []int16) (sounddb.SoundUID, error) {
+func (c *DBCache) AddSound(serverID string, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 

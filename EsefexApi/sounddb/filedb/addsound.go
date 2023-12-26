@@ -10,7 +10,7 @@ import (
 )
 
 // AddSound implements sounddb.SoundDB.
-func (f *FileDB) AddSound(serverID string, name string, iconUrl string, pcm []int16) (sounddb.SoundUID, error) {
+func (f *FileDB) AddSound(serverID string, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
 	sid, err := f.generateSoundID(serverID)
 	if err != nil {
 		return sounddb.SoundUID{}, err
@@ -20,7 +20,7 @@ func (f *FileDB) AddSound(serverID string, name string, iconUrl string, pcm []in
 		SoundID:  sid,
 		ServerID: serverID,
 		Name:     name,
-		Icon:     iconUrl,
+		Icon:     icon,
 	}
 
 	// Make sure the db folder exists

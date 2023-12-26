@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"esefexapi/sounddb"
 	"esefexapi/util"
 	"fmt"
 	"log"
@@ -38,8 +39,11 @@ var (
 func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	options := OptionsMap(i)
 
-	icon := options["icon"]
-	iconURL := util.ExtractIconUrl(icon)
+	iconOption := options["icon"]
+	icon, err := sounddb.ExtractIcon(fmt.Sprint(iconOption.Value))
+	if err != nil {
+		return nil, err
+	}
 
 	soundFile := options["sound-file"]
 	soundFileUrl := i.ApplicationCommandData().Resolved.Attachments[fmt.Sprint(soundFile.Value)].URL
@@ -49,13 +53,16 @@ func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionC
 		return nil, err
 	}
 
-	c.db.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), iconURL, pcm)
+	uid, err := c.db.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), icon, pcm)
+	if err != nil {
+		return nil, err
+	}
 
-	log.Printf("Uploaded sound effect %v to server %v", options["name"].Value, i.GuildID)
+	log.Printf("Uploaded sound effect %v to server %v", uid.SoundID, i.GuildID)
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Uploaded sound effect",
+			Content: fmt.Sprintf("Uploaded sound effect %s %s", uid.SoundID, icon.Name),
 		},
 	}, nil
 }
