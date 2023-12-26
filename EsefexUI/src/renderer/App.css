@@ -5,11 +5,11 @@
 
 
 body {
-  --mantine-color-body: #141414;
+  --mantine-color-body: #000;
   position: relative;
   color: white;
   height: 100vh;
-  background: #141414;
+  background: #000;
   font-family: sans-serif;
   overflow-y: hidden;
 }

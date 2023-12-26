@@ -1,16 +1,17 @@
 import { Button, Group, Image, Title } from "@mantine/core";
 import { FC } from "react";
 import "./Header.css";
+import logo from "../../../../assets/ESEFEX.svg";
 
 export const Header: FC = () => {
     return (
-        <>
-            <Group grow>
+        <div className="header">
+        <Group grow>
                 <div>
-                    <Image w={100} h={100} src="https://cdn.discordapp.com/attachments/248446166927147009/1177018089712402432/esefex.png?ex=658caa04&is=657a3504&hm=236dd01dab7c2356c82afccf9fab8a1bbd823774080c230565cec71fb5f62773&" />
+                    <Image w={50} h={50} src={logo} fit="contain" />
                 </div>
-                <Title className="serverName" mr={20} >Server Name</Title>
+                <Title className="serverName" >Server Name</Title>
             </Group>
-        </>
+        </div>
     );
 }

@@ -1,0 +1,25 @@
+.soundButton {
+    background-color: #0A0A0A;
+    height: 70px;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.soundButton__image {
+    height: 40px;
+    width: 40px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.soundButton__text {
+    flex-grow: 1;
+    text-align: center;
+    padding: 10px;
+}
+
+.soundButton__grid {
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
