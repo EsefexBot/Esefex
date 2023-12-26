@@ -17,7 +17,7 @@ func TestFileDB(t *testing.T) {
 	icon := sounddb.Icon{
 		Name: "icon1",
 		ID:   "icon1",
-		Url:  "https://github.com/Cinnazeyy/Esefex/raw/main/EsefexApi/test/staticfiles/icon.webp",
+		Url:  "https://raw.githubusercontent.com/EsefexBot/Esefex/main/EsefexApi/test/staticfiles/icon.webp",
 	}
 
 	serverID := "server1"
