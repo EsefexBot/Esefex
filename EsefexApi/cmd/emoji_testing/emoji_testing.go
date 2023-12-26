@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	text := "<:niggatyron:630819109726191617>🀄🆘🧌🤡🆘"
+	text := "<:emoji:630819109726191617>🀄🆘🧌🤡🆘"
 
 	icon, err := sounddb.ExtractIcon(text)
 	if err != nil {
