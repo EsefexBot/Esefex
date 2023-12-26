@@ -32,8 +32,8 @@ function Hello() {
     axios.get(config.apiUrl + "api/sounds/" + serverId)
     .then((response) => {
       setSounds(response.data);
-    }).catch(() => {
-      showErrorNotification();
+    }).catch((error) => {
+      showErrorNotification(error);
       setSounds([testSound,testSound])
     });
   };

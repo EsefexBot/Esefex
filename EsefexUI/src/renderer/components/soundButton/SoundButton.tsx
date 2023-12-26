@@ -14,9 +14,9 @@ interface SoundButtonProps {
 
 export const SoundButton: FC<SoundButtonProps> = ({sound, serverId}) => {
     const playSound = () => {
-        axios.get(config.apiUrl + "api/playsound/"+ sound.id + "/" + serverId)
-        .catch(() => {
-            showErrorNotification();
+        axios.post(config.apiUrl + "api/playsound/247763762298355712/" + serverId + "/" + sound.id)
+        .catch((error) => {
+            showErrorNotification(error);
         });
     };
     

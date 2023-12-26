@@ -1,9 +1,10 @@
 import { showNotification } from "@mantine/notifications";
+import { AxiosError } from "axios";
 
-const showErrorNotification = () => {
+const showErrorNotification = (error: AxiosError) => {
     showNotification({
         title: "Error!",
-        message: "Something went wrong!",
+        message: error.code == "ERR_NETWORK" ? "Joshua skill issue" : "Something went wrong...",
         autoClose: 5000,
         color: "red",
     });
