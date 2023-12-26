@@ -68,7 +68,7 @@ func (a *VCon) Run() {
 					continue
 				}
 
-				s := audioprocessing.NewS16leCacheReaderFromPCM(pcm)
+				s := audioprocessing.NewS16leReferenceReaderFromRef(pcm)
 				a.mixer.AddSource(s)
 				log.Println("Added sound to mixer")
 			case <-a.stop:

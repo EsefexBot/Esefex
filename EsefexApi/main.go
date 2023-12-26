@@ -8,6 +8,7 @@ import (
 	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filedb"
 	"esefexapi/util"
+	"os"
 
 	"log"
 
@@ -20,7 +21,7 @@ func init() {
 }
 
 func main() {
-	log.Println("Starting Esefex API")
+	log.Printf("Starting Esefex API with PID: %d", os.Getpid())
 
 	cfg, err := config.LoadConfig("config.toml")
 	if err != nil {

@@ -83,7 +83,7 @@ func (*ApiMockDB) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) 
 }
 
 // GetSoundPcm implements sounddb.ISoundDB.
-func (*ApiMockDB) GetSoundPcm(uid sounddb.SoundUID) ([]int16, error) {
+func (*ApiMockDB) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	panic("unimplemented")
 }
 

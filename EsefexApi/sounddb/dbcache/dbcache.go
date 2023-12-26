@@ -16,7 +16,7 @@ type DBCache struct {
 }
 
 type CachedSound struct {
-	Data []int16
+	Data *[]int16
 	Meta sounddb.SoundMeta
 }
 
@@ -41,7 +41,7 @@ func (c *DBCache) AddSound(serverID string, name string, icon sounddb.Icon, pcm 
 	}
 
 	c.sounds[uid] = &CachedSound{
-		Data: pcm,
+		Data: &pcm,
 		Meta: sounddb.SoundMeta{
 			SoundID:  uid.SoundID,
 			ServerID: serverID,
@@ -106,7 +106,7 @@ func (c *DBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) 
 }
 
 // GetSoundPcm implements db.SoundDB.
-func (c *DBCache) GetSoundPcm(uid sounddb.SoundUID) ([]int16, error) {
+func (c *DBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 

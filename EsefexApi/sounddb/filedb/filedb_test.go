@@ -55,7 +55,7 @@ func TestFileDB(t *testing.T) {
 	// Test that we can get the sound pcm
 	soundPcm2, err := db.GetSoundPcm(uid)
 	assert.Nil(t, err)
-	assert.Equal(t, soundPcm, soundPcm2)
+	assert.Equal(t, &soundPcm, soundPcm2)
 
 	// Test that we can get the server ids
 	ids, err := db.GetServerIDs()

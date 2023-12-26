@@ -9,7 +9,7 @@ import (
 )
 
 // GetSoundPcm implements sounddb.SoundDB.
-func (f *FileDB) GetSoundPcm(uid sounddb.SoundUID) ([]int16, error) {
+func (f *FileDB) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	path := fmt.Sprintf("%s/%s/%s_sound.s16le", f.location, uid.ServerID, uid.SoundID)
 	sf, err := os.Open(path)
 	if err != nil {
@@ -28,5 +28,5 @@ func (f *FileDB) GetSoundPcm(uid sounddb.SoundUID) ([]int16, error) {
 		return nil, err
 	}
 
-	return pcm, nil
+	return &pcm, nil
 }

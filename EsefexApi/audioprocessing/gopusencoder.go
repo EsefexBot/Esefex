@@ -1,7 +1,7 @@
 package audioprocessing
 
 import (
-	"encoding/binary"
+	"esefexapi/audioprocessing/pcmutil"
 	"io"
 	"log"
 
@@ -32,7 +32,7 @@ func NewGopusEncoder(s io.Reader) (*GopusEncoder, error) {
 func (e *GopusEncoder) EncodeNext() ([]byte, error) {
 	pcm := make([]int16, 960*2)
 
-	err := binary.Read(*e.source, binary.LittleEndian, &pcm)
+	_, err := pcmutil.ReadPCM(*e.source, &pcm)
 	// Read from the source
 	if err != nil && err != io.EOF {
 		log.Printf("Error reading from source: %s\n", err)
