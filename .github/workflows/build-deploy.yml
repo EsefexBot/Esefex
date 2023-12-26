@@ -23,16 +23,17 @@ jobs:
 
       - name: Push Docker Image
         run: docker push jokil/esefexapi:latest
-
                     
       - name: Deploy to production     
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ var.HOST }}
-          username: ${{ var.USERNAME }}
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /api
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d
+            cd api
+            docker compose down
+            > .env.github
+            echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env.github
+            docker compose pull
+            docker compose up -d
