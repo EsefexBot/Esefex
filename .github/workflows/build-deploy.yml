@@ -2,7 +2,7 @@ name: Go Backend CI/CD
 
 on: 
   push:
-    branches: [ "deploy" ]
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
