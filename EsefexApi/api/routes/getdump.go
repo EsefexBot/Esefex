@@ -8,7 +8,8 @@ import (
 
 // /dump
 func (routes *RouteHandlers) GetDump(w http.ResponseWriter, r *http.Request) {
-	log.Printf("%+v\n", r)
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	io.WriteString(w, "Dump!\n")
+
+	log.Printf("%+v\n", r)
 }
