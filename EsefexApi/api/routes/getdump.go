@@ -7,7 +7,7 @@ import (
 )
 
 // /dump
-func (routes *RouteHandlers) Dump(w http.ResponseWriter, r *http.Request) {
+func (routes *RouteHandlers) GetDump(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%+v\n", r)
 
 	io.WriteString(w, "Dump!\n")

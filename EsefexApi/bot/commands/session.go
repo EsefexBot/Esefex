@@ -40,7 +40,7 @@ func (c *CommandHandlers) Session(s *discordgo.Session, i *discordgo.Interaction
 	route := "joinsession"
 
 	// https://esefex.com/joinsession/1234567890
-	url := fmt.Sprintf("https://%s/%s/%s", c.domain, route, i.GuildID)
+	url := fmt.Sprintf("%s/%s/%s", c.domain, route, i.GuildID)
 
 	actions.JoinChannelVoice(s, i.GuildID, userChannel)
 
