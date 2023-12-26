@@ -8,13 +8,21 @@ var mockData = map[string]map[string]sounddb.SoundMeta{
 			SoundID:  "sound1",
 			ServerID: "server1",
 			Name:     "sound1Name",
-			Icon:     "icon1",
+			Icon: sounddb.Icon{
+				Name: "icon1",
+				ID:   "icon1ID",
+				Url:  "https://icon1Url.webp",
+			},
 		},
 		"sound2": {
 			SoundID:  "sound2",
 			ServerID: "server1",
 			Name:     "sound2Name",
-			Icon:     "icon2",
+			Icon: sounddb.Icon{
+				Name: "icon2",
+				ID:   "icon2ID",
+				Url:  "https://icon2Url.webp",
+			},
 		},
 	},
 	"server2": {
@@ -22,13 +30,21 @@ var mockData = map[string]map[string]sounddb.SoundMeta{
 			SoundID:  "sound3",
 			ServerID: "server2",
 			Name:     "sound3Name",
-			Icon:     "icon3",
+			Icon: sounddb.Icon{
+				Name: "icon3",
+				ID:   "icon3ID",
+				Url:  "https://icon3Url.webp",
+			},
 		},
 		"sound4": {
 			SoundID:  "sound4",
 			ServerID: "server2",
 			Name:     "sound4Name",
-			Icon:     "icon4",
+			Icon: sounddb.Icon{
+				Name: "icon4",
+				ID:   "icon4ID",
+				Url:  "https://icon4Url.webp",
+			},
 		},
 	},
 }
@@ -43,7 +59,7 @@ func NewApiMockDB() *ApiMockDB {
 }
 
 // AddSound implements sounddb.ISoundDB.
-func (*ApiMockDB) AddSound(serverID string, name string, icon string, pcm []int16) (sounddb.SoundUID, error) {
+func (*ApiMockDB) AddSound(serverID string, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
 	panic("unimplemented")
 }
 
