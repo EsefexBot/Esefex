@@ -4,7 +4,7 @@ type ISoundDB interface {
 	AddSound(serverID string, name string, icon Icon, pcm []int16) (SoundUID, error)
 	DeleteSound(uid SoundUID) error
 	GetSoundMeta(uid SoundUID) (SoundMeta, error)
-	GetSoundPcm(uid SoundUID) ([]int16, error)
+	GetSoundPcm(uid SoundUID) (*[]int16, error)
 	GetSoundUIDs(serverID string) ([]SoundUID, error)
 	GetServerIDs() ([]string, error)
 	SoundExists(uid SoundUID) (bool, error)
