@@ -53,7 +53,7 @@ func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionC
 		return nil, err
 	}
 
-	uid, err := c.db.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), icon, pcm)
+	uid, err := c.dbs.SoundDB.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), icon, pcm)
 	if err != nil {
 		return nil, err
 	}

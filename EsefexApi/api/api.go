@@ -3,8 +3,8 @@ package api
 import (
 	"esefexapi/api/routes"
 	"esefexapi/audioplayer"
+	"esefexapi/db"
 	"esefexapi/service"
-	"esefexapi/sounddb"
 
 	"fmt"
 	"log"
@@ -17,22 +17,22 @@ var _ service.IService = &HttpApi{}
 
 // HttpApi implements Service
 type HttpApi struct {
-	db      sounddb.ISoundDB
-	a       audioplayer.IAudioPlayer
-	apiPort int
-	cProto  string
-	stop    chan struct{}
-	ready   chan struct{}
+	handlers *routes.RouteHandlers
+	a        audioplayer.IAudioPlayer
+	apiPort  int
+	cProto   string
+	stop     chan struct{}
+	ready    chan struct{}
 }
 
-func NewHttpApi(db sounddb.ISoundDB, plr audioplayer.IAudioPlayer, apiPort int, cProto string) *HttpApi {
+func NewHttpApi(dbs db.Databases, plr audioplayer.IAudioPlayer, apiPort int, cProto string) *HttpApi {
 	return &HttpApi{
-		db:      db,
-		a:       plr,
-		apiPort: apiPort,
-		cProto:  cProto,
-		stop:    make(chan struct{}, 1),
-		ready:   make(chan struct{}),
+		handlers: routes.NewRouteHandlers(dbs, plr, cProto),
+		a:        plr,
+		apiPort:  apiPort,
+		cProto:   cProto,
+		stop:     make(chan struct{}, 1),
+		ready:    make(chan struct{}),
 	}
 }
 
@@ -41,17 +41,17 @@ func (api *HttpApi) run() {
 	log.Println("Starting webserver...")
 	defer log.Println("Webserver stopped")
 
-	routes := routes.NewRouteHandler(api.db, api.a, api.cProto)
-
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/sounds/{server_id}", routes.GetSounds).Methods("GET")
-	router.HandleFunc("/api/playsound/{user_id}/{server_id}/{sound_id}", routes.PostPlaySound).Methods("POST")
+	router.HandleFunc("/api/sounds/{server_id}", api.handlers.GetSounds).Methods("GET")
+	router.HandleFunc("/api/playsound/{user_id}/{server_id}/{sound_id}", api.handlers.PostPlaySoundInsecure).Methods("POST")
+	router.HandleFunc("/api/playsound/{sound_id}", api.handlers.PostPlaySound).Methods("POST").Headers("User-Token", "")
 
-	router.HandleFunc("/joinsession/{server_id}", routes.GetJoinSession).Methods("GET")
+	router.HandleFunc("/joinsession/{server_id}", api.handlers.GetJoinSession).Methods("GET")
+	router.HandleFunc("/link", api.handlers.GetLink).Methods("GET").Queries("t", "{t}")
 
-	router.HandleFunc("/dump", routes.GetDump)
-	router.HandleFunc("/", routes.GetIndex).Methods("GET")
+	router.HandleFunc("/dump", api.handlers.GetDump)
+	router.HandleFunc("/", api.handlers.GetIndex).Methods("GET")
 
 	// http.Handle("/", router)
 	log.Printf("Webserver started on port %d (http://localhost:%d)\n", api.apiPort, api.apiPort)

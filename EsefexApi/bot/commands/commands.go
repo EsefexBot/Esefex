@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"esefexapi/sounddb"
+	"esefexapi/db"
 	"fmt"
 	"log"
 
@@ -9,15 +9,15 @@ import (
 )
 
 type CommandHandlers struct {
-	db       sounddb.ISoundDB
+	dbs      db.Databases
 	domain   string
 	Commands map[string]*discordgo.ApplicationCommand
 	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-func NewCommandHandlers(db sounddb.ISoundDB, domain string) *CommandHandlers {
+func NewCommandHandlers(dbs db.Databases, domain string) *CommandHandlers {
 	ch := &CommandHandlers{
-		db:       db,
+		dbs:      dbs,
 		domain:   domain,
 		Commands: map[string]*discordgo.ApplicationCommand{},
 		Handlers: map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
@@ -34,6 +34,9 @@ func NewCommandHandlers(db sounddb.ISoundDB, domain string) *CommandHandlers {
 
 	ch.Commands["delete"] = DeleteCommand
 	ch.Handlers["delete"] = WithErrorHandling(ch.Delete)
+
+	ch.Commands["link"] = LinkCommand
+	ch.Handlers["link"] = WithErrorHandling(ch.Link)
 
 	return ch
 }

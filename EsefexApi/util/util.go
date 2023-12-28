@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"regexp"
 	"strings"
@@ -45,4 +46,15 @@ func GetEmojiURL(emoji string) string {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/twitter/twemoji/master/assets/svg/%s.svg", name)
 
 	return url
+}
+
+var TokenCharset = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+func RandomString(charset []rune, length int) string {
+	str := make([]rune, 32)
+	for i := range str {
+		str[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(str)
 }

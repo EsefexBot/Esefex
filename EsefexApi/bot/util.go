@@ -9,8 +9,6 @@ import (
 )
 
 func (b *DiscordBot) RegisterComands(s *discordgo.Session) {
-	log.Println("Registering commands...")
-
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if h, ok := b.cmdh.Handlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)

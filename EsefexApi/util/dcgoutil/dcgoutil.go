@@ -1,10 +1,13 @@
 package dcgoutil
 
 import (
+	"errors"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
+
+var NotInVC = errors.New("Bot is not in a voice channel")
 
 // util functions for discordgo
 
@@ -57,7 +60,7 @@ func GetVCUsers(s *discordgo.Session, serverID, channelID string) ([]*discordgo.
 	return channelUsers, nil
 }
 
-func UserVC(s *discordgo.Session, serverID, userID string) (string, error) {
+func UserServerVC(s *discordgo.Session, serverID, userID string) (string, error) {
 	vs, err := s.State.VoiceState(serverID, userID)
 	if err != nil {
 		return "", err
@@ -67,4 +70,44 @@ func UserVC(s *discordgo.Session, serverID, userID string) (string, error) {
 	}
 
 	return vs.ChannelID, nil
+}
+
+func UserVC(s *discordgo.Session, userID string) (*discordgo.VoiceState, error) {
+	for _, guild := range s.State.Guilds {
+		vs, err := s.State.VoiceState(guild.ID, userID)
+		if err != nil {
+			return nil, err
+		}
+		if vs == nil {
+			continue
+		}
+
+		return vs, nil
+	}
+
+	return nil, NotInVC
+}
+
+func UserInBotVC(s *discordgo.Session, userID string) (bool, error) {
+	for _, guild := range s.State.Guilds {
+		vs, err := s.State.VoiceState(guild.ID, userID)
+		if err != nil {
+			return false, err
+		}
+		if vs == nil {
+			continue
+		}
+
+		botVC, err := GetBotVC(s, guild.ID)
+		if err != nil {
+			return false, err
+		}
+		if botVC == nil {
+			continue
+		}
+
+		return botVC.ChannelID == vs.ChannelID, nil
+	}
+
+	return false, nil
 }

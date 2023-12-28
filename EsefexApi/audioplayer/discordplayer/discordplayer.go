@@ -2,10 +2,10 @@ package discordplayer
 
 import (
 	"esefexapi/audioplayer/discordplayer/vcon"
+	"esefexapi/db"
 
 	"esefexapi/audioplayer"
 	"esefexapi/service"
-	"esefexapi/sounddb"
 
 	"time"
 
@@ -24,16 +24,16 @@ var _ audioplayer.IAudioPlayer = &DiscordPlayer{}
 type DiscordPlayer struct {
 	vcs   map[string]*vcon.VCon
 	ds    *discordgo.Session
-	db    sounddb.ISoundDB
+	dbs   db.Databases
 	stop  chan struct{}
 	ready chan struct{}
 }
 
-func NewDiscordPlayer(ds *discordgo.Session, db sounddb.ISoundDB) *DiscordPlayer {
+func NewDiscordPlayer(ds *discordgo.Session, dbs db.Databases) *DiscordPlayer {
 	return &DiscordPlayer{
 		vcs:   make(map[string]*vcon.VCon),
 		ds:    ds,
-		db:    db,
+		dbs:   dbs,
 		stop:  make(chan struct{}),
 		ready: make(chan struct{}),
 	}

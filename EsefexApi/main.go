@@ -5,10 +5,14 @@ import (
 	"esefexapi/audioplayer/discordplayer"
 	"esefexapi/bot"
 	"esefexapi/config"
+	"esefexapi/db"
+	"esefexapi/linktokenstore/memorylinktokenstore"
 	"esefexapi/sounddb/dbcache"
-	"esefexapi/sounddb/filedb"
+	"esefexapi/sounddb/filesounddb"
+	"esefexapi/userdb/fileuserdb"
 	"esefexapi/util"
 	"os"
+	"time"
 
 	"log"
 
@@ -33,17 +37,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fdb, err := filedb.NewFileDB(cfg.FileDatabase.Location)
+	sdb, err := filesounddb.NewFileDB(cfg.FileSoundDB.Location)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db := dbcache.NewDBCache(fdb)
+	sdbc := dbcache.NewSoundDBCache(sdb)
 
-	plr := discordplayer.NewDiscordPlayer(ds, db)
+	udb, err := fileuserdb.NewFileUserDB(cfg.FileUserDB.Location)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	api := api.NewHttpApi(db, plr, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
-	bot := bot.NewDiscordBot(ds, db, cfg.HttpApi.Domain)
+	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(time.Minute * 5)
+
+	dbs := db.Databases{
+		SoundDB:        sdbc,
+		UserDB:         udb,
+		LinkTokenStore: ldb,
+	}
+
+	plr := discordplayer.NewDiscordPlayer(ds, dbs)
+
+	api := api.NewHttpApi(dbs, plr, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
+	bot := bot.NewDiscordBot(ds, dbs, cfg.HttpApi.Domain)
 
 	log.Println("Components bootstraped, starting...")
 
@@ -59,6 +76,8 @@ func main() {
 	<-api.Stop()
 	<-bot.Stop()
 	<-plr.Stop()
+
+	udb.Close()
 
 	log.Println("All components stopped, exiting...")
 }

@@ -1,82 +1,30 @@
 package discordplayer
 
 import (
-	"esefexapi/audioplayer/discordplayer/vcon"
 	"esefexapi/sounddb"
 	"esefexapi/util/dcgoutil"
 	"log"
 )
 
-func (c *DiscordPlayer) PlaySound(uid sounddb.SoundUID, serverID, userID string) error {
-	log.Printf("Playing sound %s\n", uid)
+func (c *DiscordPlayer) PlaySound(soundID string, userID string) error {
+	log.Printf("Playing sound '%v' for user '%v'", soundID, userID)
 
-	vc, err := c.ensureVCon(serverID, userID)
+	// usr, err := c.ds.User(userID)
+	// if err != nil {
+	// 	return err
+	// }
+
+	uservc, err := dcgoutil.UserVC(c.ds, userID)
 	if err != nil {
 		return err
 	}
 
-	vc.PlaySound(uid)
+	vc, err := c.ensureVCon(uservc.GuildID, userID)
+	if err != nil {
+		return err
+	}
+
+	vc.PlaySound(sounddb.SuidFromStrings(uservc.GuildID, soundID))
 
 	return nil
-}
-
-func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*vcon.VCon, error) {
-	usrChanID, err := dcgoutil.UserVC(c.ds, serverID, userID)
-	if err != nil {
-		return nil, err
-	}
-
-	botChan, err := dcgoutil.GetBotVC(c.ds, serverID)
-	if err != nil {
-		return nil, err
-	}
-
-	// if the bot is in the server and in the user's channel, return the VCon for that channel (if it exists) or create a new one
-
-	if usrChanID == botChan.ChannelID && c.vcs[usrChanID] != nil {
-		return c.vcs[usrChanID], nil
-	}
-
-	if usrChanID == botChan.ChannelID && c.vcs[usrChanID] == nil {
-		vc, err := vcon.NewVCon(c.ds, c.db, serverID, usrChanID)
-		if err != nil {
-			return nil, err
-		}
-
-		c.vcs[usrChanID] = vc
-		vc.Run()
-
-		return vc, nil
-	}
-
-	// if the bot is not in the server, join the user's channel by creating a new VCon
-
-	if botChan == nil {
-		vc, err := vcon.NewVCon(c.ds, c.db, serverID, usrChanID)
-		if err != nil {
-			return nil, err
-		}
-
-		c.vcs[usrChanID] = vc
-		vc.Run()
-
-		return vc, nil
-	}
-
-	// if the bot is in the server but not in the user's channel, delete the VCon for the bot's current channel and create a new one for the user's channel
-
-	if c.vcs[botChan.ChannelID] != nil {
-		c.vcs[botChan.ChannelID].Close()
-		delete(c.vcs, botChan.ChannelID)
-	}
-
-	vc, err := vcon.NewVCon(c.ds, c.db, serverID, usrChanID)
-	if err != nil {
-		return nil, err
-	}
-
-	c.vcs[usrChanID] = vc
-	vc.Run()
-
-	return vc, nil
 }

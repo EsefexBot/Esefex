@@ -7,7 +7,7 @@ import (
 )
 
 // /dump
-func (routes *RouteHandlers) GetDump(w http.ResponseWriter, r *http.Request) {
+func (h *RouteHandlers) GetDump(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	io.WriteString(w, "Dump!\n")
 

@@ -11,11 +11,11 @@ import (
 )
 
 // api/sounds/<server_id>
-func (routes *RouteHandlers) GetSounds(w http.ResponseWriter, r *http.Request) {
+func (h *RouteHandlers) GetSounds(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	server_id := vars["server_id"]
 
-	uids, err := routes.db.GetSoundUIDs(server_id)
+	uids, err := h.dbs.SoundDB.GetSoundUIDs(server_id)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -25,7 +25,7 @@ func (routes *RouteHandlers) GetSounds(w http.ResponseWriter, r *http.Request) {
 
 	sounds := make([]sounddb.SoundMeta, len(uids))
 	for i, uid := range uids {
-		m, err := routes.db.GetSoundMeta(uid)
+		m, err := h.dbs.SoundDB.GetSoundMeta(uid)
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)

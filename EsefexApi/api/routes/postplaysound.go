@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"esefexapi/sounddb"
+	"esefexapi/userdb"
 	"fmt"
 	"io"
 	"log"
@@ -10,16 +10,23 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// api/playsound/<user_id>/<server_id>/<sound_id>
-func (routes *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request) {
+// api/playsound/<sound_id>
+func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request) {
 	log.Printf("got /playsound request\n")
 
 	vars := mux.Vars(r)
-	user_id := vars["user_id"]
-	server_id := vars["server_id"]
 	sound_id := vars["sound_id"]
 
-	err := routes.a.PlaySound(sounddb.SuidFromStrings(server_id, sound_id), server_id, user_id)
+	user_token := r.Header.Get("User-Token")
+	user, err := h.dbs.UserDB.GetUserByToken(userdb.Token(user_token))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(fmt.Sprintf("Error: %s", err)))
+		return
+	}
+
+	err = h.a.PlaySound(sound_id, user.ID)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)

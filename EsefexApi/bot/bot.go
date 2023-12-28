@@ -2,8 +2,8 @@ package bot
 
 import (
 	"esefexapi/bot/commands"
+	"esefexapi/db"
 	"esefexapi/service"
-	"esefexapi/sounddb"
 
 	"log"
 
@@ -20,10 +20,10 @@ type DiscordBot struct {
 	ready   chan struct{}
 }
 
-func NewDiscordBot(s *discordgo.Session, db sounddb.ISoundDB, domain string) *DiscordBot {
+func NewDiscordBot(s *discordgo.Session, dbs db.Databases, domain string) *DiscordBot {
 	return &DiscordBot{
 		Session: s,
-		cmdh:    commands.NewCommandHandlers(db, domain),
+		cmdh:    commands.NewCommandHandlers(dbs, domain),
 		stop:    make(chan struct{}, 1),
 		ready:   make(chan struct{}),
 	}
@@ -40,13 +40,15 @@ func (b *DiscordBot) run() {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
 
+	s.Identify.Intents = discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsGuildMembers | discordgo.IntentsGuildPresences
+
 	err := s.Open()
 	if err != nil {
 		log.Fatalf("Cannot open the session: %v", err)
 	}
 	defer s.Close()
 
-	log.Println("Adding commands...")
+	log.Println("Registering commands...")
 	b.RegisterComands(s)
 	defer b.DeleteAllCommands(s)
 	// defer actions.LeaveAllChannels(s)

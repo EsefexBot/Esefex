@@ -1,4 +1,4 @@
-package filedb
+package filesounddb
 
 import (
 	"esefexapi/sounddb"

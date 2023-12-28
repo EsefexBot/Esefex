@@ -10,10 +10,10 @@ import (
 var instance *Config
 
 type Config struct {
-	Test         string       `toml:"test"`
-	HttpApi      HttpApi      `toml:"http_api"`
-	FileDatabase FileDatabase `toml:"file_database"`
-	Bot          Bot          `toml:"bot"`
+	HttpApi     HttpApi           `toml:"http_api"`
+	FileSoundDB FileSoundDatabase `toml:"file_sound_database"`
+	FileUserDB  FileUserDatabase  `toml:"file_user_database"`
+	Bot         Bot               `toml:"bot"`
 }
 
 type HttpApi struct {
@@ -22,7 +22,11 @@ type HttpApi struct {
 	CustomProtocol string `toml:"custom_protocol"`
 }
 
-type FileDatabase struct {
+type FileSoundDatabase struct {
+	Location string `toml:"location"`
+}
+
+type FileUserDatabase struct {
 	Location string `toml:"location"`
 }
 

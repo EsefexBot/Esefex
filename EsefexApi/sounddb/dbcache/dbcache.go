@@ -5,11 +5,11 @@ import (
 	"sync"
 )
 
-var _ sounddb.ISoundDB = &DBCache{}
+var _ sounddb.ISoundDB = &SoundDBCache{}
 
 // DB Cache loads all sounds into memory and caches them.
-// DBCache implements db.SoundDB
-type DBCache struct {
+// SoundDBCache implements db.SoundDB
+type SoundDBCache struct {
 	sounds map[sounddb.SoundUID]*CachedSound
 	db     sounddb.ISoundDB
 	rw     sync.RWMutex
@@ -20,9 +20,9 @@ type CachedSound struct {
 	Meta sounddb.SoundMeta
 }
 
-// NewDBCache creates a new DBCache.
-func NewDBCache(db sounddb.ISoundDB) *DBCache {
-	c := &DBCache{
+// NewSoundDBCache creates a new DBCache.
+func NewSoundDBCache(db sounddb.ISoundDB) *SoundDBCache {
+	c := &SoundDBCache{
 		sounds: make(map[sounddb.SoundUID]*CachedSound),
 		db:     db,
 	}
@@ -31,7 +31,7 @@ func NewDBCache(db sounddb.ISoundDB) *DBCache {
 }
 
 // AddSound implements db.SoundDB.
-func (c *DBCache) AddSound(serverID string, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
+func (c *SoundDBCache) AddSound(serverID string, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
@@ -54,7 +54,7 @@ func (c *DBCache) AddSound(serverID string, name string, icon sounddb.Icon, pcm 
 }
 
 // DeleteSound implements db.SoundDB.
-func (c *DBCache) DeleteSound(uid sounddb.SoundUID) error {
+func (c *SoundDBCache) DeleteSound(uid sounddb.SoundUID) error {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
@@ -69,7 +69,7 @@ func (c *DBCache) DeleteSound(uid sounddb.SoundUID) error {
 }
 
 // GetServerIDs implements db.SoundDB.
-func (c *DBCache) GetServerIDs() ([]string, error) {
+func (c *SoundDBCache) GetServerIDs() ([]string, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 
@@ -88,7 +88,7 @@ func (c *DBCache) GetServerIDs() ([]string, error) {
 }
 
 // GetSoundMeta implements db.SoundDB.
-func (c *DBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
+func (c *SoundDBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 
@@ -106,7 +106,7 @@ func (c *DBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) 
 }
 
 // GetSoundPcm implements db.SoundDB.
-func (c *DBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
+func (c *SoundDBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 
@@ -124,7 +124,7 @@ func (c *DBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 }
 
 // GetSoundUIDs implements db.SoundDB.
-func (c *DBCache) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
+func (c *SoundDBCache) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 
@@ -139,7 +139,7 @@ func (c *DBCache) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
 	return uids, nil
 }
 
-func (c *DBCache) CacheAll() error {
+func (c *SoundDBCache) CacheAll() error {
 	servers, err := c.db.GetServerIDs()
 	if err != nil {
 		return err
@@ -162,7 +162,7 @@ func (c *DBCache) CacheAll() error {
 	return nil
 }
 
-func (c *DBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
+func (c *SoundDBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
@@ -191,7 +191,7 @@ func (c *DBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
 
 }
 
-func (c *DBCache) SoundExists(uid sounddb.SoundUID) (bool, error) {
+func (c *SoundDBCache) SoundExists(uid sounddb.SoundUID) (bool, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 
