@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/pelletier/go-toml"
+	"github.com/pkg/errors"
 )
 
 var instance *Config
@@ -37,13 +38,13 @@ func LoadConfig(path string) (*Config, error) {
 	// load config from file
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error opening config file")
 	}
 	defer f.Close()
 
 	configStr, err := io.ReadAll(f)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error reading config file")
 	}
 
 	// log.Println("Loaded config from file")
@@ -52,7 +53,7 @@ func LoadConfig(path string) (*Config, error) {
 	var config Config
 	err = toml.Unmarshal(configStr, &config)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error unmarshalling config")
 	}
 
 	return &config, nil

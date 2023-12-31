@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -31,7 +32,7 @@ func (c *CommandHandlers) Delete(s *discordgo.Session, i *discordgo.InteractionC
 
 	exists, err := c.dbs.SoundDB.SoundExists(uid)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error checking if sound exists")
 	}
 	if !exists {
 		return &discordgo.InteractionResponse{
@@ -46,8 +47,7 @@ func (c *CommandHandlers) Delete(s *discordgo.Session, i *discordgo.InteractionC
 
 	err = c.dbs.SoundDB.DeleteSound(uid)
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		return nil, errors.Wrap(err, "Error deleting sound")
 	}
 
 	log.Printf("Deleted sound effect %v from server %v", soundID.Value, i.GuildID)

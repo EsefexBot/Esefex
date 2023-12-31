@@ -7,6 +7,8 @@ import (
 	"os"
 	"path"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 var _ userdb.IUserDB = &FileUserDB{}
@@ -23,22 +25,19 @@ func NewFileUserDB(filePath string) (*FileUserDB, error) {
 
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
-		log.Printf("Error opening file: %s", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Error opening file")
 	}
 
 	stat, err := file.Stat()
 	if err != nil {
-		log.Printf("Error getting file stats: %s", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting file stats")
 	}
 
 	if stat.Size() == 0 {
 		log.Println("Users file is empty, writing empty array")
 		_, err = file.WriteString("[]")
 		if err != nil {
-			log.Printf("Error writing to file: %s", err)
-			return nil, err
+			return nil, errors.Wrap(err, "Error writing to file")
 		}
 	}
 

@@ -3,10 +3,12 @@ package vcon
 import (
 	"esefexapi/audioprocessing"
 	"esefexapi/sounddb"
+
 	"log"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 type VCon struct {
@@ -22,16 +24,14 @@ type VCon struct {
 func NewVCon(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, channelID string) (*VCon, error) {
 	vc, err := dc.ChannelVoiceJoin(guildID, channelID, false, true)
 	if err != nil {
-		log.Printf("Error joining voice channel: %s\n", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Error joining voice channel")
 	}
 
 	mixer := audioprocessing.NewS16leMixReader()
 
 	enc, err := audioprocessing.NewGopusEncoder(mixer)
 	if err != nil {
-		log.Printf("Error creating encoder: %s\n", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Error creating encoder")
 	}
 
 	return &VCon{
@@ -64,7 +64,7 @@ func (a *VCon) Run() {
 				log.Printf("Playing sound %s\n", sound)
 				pcm, err := a.db.GetSoundPcm(sound)
 				if err != nil {
-					log.Println(err)
+					log.Printf("Error getting sound pcm: %+v\n", err)
 					continue
 				}
 
@@ -79,7 +79,7 @@ func (a *VCon) Run() {
 				if !a.mixer.Empty() {
 					buf, err := a.enc.EncodeNext()
 					if err != nil {
-						log.Println(err)
+						log.Printf("Error encoding next: %+v\n", err)
 					}
 					a.vc.OpusSend <- buf
 				}

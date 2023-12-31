@@ -21,9 +21,9 @@ func (h *RouteHandlers) PostPlaySoundInsecure(w http.ResponseWriter, r *http.Req
 
 	err := h.a.PlaySoundInsecure(sounddb.SuidFromStrings(server_id, sound_id), server_id, user_id)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Error: %s", err)))
+		errorMsg := fmt.Sprintf("Error playing sound: %+v", err)
+		log.Println(errorMsg)
+		http.Error(w, errorMsg, http.StatusInternalServerError)
 		return
 	}
 

@@ -3,17 +3,19 @@ package discordplayer
 import (
 	"esefexapi/audioplayer/discordplayer/vcon"
 	"esefexapi/util/dcgoutil"
+
+	"github.com/pkg/errors"
 )
 
 func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*vcon.VCon, error) {
 	usrChanID, err := dcgoutil.UserServerVC(c.ds, serverID, userID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting user voice channel")
 	}
 
 	botChan, err := dcgoutil.GetBotVC(c.ds, serverID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting bot voice channel")
 	}
 
 	// if the bot is in the server and in the user's channel, return the VCon for that channel (if it exists) or create a new one
@@ -25,7 +27,7 @@ func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*vcon.VCon, error) 
 	if usrChanID == botChan.ChannelID && c.vcs[usrChanID] == nil {
 		vc, err := vcon.NewVCon(c.ds, c.dbs.SoundDB, serverID, usrChanID)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Error creating new VCon")
 		}
 
 		c.vcs[usrChanID] = vc
@@ -39,7 +41,7 @@ func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*vcon.VCon, error) 
 	if botChan == nil {
 		vc, err := vcon.NewVCon(c.ds, c.dbs.SoundDB, serverID, usrChanID)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Error creating new VCon")
 		}
 
 		c.vcs[usrChanID] = vc
@@ -57,7 +59,7 @@ func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*vcon.VCon, error) 
 
 	vc, err := vcon.NewVCon(c.ds, c.dbs.SoundDB, serverID, usrChanID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error creating new VCon")
 	}
 
 	c.vcs[usrChanID] = vc

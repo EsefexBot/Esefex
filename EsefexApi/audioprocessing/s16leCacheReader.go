@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"io"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
 type S16leCacheReader struct {
@@ -38,7 +40,7 @@ func (s *S16leCacheReader) LoadFromReader(reader io.Reader) (err error) {
 			bytes = append(bytes, byte(short))
 			bytes = append(bytes, byte(short>>8))
 		} else if err != io.EOF {
-			return err
+			return errors.Wrap(err, "Error reading from reader")
 		} else {
 			break
 		}

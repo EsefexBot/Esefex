@@ -45,12 +45,12 @@ func WithErrorHandling(h func(s *discordgo.Session, i *discordgo.InteractionCrea
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		r, err := h(s, i)
 		if err != nil {
-			log.Printf("Cannot execute command: %v", err)
+			log.Printf("Cannot execute command: %+v", err)
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("An error has occurred while executing the command: %v", err),
+					Content: fmt.Sprintf("An error has occurred while executing the command: %+v", err),
 				},
 			})
 		}

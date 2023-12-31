@@ -3,6 +3,8 @@ package dbcache
 import (
 	"esefexapi/sounddb"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 var _ sounddb.ISoundDB = &SoundDBCache{}
@@ -37,7 +39,7 @@ func (c *SoundDBCache) AddSound(serverID string, name string, icon sounddb.Icon,
 
 	uid, err := c.db.AddSound(serverID, name, icon, pcm)
 	if err != nil {
-		return sounddb.SoundUID{}, err
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error adding sound")
 	}
 
 	c.sounds[uid] = &CachedSound{
@@ -60,7 +62,7 @@ func (c *SoundDBCache) DeleteSound(uid sounddb.SoundUID) error {
 
 	err := c.db.DeleteSound(uid)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error deleting sound")
 	}
 
 	delete(c.sounds, uid)
@@ -99,7 +101,7 @@ func (c *SoundDBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, er
 	c.rw.RUnlock()
 	s, err := c.LoadSound(uid)
 	if err != nil {
-		return sounddb.SoundMeta{}, err
+		return sounddb.SoundMeta{}, errors.Wrap(err, "Error loading sound")
 	}
 
 	return s.Meta, nil
@@ -117,7 +119,7 @@ func (c *SoundDBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	c.rw.RUnlock()
 	s, err := c.LoadSound(uid)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error loading sound")
 	}
 
 	return s.Data, nil
@@ -142,19 +144,19 @@ func (c *SoundDBCache) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error)
 func (c *SoundDBCache) CacheAll() error {
 	servers, err := c.db.GetServerIDs()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error getting server ids")
 	}
 
 	for _, serverID := range servers {
 		uids, err := c.db.GetSoundUIDs(serverID)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "Error getting sound uids")
 		}
 
 		for _, uid := range uids {
 			_, err := c.LoadSound(uid)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "Error loading sound")
 			}
 		}
 	}
@@ -172,12 +174,12 @@ func (c *SoundDBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
 
 	pcm, err := c.db.GetSoundPcm(uid)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting sound pcm")
 	}
 
 	meta, err := c.db.GetSoundMeta(uid)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting sound meta")
 	}
 
 	s := CachedSound{

@@ -1,7 +1,7 @@
 package linktokenstore
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"time"
 )
 

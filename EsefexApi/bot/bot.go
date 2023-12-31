@@ -34,24 +34,24 @@ func (b *DiscordBot) run() {
 	log.Println("Starting bot...")
 	defer log.Println("Bot stopped")
 
-	s := b.Session
+	ds := b.Session
+	ds.Identify.Intents = discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsGuildMembers | discordgo.IntentsGuildPresences
 
-	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
-	})
+	ready := b.WaitReady()
+	log.Println("Registering command handlers...")
+	b.RegisterComandHandlers()
 
-	s.Identify.Intents = discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsGuildMembers | discordgo.IntentsGuildPresences
-
-	err := s.Open()
+	err := ds.Open()
 	if err != nil {
-		log.Fatalf("Cannot open the session: %v", err)
+		log.Fatalf("Cannot open the session: %+v", err)
 	}
-	defer s.Close()
+	defer ds.Close()
+
+	<-ready
 
 	log.Println("Registering commands...")
-	b.RegisterComands(s)
-	defer b.DeleteAllCommands(s)
-	// defer actions.LeaveAllChannels(s)
+	b.RegisterComands()
+	defer b.DeleteAllCommands()
 
 	log.Println("Bot Ready.")
 	close(b.ready)

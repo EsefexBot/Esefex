@@ -20,17 +20,19 @@ func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request) {
 	user_token := r.Header.Get("User-Token")
 	user, err := h.dbs.UserDB.GetUserByToken(userdb.Token(user_token))
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(fmt.Sprintf("Error: %s", err)))
+		errorMsg := fmt.Sprintf("Error getting user by token: %+v", err)
+
+		log.Println(errorMsg)
+		http.Error(w, errorMsg, http.StatusUnauthorized)
 		return
 	}
 
 	err = h.a.PlaySound(sound_id, user.ID)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Error: %s", err)))
+		errorMsg := fmt.Sprintf("Error playing sound: %+v", err)
+
+		log.Println(errorMsg)
+		http.Error(w, errorMsg, http.StatusInternalServerError)
 		return
 	}
 

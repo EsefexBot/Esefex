@@ -11,10 +11,10 @@ import (
 	"esefexapi/sounddb/filesounddb"
 	"esefexapi/userdb/fileuserdb"
 	"esefexapi/util"
-	"os"
-	"time"
 
 	"log"
+	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -71,6 +71,7 @@ func main() {
 	log.Println("All components started successfully :)")
 	log.Println("Press Ctrl+C to exit")
 	<-util.Interrupt()
+	println()
 	log.Println("Gracefully shutting down...")
 
 	<-api.Stop()

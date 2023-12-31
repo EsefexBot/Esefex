@@ -4,6 +4,8 @@ import (
 	"esefexapi/linktokenstore"
 	"esefexapi/util"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 var _ linktokenstore.ILinkTokenStore = &MemoryLinkTokenStore{}
@@ -67,12 +69,12 @@ func (m *MemoryLinkTokenStore) DeleteToken(userID string) error {
 func (m *MemoryLinkTokenStore) ValidateToken(tokenStr string) (bool, error) {
 	user, err := m.GetUser(tokenStr)
 	if err != nil {
-		return false, err
+		return false, errors.Wrap(err, "Error getting user from token")
 	}
 
 	token, err := m.GetToken(user)
 	if err != nil {
-		return false, err
+		return false, errors.Wrap(err, "Error getting token")
 	}
 
 	if token.Expiry.Before(time.Now()) {

@@ -3,6 +3,8 @@ package discordplayer
 import (
 	"esefexapi/sounddb"
 	"log"
+
+	"github.com/pkg/errors"
 )
 
 func (c *DiscordPlayer) PlaySoundInsecure(uid sounddb.SoundUID, serverID, userID string) error {
@@ -10,7 +12,7 @@ func (c *DiscordPlayer) PlaySoundInsecure(uid sounddb.SoundUID, serverID, userID
 
 	vc, err := c.ensureVCon(serverID, userID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error ensuring voice connection")
 	}
 
 	vc.PlaySound(uid)

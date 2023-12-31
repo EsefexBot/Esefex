@@ -17,9 +17,10 @@ func (h *RouteHandlers) GetSounds(w http.ResponseWriter, r *http.Request) {
 
 	uids, err := h.dbs.SoundDB.GetSoundUIDs(server_id)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Error: %s", err)))
+		errorMsg := fmt.Sprintf("Error getting sound uids: %+v", err)
+
+		log.Print(errorMsg)
+		http.Error(w, errorMsg, http.StatusInternalServerError)
 		return
 	}
 
@@ -27,9 +28,10 @@ func (h *RouteHandlers) GetSounds(w http.ResponseWriter, r *http.Request) {
 	for i, uid := range uids {
 		m, err := h.dbs.SoundDB.GetSoundMeta(uid)
 		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("Error: %s", err)))
+			errorMsg := fmt.Sprintf("Error getting sound meta: %+v", err)
+
+			log.Println(errorMsg)
+			http.Error(w, errorMsg, http.StatusInternalServerError)
 			return
 		}
 
@@ -38,9 +40,10 @@ func (h *RouteHandlers) GetSounds(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse, err := json.Marshal(sounds)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Error: %s", err)))
+		errorMsg := fmt.Sprintf("Error marshalling json: %+v", err)
+
+		log.Println(errorMsg)
+		http.Error(w, errorMsg, http.StatusInternalServerError)
 		return
 	}
 

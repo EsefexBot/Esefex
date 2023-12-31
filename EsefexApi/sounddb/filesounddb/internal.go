@@ -4,6 +4,8 @@ import (
 	"esefexapi/sounddb"
 	"math/rand"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 func (f *FileDB) generateSoundID(serverId string) (string, error) {
@@ -16,7 +18,7 @@ func (f *FileDB) generateSoundID(serverId string) (string, error) {
 
 		exists, err := f.SoundExists(sounddb.SuidFromStrings(serverId, id))
 		if err != nil {
-			return "", err
+			return "", errors.Wrap(err, "Error checking if sound exists")
 		}
 
 		if !exists {

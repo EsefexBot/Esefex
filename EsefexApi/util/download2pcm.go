@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"regexp"
 	"slices"
+
+	"github.com/pkg/errors"
 )
 
 var validExt = []string{"mp3", "wav", "ogg", "flac", "m4a", "aac"}
@@ -13,7 +15,7 @@ var validExt = []string{"mp3", "wav", "ogg", "flac", "m4a", "aac"}
 func Download2PCM(url string) ([]int16, error) {
 	ext, err := ExtFromUrl(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting extension from url")
 	}
 
 	if !slices.Contains(validExt, ext) {
@@ -22,12 +24,12 @@ func Download2PCM(url string) ([]int16, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error downloading sound")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "audio/mpeg" {
-		return nil, fmt.Errorf("status code error: %v", resp.StatusCode)
+		return nil, errors.Wrapf(err, "Error downloading sound: %v", resp.StatusCode)
 	}
 
 	cmd := exec.Command("ffmpeg", "-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-f", "s16le", "-ac", "2", "-ar", "48000", "-")
@@ -35,7 +37,7 @@ func Download2PCM(url string) ([]int16, error) {
 
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error converting sound")
 	}
 
 	pcm := make([]int16, len(out)/2)
@@ -49,7 +51,7 @@ func Download2PCM(url string) ([]int16, error) {
 func ExtFromDisposition(disposition string) (string, error) {
 	r, err := regexp.Compile(`filename=".+\.(.+)"`)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "Error compiling regex")
 	}
 
 	m := r.FindStringSubmatch(disposition)
@@ -63,7 +65,7 @@ func ExtFromDisposition(disposition string) (string, error) {
 func ExtFromUrl(url string) (string, error) {
 	r, err := regexp.Compile(`^.+\.(.+)\?.+$`)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "Error compiling regex")
 	}
 
 	m := r.FindStringSubmatch(url)

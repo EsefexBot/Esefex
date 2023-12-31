@@ -4,6 +4,8 @@ import (
 	"esefexapi/sounddb"
 	"esefexapi/util/dcgoutil"
 	"log"
+
+	"github.com/pkg/errors"
 )
 
 func (c *DiscordPlayer) PlaySound(soundID string, userID string) error {
@@ -16,12 +18,12 @@ func (c *DiscordPlayer) PlaySound(soundID string, userID string) error {
 
 	uservc, err := dcgoutil.UserVC(c.ds, userID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error getting user's voice channel")
 	}
 
 	vc, err := c.ensureVCon(uservc.GuildID, userID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error ensuring voice connection")
 	}
 
 	vc.PlaySound(sounddb.SuidFromStrings(uservc.GuildID, soundID))

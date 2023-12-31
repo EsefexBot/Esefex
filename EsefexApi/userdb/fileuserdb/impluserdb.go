@@ -5,6 +5,8 @@ import (
 	"esefexapi/util"
 	"log"
 	"slices"
+
+	"github.com/pkg/errors"
 )
 
 // GetUser implements userdb.UserDB.
@@ -59,7 +61,7 @@ func (f *FileUserDB) NewToken(userID string) (userdb.Token, error) {
 
 	user, err := f.getOrCreateUser(userID)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "Error getting or creating user")
 	}
 
 	user.Tokens = append(user.Tokens, userdb.Token(token))
@@ -83,7 +85,7 @@ func (f *FileUserDB) getOrCreateUser(userID string) (*userdb.User, error) {
 		user, err = f.GetUser(userID)
 	}
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting user")
 	}
 	return user, nil
 }

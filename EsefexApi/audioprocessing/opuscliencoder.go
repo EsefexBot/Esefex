@@ -4,6 +4,8 @@ import (
 	"io"
 	"log"
 	"os/exec"
+
+	"github.com/pkg/errors"
 )
 
 type OpusCliEncoder struct {
@@ -18,17 +20,17 @@ func NewOpusCliEncoder(s io.Reader) (*OpusCliEncoder, error) {
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting stdin pipe")
 	}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting stdout pipe")
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error starting opusenc")
 	}
 
 	return &OpusCliEncoder{
@@ -49,17 +51,14 @@ func (e *OpusCliEncoder) EncodeNext() ([]byte, error) {
 	log.Println("Reading from source")
 	n, err := (*e.source).Read(buf)
 	if err != nil {
-		log.Println("Error reading from source")
-		return nil, err
+		return nil, errors.Wrap(err, "Error reading from source")
 	}
 
 	//Write to the encoder
 	log.Println("Writing to encoder stdin")
 	n, err = (*e.stdin).Write(buf[:n])
 	if err != nil {
-		log.Println("Error writing to encoder stdin")
-		log.Println(n)
-		return nil, err
+		return nil, errors.Wrapf(err, "Error writing to encoder stdin (%d bytes written)", n)
 	}
 
 	bytes := make([]byte, 960*2*2)
@@ -68,17 +67,8 @@ func (e *OpusCliEncoder) EncodeNext() ([]byte, error) {
 	log.Println("Reading from encoder stdout")
 	n, err = (*e.stdout).Read(bytes)
 	if err != nil {
-		log.Println("Error reading from encoder stdout")
-		return nil, err
+		return nil, errors.Wrap(err, "Error reading from encoder stdout")
 	}
-
-	// Read from the encoder
-	// log.Println("Reading from encoder stdout")
-	// bytes, err := io.ReadAll(*e.stdout)
-	// if err != nil {
-	// 	log.Println("Error reading from encoder stdout")
-	// 	return nil, err
-	// }
 
 	// return bytes, nil
 	return bytes[:n], nil

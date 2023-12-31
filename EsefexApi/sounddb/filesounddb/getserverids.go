@@ -3,14 +3,16 @@ package filesounddb
 import (
 	"log"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
 // GetServerIDs implements sounddb.SoundDB.
 func (f *FileDB) GetServerIDs() ([]string, error) {
 	files, err := os.ReadDir(f.location)
 	if err != nil {
-		log.Print(err)
-		return nil, err
+		log.Printf("Error reading directory: %+v", err)
+		return nil, errors.Wrap(err, "Error reading directory")
 	}
 
 	ids := make([]string, 0)
