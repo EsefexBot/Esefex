@@ -13,7 +13,7 @@ func main() {
 
 	err := baz()
 	if err != nil {
-		log.Printf("%+v", errors.FirstStack(err))
+		log.Printf("%+v", err)
 	}
 }
 
