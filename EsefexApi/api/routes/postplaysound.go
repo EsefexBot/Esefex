@@ -29,7 +29,7 @@ func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request) {
 
 	err = h.a.PlaySound(sound_id, user.ID)
 	if err != nil {
-		errorMsg := fmt.Sprintf("Error playing sound: %+v", err)
+		errorMsg := fmt.Sprintf("Error playing sound: \n%+v", err)
 
 		log.Println(errorMsg)
 		http.Error(w, errorMsg, http.StatusInternalServerError)

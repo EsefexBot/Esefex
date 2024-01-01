@@ -57,7 +57,7 @@ func main() {
 		LinkTokenStore: ldb,
 	}
 
-	plr := discordplayer.NewDiscordPlayer(ds, dbs)
+	plr := discordplayer.NewDiscordPlayer(ds, dbs, cfg.Bot.UseTimeouts, time.Duration(cfg.Bot.Timeout)*time.Second)
 
 	api := api.NewHttpApi(dbs, plr, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
 	bot := bot.NewDiscordBot(ds, dbs, cfg.HttpApi.Domain)

@@ -10,12 +10,12 @@ import (
 func (c *DiscordPlayer) PlaySoundInsecure(uid sounddb.SoundUID, serverID, userID string) error {
 	log.Printf("Playing sound %s\n", uid)
 
-	vc, err := c.ensureVCon(serverID, userID)
+	vd, err := c.ensureVCon(serverID, userID)
 	if err != nil {
 		return errors.Wrap(err, "Error ensuring voice connection")
 	}
 
-	vc.PlaySound(uid)
+	vd.vcon.PlaySound(uid)
 
 	return nil
 }

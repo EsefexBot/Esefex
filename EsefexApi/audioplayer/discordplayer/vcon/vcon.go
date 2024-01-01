@@ -61,7 +61,15 @@ func (a *VCon) Run() {
 			// log.Println("Looping...")
 			select {
 			case sound := <-a.playSound:
-				log.Printf("Playing sound %s\n", sound)
+				// log.Printf("Playing sound %s\n", sound)
+				ok, err := a.db.SoundExists(sound)
+				if err != nil {
+					log.Printf("Error checking if sound exists: %+v\n", err)
+					continue
+				} else if !ok {
+					log.Printf("Sound does not exist: %+v\n", sound)
+					continue
+				}
 				pcm, err := a.db.GetSoundPcm(sound)
 				if err != nil {
 					log.Printf("Error getting sound pcm: %+v\n", err)
@@ -70,7 +78,7 @@ func (a *VCon) Run() {
 
 				s := audioprocessing.NewS16leReferenceReaderFromRef(pcm)
 				a.mixer.AddSource(s)
-				log.Println("Added sound to mixer")
+				// log.Println("Added sound to mixer")
 			case <-a.stop:
 				return
 			default:
@@ -95,4 +103,8 @@ func (a *VCon) Close() {
 	close(a.stop)
 	a.vc.Speaking(false)
 	a.vc.Disconnect()
+}
+
+func (a *VCon) IsPlaying() bool {
+	return !a.mixer.Empty()
 }

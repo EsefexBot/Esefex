@@ -11,3 +11,5 @@ location = "./data/sounds"
 location = "./data/users/users.json"
 
 [bot]
+use_timeouts = false
+timeout = 60 # minutes

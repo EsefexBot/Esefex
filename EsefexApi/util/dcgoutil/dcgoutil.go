@@ -1,46 +1,50 @@
 package dcgoutil
 
 import (
+	// "log"
+
+	opt "esefexapi/option"
+
 	"github.com/bwmarrin/discordgo"
+	// "github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 )
 
-var BotNotInVC = errors.New("Bot is not in a voice channel")
-var UserNotInVC = errors.New("User is not in a voice channel")
-
 // util functions for discordgo
 
+// checks if the bot is in a voice channel in a server
 func BotInVC(ds *discordgo.Session, serverID, channelID string) (bool, error) {
 	vs, err := ds.State.VoiceState(serverID, ds.State.User.ID)
-	if err != nil {
+	if err == discordgo.ErrStateNotFound {
+		return false, nil
+	} else if err != nil {
 		return false, errors.Wrap(err, "Error getting bot voice state")
 	}
-	if vs == nil {
-		return false, nil
-	}
-
 	return vs.ChannelID == channelID, nil
 }
 
-func GetBotVC(ds *discordgo.Session, serverID string) (*discordgo.VoiceState, error) {
+// gets the voice state of the bot in a server
+func GetBotVC(ds *discordgo.Session, serverID string) (opt.Option[*discordgo.VoiceState], error) {
 	vc, err := ds.State.VoiceState(serverID, ds.State.User.ID)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error getting bot voice state")
+	if err == discordgo.ErrStateNotFound {
+		return opt.None[*discordgo.VoiceState](), nil
+	} else if err != nil {
+		return opt.None[*discordgo.VoiceState](), errors.Wrap(err, "Error getting bot voice state")
 	}
 
-	return vc, nil
+	return opt.Some(vc), nil
 }
 
-// gets a list of users in a the channel the bot is in (excluding the bot)
-func GetVCUsers(s *discordgo.Session, serverID, channelID string) ([]*discordgo.VoiceState, error) {
+// gets a list of users in a the channel the bot is in
+func GetVCUsers(ds *discordgo.Session, serverID, channelID string) ([]*discordgo.VoiceState, error) {
 	// Get the Guild object
-	guild, err := s.State.Guild(serverID)
+	guild, err := ds.State.Guild(serverID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting guild")
 	}
 
 	// Find the VoiceChannel object
-	voiceChannel, err := s.State.Channel(channelID)
+	voiceChannel, err := ds.State.Channel(channelID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting voice channel")
 	}
@@ -58,51 +62,51 @@ func GetVCUsers(s *discordgo.Session, serverID, channelID string) ([]*discordgo.
 	return channelUsers, nil
 }
 
-func UserServerVC(s *discordgo.Session, serverID, userID string) (string, error) {
-	vs, err := s.State.VoiceState(serverID, userID)
-	if err != nil {
-		return "", errors.Wrap(err, "Error getting voice state")
-	}
-	if vs == nil {
-		return "", UserNotInVC
+// gets the voice state of a user in a server
+func UserServerVC(ds *discordgo.Session, serverID, userID string) (opt.Option[*discordgo.VoiceState], error) {
+	vs, err := ds.State.VoiceState(serverID, userID)
+	if err == discordgo.ErrStateNotFound {
+		return opt.None[*discordgo.VoiceState](), nil
+	} else if err != nil {
+		return opt.None[*discordgo.VoiceState](), errors.Wrap(err, "Error getting voice state")
 	}
 
-	return vs.ChannelID, nil
+	return opt.Some(vs), nil
 }
 
-func UserVC(s *discordgo.Session, userID string) (*discordgo.VoiceState, error) {
-	for _, guild := range s.State.Guilds {
-		vs, err := s.State.VoiceState(guild.ID, userID)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error getting voice state")
-		}
-		if vs == nil {
+// gets the voice state of a user in any server
+func UserVC(ds *discordgo.Session, userID string) (opt.Option[*discordgo.VoiceState], error) {
+	for _, guild := range ds.State.Guilds {
+		vs, err := ds.State.VoiceState(guild.ID, userID)
+		if err == discordgo.ErrStateNotFound {
 			continue
+		} else if err != nil {
+			return opt.None[*discordgo.VoiceState](), errors.Wrap(err, "Error getting voice state")
 		}
 
-		return vs, nil
+		return opt.Some(vs), nil
 	}
 
-	return nil, BotNotInVC
+	return opt.None[*discordgo.VoiceState](), nil
 }
 
-func UserInBotVC(s *discordgo.Session, userID string) (bool, error) {
-	for _, guild := range s.State.Guilds {
-		vs, err := s.State.VoiceState(guild.ID, userID)
-		if err != nil {
+// checks if a user is in the same voice channel as the bot
+func UserInBotVC(ds *discordgo.Session, userID string) (bool, error) {
+	for _, guild := range ds.State.Guilds {
+		vs, err := ds.State.VoiceState(guild.ID, userID)
+		if err == discordgo.ErrStateNotFound {
+			continue
+		} else if err != nil {
 			return false, errors.Wrap(err, "Error getting voice state")
 		}
-		if vs == nil {
-			continue
-		}
 
-		botVC, err := GetBotVC(s, guild.ID)
+		botVCopt, err := GetBotVC(ds, guild.ID)
 		if err != nil {
 			return false, errors.Wrap(err, "Error getting bot voice state")
-		}
-		if botVC == nil {
+		} else if botVCopt.IsNone() {
 			continue
 		}
+		botVC := botVCopt.Unwrap()
 
 		return botVC.ChannelID == vs.ChannelID, nil
 	}

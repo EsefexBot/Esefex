@@ -92,14 +92,16 @@ func (c *SoundDBCache) GetServerIDs() ([]string, error) {
 // GetSoundMeta implements db.SoundDB.
 func (c *SoundDBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
 	c.rw.RLock()
-	defer c.rw.RUnlock()
 
 	if sound, ok := c.sounds[uid]; ok {
+		c.rw.RUnlock()
 		return sound.Meta, nil
 	}
-
 	c.rw.RUnlock()
 	s, err := c.LoadSound(uid)
+
+	c.rw.RLock()
+	defer c.rw.RUnlock()
 	if err != nil {
 		return sounddb.SoundMeta{}, errors.Wrap(err, "Error loading sound")
 	}
@@ -110,14 +112,18 @@ func (c *SoundDBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, er
 // GetSoundPcm implements db.SoundDB.
 func (c *SoundDBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	c.rw.RLock()
-	defer c.rw.RUnlock()
 
 	if sound, ok := c.sounds[uid]; ok {
+		c.rw.RUnlock()
 		return sound.Data, nil
 	}
 
 	c.rw.RUnlock()
+
 	s, err := c.LoadSound(uid)
+
+	c.rw.RLock()
+	defer c.rw.RUnlock()
 	if err != nil {
 		return nil, errors.Wrap(err, "Error loading sound")
 	}

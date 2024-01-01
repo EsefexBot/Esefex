@@ -32,6 +32,8 @@ type FileUserDatabase struct {
 }
 
 type Bot struct {
+	UseTimeouts bool    `toml:"use_timeouts"`
+	Timeout     float32 `toml:"timeout"`
 }
 
 func LoadConfig(path string) (*Config, error) {
