@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// link?<server_id>
+// api/link?<server_id>
 func (h *RouteHandlers) GetLink(w http.ResponseWriter, r *http.Request) {
 	linkToken := r.URL.Query().Get("t")
 
