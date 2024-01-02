@@ -59,7 +59,8 @@ func (api *HttpApi) run() {
 	router.HandleFunc("/api/playsound/{sound_id}", cors(auth(h.PostPlaySound))).Methods("POST").Headers("User-Token", "")
 
 	router.HandleFunc("/joinsession/{server_id}", cors(h.GetJoinSession)).Methods("GET")
-	router.HandleFunc("/link", cors(h.GetLink)).Methods("GET").Queries("t", "{t}")
+	router.HandleFunc("/link", cors(h.GetLinkDefer)).Methods("GET").Queries("t", "{t}")
+	router.HandleFunc("/api/link", cors(h.GetLink)).Methods("GET").Queries("t", "{t}")
 
 	router.HandleFunc("/dump", cors(h.GetDump))
 	router.HandleFunc("/", cors(h.GetIndex)).Methods("GET")
