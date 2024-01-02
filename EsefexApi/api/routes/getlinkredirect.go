@@ -39,11 +39,12 @@ func (h *RouteHandlers) GetLinkRedirect(w http.ResponseWriter, r *http.Request) 
 	}
 
 	cookie := http.Cookie{
-		Name:     "User-Token",
-		Value:    string(userToken),
-		Path:     "/",
-		MaxAge:   0,
-		Secure:   true,
+		Name:   "User-Token",
+		Value:  string(userToken),
+		Path:   "/",
+		MaxAge: 0,
+		// enable this once we have https
+		Secure:   false,
 		HttpOnly: true,
 		SameSite: http.SameSiteDefaultMode,
 	}
