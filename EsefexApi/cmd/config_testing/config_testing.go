@@ -18,7 +18,6 @@ func main() {
 	cfg = &config.Config{
 		HttpApi: config.HttpApi{
 			Port:           8080,
-			Domain:         "http://localhost",
 			CustomProtocol: "esefex",
 		},
 		FileSoundDB: config.FileSoundDatabase{
