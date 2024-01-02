@@ -1,17 +1,10 @@
 async function init() {
     const soundsDiv = document.getElementById('sounds');
     const userTokenInput = document.getElementById('userTokenInput');
-    userTokenInput.value = document.cookie.split('; ').find(row => row.startsWith('User-Token')).split('=')[1];
-
-    userTokenInput.addEventListener('change', (e) => {
-        setUserToken(e.target.value);
-    });
 
     let serverRequest = await fetch('/api/server', {
         method: 'GET',
-        headers: {
-            'User-Token': userTokenInput.value
-        }
+        credentials: 'same-origin',
     });
 
     if (serverRequest.status != 200) {
@@ -23,9 +16,7 @@ async function init() {
 
     let soundsRequest = await fetch(`/api/sounds/${await serverRequest.text()}`, {
         method: 'GET',
-        headers: {
-            'User-Token': userTokenInput.value
-        }
+        credentials: 'same-origin',
     });
     let sounds = await soundsRequest.json();
 
@@ -35,17 +26,11 @@ async function init() {
         soundButton.addEventListener('click', async () => {
             await fetch(`/api/playsound/${sound.id}`, {
                 method: 'POST',
-                headers: {
-                    'User-Token': userTokenInput.value
-                }
+                credentials: 'same-origin',
             });
         });
         soundsDiv.appendChild(soundButton);
     });
-}
-
-function setUserToken(token) {
-    document.cookie = `User-Token=${token}`;
 }
 
 init();

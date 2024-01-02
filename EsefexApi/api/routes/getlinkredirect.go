@@ -2,12 +2,17 @@ package routes
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 )
 
+type LinkRedirect struct {
+	RedirectUrl string
+}
+
 // api/link?<server_id>
-func (h *RouteHandlers) GetLink(w http.ResponseWriter, r *http.Request) {
+func (h *RouteHandlers) GetLinkRedirect(w http.ResponseWriter, r *http.Request) {
 	linkToken := r.URL.Query().Get("t")
 
 	if linkToken == "" {
@@ -33,10 +38,6 @@ func (h *RouteHandlers) GetLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirectUrl := fmt.Sprintf("%s://link/%s", h.cProto, userToken)
-	response := fmt.Sprintf(`<meta http-equiv="refresh" content="0; URL=%s" />`, redirectUrl)
-	fmt.Fprint(w, response)
-
 	cookie := http.Cookie{
 		Name:     "User-Token",
 		Value:    string(userToken),
@@ -44,11 +45,25 @@ func (h *RouteHandlers) GetLink(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   0,
 		Secure:   true,
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteDefaultMode,
 	}
 	http.SetCookie(w, &cookie)
 
 	w.Header().Set("Content-Type", "text/html")
+
+	tmpl, err := template.ParseFiles("./api/templates/linkredirect.html")
+	if err != nil {
+		http.Error(w, "Error parsing template", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, LinkRedirect{
+		RedirectUrl: fmt.Sprintf("%s://link/%s", h.cProto, userToken),
+	})
+	if err != nil {
+		http.Error(w, "Error executing template", http.StatusInternalServerError)
+		return
+	}
 
 	h.dbs.LinkTokenStore.DeleteToken(userID)
 

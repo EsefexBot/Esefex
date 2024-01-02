@@ -26,9 +26,6 @@ func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
 	ch.Commands["upload"] = UploadCommand
 	ch.Handlers["upload"] = WithErrorHandling(ch.Upload)
 
-	ch.Commands["session"] = SessionCommand
-	ch.Handlers["session"] = WithErrorHandling(ch.Session)
-
 	ch.Commands["list"] = ListCommand
 	ch.Handlers["list"] = WithErrorHandling(ch.List)
 
@@ -37,6 +34,9 @@ func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
 
 	ch.Commands["link"] = LinkCommand
 	ch.Handlers["link"] = WithErrorHandling(ch.Link)
+
+	ch.Commands["unlink"] = UnlinkCommand
+	ch.Handlers["unlink"] = WithErrorHandling(ch.Unlink)
 
 	return ch
 }
