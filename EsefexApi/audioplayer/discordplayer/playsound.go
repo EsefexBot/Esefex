@@ -12,7 +12,7 @@ import (
 func (c *DiscordPlayer) PlaySound(soundID string, userID string) error {
 	log.Printf("Playing sound '%v' for user '%v'", soundID, userID)
 
-	OuserVc, err := dcgoutil.UserVC(c.ds, userID)
+	OuserVc, err := dcgoutil.UserVCAny(c.ds, userID)
 	if err != nil {
 		return errors.Wrap(err, "Error getting user's voice channel")
 	} else if OuserVc.IsNone() {

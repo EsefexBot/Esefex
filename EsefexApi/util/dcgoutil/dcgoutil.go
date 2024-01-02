@@ -75,7 +75,7 @@ func UserServerVC(ds *discordgo.Session, serverID, userID string) (opt.Option[*d
 }
 
 // gets the voice state of a user in any server
-func UserVC(ds *discordgo.Session, userID string) (opt.Option[*discordgo.VoiceState], error) {
+func UserVCAny(ds *discordgo.Session, userID string) (opt.Option[*discordgo.VoiceState], error) {
 	for _, guild := range ds.State.Guilds {
 		vs, err := ds.State.VoiceState(guild.ID, userID)
 		if err == discordgo.ErrStateNotFound {
@@ -115,8 +115,8 @@ func UserInBotVC(ds *discordgo.Session, userID string) (bool, error) {
 }
 
 // gets the server a user is connected to (if any)
-func UserServer(ds *discordgo.Session, userID string) (opt.Option[*discordgo.Guild], error) {
-	Ochan, err := UserVC(ds, userID)
+func UserVCGuild(ds *discordgo.Session, userID string) (opt.Option[*discordgo.Guild], error) {
+	Ochan, err := UserVCAny(ds, userID)
 	if err != nil {
 		return opt.None[*discordgo.Guild](), errors.Wrap(err, "Error getting user voice state")
 	} else if Ochan.IsNone() {
@@ -131,4 +131,24 @@ func UserServer(ds *discordgo.Session, userID string) (opt.Option[*discordgo.Gui
 	}
 
 	return opt.Some(guild), nil
+}
+
+// get the list of servers a user is a member of
+func UserServers(ds *discordgo.Session, userID string) ([]*discordgo.Guild, error) {
+	servers := []*discordgo.Guild{}
+
+	for _, guild := range ds.State.Guilds {
+		member, err := ds.State.Member(guild.ID, userID)
+		if err == discordgo.ErrStateNotFound {
+			continue
+		} else if err != nil {
+			return nil, errors.Wrap(err, "Error getting member")
+		}
+
+		if member.User.ID == userID {
+			servers = append(servers, guild)
+		}
+	}
+
+	return servers, nil
 }

@@ -53,6 +53,7 @@ func (api *HttpApi) run() {
 	router.HandleFunc("/api/sounds/{server_id}", cors(h.GetSounds)).Methods("GET")
 
 	router.HandleFunc("/api/server", cors(auth(h.GetServer))).Methods("GET").Headers("User-Token", "")
+	router.HandleFunc("/api/servers", cors(auth(h.GetServers))).Methods("GET").Headers("User-Token", "")
 
 	router.HandleFunc("/api/playsound/{user_id}/{server_id}/{sound_id}", cors(h.PostPlaySoundInsecure)).Methods("POST")
 	router.HandleFunc("/api/playsound/{sound_id}", cors(auth(h.PostPlaySound))).Methods("POST").Headers("User-Token", "")
@@ -63,10 +64,11 @@ func (api *HttpApi) run() {
 	router.HandleFunc("/dump", cors(h.GetDump))
 	router.HandleFunc("/", cors(h.GetIndex)).Methods("GET")
 
-	// http.Handle("/", router)
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./api/public/"))))
+
 	log.Printf("Webserver started on port %d (http://localhost:%d)\n", api.apiPort, api.apiPort)
 
-	go http.ListenAndServe(fmt.Sprintf(":%d", api.apiPort), router)
+	go http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", api.apiPort), router)
 
 	close(api.ready)
 	<-api.stop
