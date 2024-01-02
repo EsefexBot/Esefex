@@ -35,5 +35,7 @@ jobs:
             docker compose down
             > .env.github
             echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env.github
+            echo DOMAIN=${{ vars.DOMAIN }} >> .env.github
             docker compose pull
             docker compose up -d
+            
