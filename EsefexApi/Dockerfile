@@ -1,7 +1,4 @@
-FROM golang:1.21.5
-
-# Install ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg
+FROM jokil/esefexapi:base
 
 # Install go packages
 WORKDIR /api
