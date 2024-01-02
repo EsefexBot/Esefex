@@ -61,11 +61,13 @@ func (b *DiscordBot) DeleteGuildCommands(guildID string) {
 	}
 }
 
+var BotTokenNotSet = errors.New("BOT_TOKEN is not set")
+
 func CreateSession() (*discordgo.Session, error) {
 	token := os.Getenv("BOT_TOKEN")
 
 	if token == "" {
-		return nil, errors.New("BOT_TOKEN is not set")
+		return nil, BotTokenNotSet
 	}
 
 	s, err := discordgo.New("Bot " + token)

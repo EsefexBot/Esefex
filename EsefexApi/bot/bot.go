@@ -20,7 +20,7 @@ type DiscordBot struct {
 	ready   chan struct{}
 }
 
-func NewDiscordBot(s *discordgo.Session, dbs db.Databases, domain string) *DiscordBot {
+func NewDiscordBot(s *discordgo.Session, dbs *db.Databases, domain string) *DiscordBot {
 	return &DiscordBot{
 		Session: s,
 		cmdh:    commands.NewCommandHandlers(dbs, domain),

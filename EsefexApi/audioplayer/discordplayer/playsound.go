@@ -1,6 +1,7 @@
 package discordplayer
 
 import (
+	"esefexapi/audioplayer"
 	"esefexapi/sounddb"
 	"esefexapi/util/dcgoutil"
 	"log"
@@ -15,7 +16,7 @@ func (c *DiscordPlayer) PlaySound(soundID string, userID string) error {
 	if err != nil {
 		return errors.Wrap(err, "Error getting user's voice channel")
 	} else if OuserVc.IsNone() {
-		return errors.New("User is not in a voice channel")
+		return audioplayer.UserNotInVC
 	}
 	userVC := OuserVc.Unwrap()
 

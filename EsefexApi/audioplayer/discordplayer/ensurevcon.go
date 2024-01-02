@@ -1,19 +1,18 @@
 package discordplayer
 
 import (
+	"esefexapi/audioplayer"
 	"esefexapi/util/dcgoutil"
+
 	"github.com/pkg/errors"
 )
-
-var BotNotInVC = errors.New("Bot is not in a voice channel")
-var UserNotInVC = errors.New("User is not in a voice channel")
 
 func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*VconData, error) {
 	OusrChan, err := dcgoutil.UserServerVC(c.ds, serverID, userID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting user voice channel")
 	} else if OusrChan.IsNone() {
-		return nil, UserNotInVC
+		return nil, audioplayer.UserNotInVC
 	}
 	usrChan := OusrChan.Unwrap()
 

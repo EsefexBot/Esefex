@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"esefexapi/userdb"
 	"fmt"
 	"io"
 	"log"
@@ -11,23 +10,13 @@ import (
 )
 
 // api/playsound/<sound_id>
-func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request) {
+func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request, userID string) {
 	log.Printf("got /playsound request\n")
 
 	vars := mux.Vars(r)
 	sound_id := vars["sound_id"]
 
-	user_token := r.Header.Get("User-Token")
-	user, err := h.dbs.UserDB.GetUserByToken(userdb.Token(user_token))
-	if err != nil {
-		errorMsg := fmt.Sprintf("Error getting user by token: %+v", err)
-
-		log.Println(errorMsg)
-		http.Error(w, errorMsg, http.StatusUnauthorized)
-		return
-	}
-
-	err = h.a.PlaySound(sound_id, user.ID)
+	err := h.a.PlaySound(sound_id, userID)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error playing sound: \n%+v", err)
 
@@ -36,6 +25,5 @@ func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	io.WriteString(w, "Play sound!\n")
 }

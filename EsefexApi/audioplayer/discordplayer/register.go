@@ -24,10 +24,12 @@ func (c *DiscordPlayer) RegisterVcon(serverID string, channelID string) (*VconDa
 	return vd, nil
 }
 
+var VconNotFound = errors.New("VCon not found")
+
 func (c *DiscordPlayer) UnregisterVcon(channelID string) error {
 	vd, ok := c.vds[ChannelID(channelID)]
 	if !ok {
-		return errors.New("VCon not found")
+		return VconNotFound
 	}
 
 	delete(c.vds, ChannelID(channelID))

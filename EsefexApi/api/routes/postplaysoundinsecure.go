@@ -27,6 +27,5 @@ func (h *RouteHandlers) PostPlaySoundInsecure(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	io.WriteString(w, "Play sound!\n")
 }

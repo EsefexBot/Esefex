@@ -37,11 +37,11 @@ type VconData struct {
 	vcon         *vcon.VCon
 }
 
-func NewDiscordPlayer(ds *discordgo.Session, dbs db.Databases, useTimeouts bool, timeout time.Duration) *DiscordPlayer {
+func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool, timeout time.Duration) *DiscordPlayer {
 	dp := &DiscordPlayer{
 		vds:         make(map[ChannelID]*VconData),
 		ds:          ds,
-		dbs:         dbs,
+		dbs:         *dbs,
 		stop:        make(chan struct{}),
 		ready:       make(chan struct{}),
 		useTimeouts: useTimeouts,

@@ -1,6 +1,7 @@
 package fileuserdb
 
 import (
+	"esefexapi/opt"
 	"esefexapi/userdb"
 	"esefexapi/util"
 	"log"
@@ -10,13 +11,13 @@ import (
 )
 
 // GetUser implements userdb.UserDB.
-func (f *FileUserDB) GetUser(id string) (*userdb.User, error) {
+func (f *FileUserDB) GetUser(id string) (opt.Option[*userdb.User], error) {
 	for _, user := range f.Users {
 		if user.ID == id {
-			return &user, nil
+			return opt.Some(&user), nil
 		}
 	}
-	return nil, userdb.ErrUserNotFound
+	return opt.None[*userdb.User](), nil
 }
 
 // AddUser implements userdb.UserDB.
@@ -47,13 +48,14 @@ func (f *FileUserDB) GetAllUsers() ([]*userdb.User, error) {
 }
 
 // GetUserByToken implements userdb.UserDB.
-func (f *FileUserDB) GetUserByToken(token userdb.Token) (*userdb.User, error) {
+func (f *FileUserDB) GetUserByToken(token userdb.Token) (opt.Option[*userdb.User], error) {
 	for _, user := range f.Users {
 		if slices.Contains(user.Tokens, token) {
-			return &user, nil
+			return opt.Some(&user), nil
 		}
 	}
-	return nil, userdb.ErrUserNotFound
+
+	return opt.None[*userdb.User](), nil
 }
 
 func (f *FileUserDB) NewToken(userID string) (userdb.Token, error) {
@@ -76,16 +78,16 @@ func (f *FileUserDB) NewToken(userID string) (userdb.Token, error) {
 }
 
 func (f *FileUserDB) getOrCreateUser(userID string) (*userdb.User, error) {
-	user, err := f.GetUser(userID)
-	if err == userdb.ErrUserNotFound {
+	Ouser, err := f.GetUser(userID)
+	if Ouser.IsNone() {
 		f.SetUser(userdb.User{
 			ID:     userID,
 			Tokens: []userdb.Token{},
 		})
-		user, err = f.GetUser(userID)
+		Ouser, err = f.GetUser(userID)
 	}
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting user")
 	}
-	return user, nil
+	return Ouser.Unwrap(), nil
 }

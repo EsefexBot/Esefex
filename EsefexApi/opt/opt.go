@@ -1,4 +1,4 @@
-package option
+package opt
 
 type Option[T any] struct {
 	some  bool

@@ -17,7 +17,6 @@ func (h *RouteHandlers) GetJoinSession(w http.ResponseWriter, r *http.Request) {
 	response := fmt.Sprintf(`<meta http-equiv="refresh" content="0; URL=%s" />`, redirectUrl)
 
 	w.Header().Set("Content-Type", "text/html")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	fmt.Fprint(w, response)
 
 	log.Printf("got /joinsession request\n")

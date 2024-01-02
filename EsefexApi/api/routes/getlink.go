@@ -49,7 +49,6 @@ func (h *RouteHandlers) GetLink(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &cookie)
 
 	w.Header().Set("Content-Type", "text/html")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	h.dbs.LinkTokenStore.DeleteToken(userID)
 

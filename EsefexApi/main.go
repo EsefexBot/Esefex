@@ -51,7 +51,7 @@ func main() {
 
 	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(time.Minute * 5)
 
-	dbs := db.Databases{
+	dbs := &db.Databases{
 		SoundDB:        sdbc,
 		UserDB:         udb,
 		LinkTokenStore: ldb,
@@ -59,7 +59,7 @@ func main() {
 
 	plr := discordplayer.NewDiscordPlayer(ds, dbs, cfg.Bot.UseTimeouts, time.Duration(cfg.Bot.Timeout)*time.Second)
 
-	api := api.NewHttpApi(dbs, plr, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
+	api := api.NewHttpApi(dbs, plr, ds, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
 	bot := bot.NewDiscordBot(ds, dbs, cfg.HttpApi.Domain)
 
 	log.Println("Components bootstraped, starting...")

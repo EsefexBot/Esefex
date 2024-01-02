@@ -12,4 +12,4 @@ location = "./data/users/users.json"
 
 [bot]
 use_timeouts = false
-timeout = 60 # minutes
+timeout = 60.0 # minutes

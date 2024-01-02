@@ -9,13 +9,13 @@ import (
 )
 
 type CommandHandlers struct {
-	dbs      db.Databases
+	dbs      *db.Databases
 	domain   string
 	Commands map[string]*discordgo.ApplicationCommand
 	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-func NewCommandHandlers(dbs db.Databases, domain string) *CommandHandlers {
+func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
 	ch := &CommandHandlers{
 		dbs:      dbs,
 		domain:   domain,

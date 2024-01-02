@@ -3,7 +3,7 @@ package dcgoutil
 import (
 	// "log"
 
-	opt "esefexapi/option"
+	"esefexapi/opt"
 
 	"github.com/bwmarrin/discordgo"
 	// "github.com/davecgh/go-spew/spew"
@@ -112,4 +112,23 @@ func UserInBotVC(ds *discordgo.Session, userID string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// gets the server a user is connected to (if any)
+func UserServer(ds *discordgo.Session, userID string) (opt.Option[*discordgo.Guild], error) {
+	Ochan, err := UserVC(ds, userID)
+	if err != nil {
+		return opt.None[*discordgo.Guild](), errors.Wrap(err, "Error getting user voice state")
+	} else if Ochan.IsNone() {
+		return opt.None[*discordgo.Guild](), nil
+	}
+
+	vs := Ochan.Unwrap()
+
+	guild, err := ds.State.Guild(vs.GuildID)
+	if err != nil {
+		return opt.None[*discordgo.Guild](), errors.Wrap(err, "Error getting guild")
+	}
+
+	return opt.Some(guild), nil
 }
