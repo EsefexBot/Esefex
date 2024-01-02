@@ -50,7 +50,7 @@ func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool
 
 	ds.AddHandler(func(s *discordgo.Session, e *discordgo.VoiceStateUpdate) {
 		// check if previous state has a vcon associated with it and close it, make sure that it is not closed twice
-		if e.BeforeUpdate == nil {
+		if e.BeforeUpdate == nil || e.ChannelID != "" {
 			return
 		}
 
@@ -76,13 +76,12 @@ func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool
 			return
 		}
 
-		log.Printf("Users in channel: %d", len(users))
+		// log.Printf("Users in channel: %d", len(users))
 
 		if len(users) == 1 {
 			log.Printf("Channel empty, closing vcon: %s", e.BeforeUpdate.ChannelID)
 			dp.UnregisterVcon(e.BeforeUpdate.ChannelID)
 		}
-
 	})
 
 	return dp
