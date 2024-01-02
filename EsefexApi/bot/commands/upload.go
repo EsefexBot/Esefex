@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -42,7 +43,7 @@ func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionC
 	iconOption := options["icon"]
 	icon, err := sounddb.ExtractIcon(fmt.Sprint(iconOption.Value))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error extracting icon")
 	}
 
 	soundFile := options["sound-file"]
@@ -50,12 +51,12 @@ func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionC
 
 	pcm, err := util.Download2PCM(soundFileUrl)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error downloading sound file")
 	}
 
-	uid, err := c.db.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), icon, pcm)
+	uid, err := c.dbs.SoundDB.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), icon, pcm)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error adding sound")
 	}
 
 	log.Printf("Uploaded sound effect %v to server %v", uid.SoundID, i.GuildID)

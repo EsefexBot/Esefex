@@ -2,19 +2,23 @@ package routes
 
 import (
 	"esefexapi/audioplayer"
-	"esefexapi/sounddb"
+	"esefexapi/db"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 type RouteHandlers struct {
+	dbs    *db.Databases
 	a      audioplayer.IAudioPlayer
-	db     sounddb.ISoundDB
+	ds     *discordgo.Session
 	cProto string
 }
 
-func NewRouteHandler(db sounddb.ISoundDB, a audioplayer.IAudioPlayer, cProto string) *RouteHandlers {
+func NewRouteHandlers(dbs *db.Databases, a audioplayer.IAudioPlayer, ds *discordgo.Session, cProto string) *RouteHandlers {
 	return &RouteHandlers{
 		a:      a,
-		db:     db,
+		dbs:    dbs,
+		ds:     ds,
 		cProto: cProto,
 	}
 }

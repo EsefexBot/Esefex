@@ -1,15 +1,13 @@
 package routes
 
 import (
-	"io"
-	"log"
 	"net/http"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // /dump
-func (routes *RouteHandlers) GetDump(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	io.WriteString(w, "Dump!\n")
-
-	log.Printf("%+v\n", r)
+func (h *RouteHandlers) GetDump(w http.ResponseWriter, r *http.Request) {
+	spew.Fdump(w, r)
+	spew.Dump(r)
 }

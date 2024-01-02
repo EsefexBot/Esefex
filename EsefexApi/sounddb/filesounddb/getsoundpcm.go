@@ -1,4 +1,4 @@
-package filedb
+package filesounddb
 
 import (
 	"encoding/binary"
@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
 // GetSoundPcm implements sounddb.SoundDB.
@@ -13,19 +15,19 @@ func (f *FileDB) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	path := fmt.Sprintf("%s/%s/%s_sound.s16le", f.location, uid.ServerID, uid.SoundID)
 	sf, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error opening sound file")
 	}
 
 	sfs, err := sf.Stat()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting sound file stats")
 	}
 
 	pcm := make([]int16, sfs.Size()/2)
 
 	err = binary.Read(sf, binary.LittleEndian, &pcm)
 	if err != nil && err != io.EOF {
-		return nil, err
+		return nil, errors.Wrap(err, "Error reading sound file")
 	}
 
 	return &pcm, nil

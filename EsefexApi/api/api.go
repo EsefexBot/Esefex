@@ -1,15 +1,17 @@
 package api
 
 import (
+	"esefexapi/api/middleware"
 	"esefexapi/api/routes"
 	"esefexapi/audioplayer"
+	"esefexapi/db"
 	"esefexapi/service"
-	"esefexapi/sounddb"
 
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/gorilla/mux"
 )
 
@@ -17,22 +19,24 @@ var _ service.IService = &HttpApi{}
 
 // HttpApi implements Service
 type HttpApi struct {
-	db      sounddb.ISoundDB
-	a       audioplayer.IAudioPlayer
-	apiPort int
-	cProto  string
-	stop    chan struct{}
-	ready   chan struct{}
+	handlers *routes.RouteHandlers
+	mw       *middleware.Middleware
+	a        audioplayer.IAudioPlayer
+	apiPort  int
+	cProto   string
+	stop     chan struct{}
+	ready    chan struct{}
 }
 
-func NewHttpApi(db sounddb.ISoundDB, plr audioplayer.IAudioPlayer, apiPort int, cProto string) *HttpApi {
+func NewHttpApi(dbs *db.Databases, plr audioplayer.IAudioPlayer, ds *discordgo.Session, apiPort int, cProto string) *HttpApi {
 	return &HttpApi{
-		db:      db,
-		a:       plr,
-		apiPort: apiPort,
-		cProto:  cProto,
-		stop:    make(chan struct{}, 1),
-		ready:   make(chan struct{}),
+		handlers: routes.NewRouteHandlers(dbs, plr, ds, cProto),
+		mw:       middleware.NewMiddleware(dbs),
+		a:        plr,
+		apiPort:  apiPort,
+		cProto:   cProto,
+		stop:     make(chan struct{}, 1),
+		ready:    make(chan struct{}),
 	}
 }
 
@@ -41,22 +45,30 @@ func (api *HttpApi) run() {
 	log.Println("Starting webserver...")
 	defer log.Println("Webserver stopped")
 
-	routes := routes.NewRouteHandler(api.db, api.a, api.cProto)
-
 	router := mux.NewRouter()
+	auth := api.mw.Auth
+	cors := api.mw.Cors
+	h := api.handlers
 
-	router.HandleFunc("/api/sounds/{server_id}", routes.GetSounds).Methods("GET")
-	router.HandleFunc("/api/playsound/{user_id}/{server_id}/{sound_id}", routes.PostPlaySound).Methods("POST")
+	router.HandleFunc("/api/sounds/{server_id}", cors(h.GetSounds)).Methods("GET")
 
-	router.HandleFunc("/joinsession/{server_id}", routes.GetJoinSession).Methods("GET")
+	router.HandleFunc("/api/server", cors(auth(h.GetServer))).Methods("GET").Headers("User-Token", "")
+	router.HandleFunc("/api/servers", cors(auth(h.GetServers))).Methods("GET").Headers("User-Token", "")
 
-	router.HandleFunc("/dump", routes.GetDump)
-	router.HandleFunc("/", routes.GetIndex).Methods("GET")
+	router.HandleFunc("/api/playsound/{user_id}/{server_id}/{sound_id}", cors(h.PostPlaySoundInsecure)).Methods("POST")
+	router.HandleFunc("/api/playsound/{sound_id}", cors(auth(h.PostPlaySound))).Methods("POST").Headers("User-Token", "")
 
-	// http.Handle("/", router)
+	router.HandleFunc("/joinsession/{server_id}", cors(h.GetJoinSession)).Methods("GET")
+	router.HandleFunc("/link", h.GetLink).Methods("GET").Queries("t", "{t}")
+
+	router.HandleFunc("/dump", cors(h.GetDump))
+	router.HandleFunc("/", cors(h.GetIndex)).Methods("GET")
+
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./api/public/"))))
+
 	log.Printf("Webserver started on port %d (http://localhost:%d)\n", api.apiPort, api.apiPort)
 
-	go http.ListenAndServe(fmt.Sprintf(":%d", api.apiPort), router)
+	go http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", api.apiPort), router)
 
 	close(api.ready)
 	<-api.stop

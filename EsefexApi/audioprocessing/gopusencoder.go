@@ -3,8 +3,8 @@ package audioprocessing
 import (
 	"esefexapi/audioprocessing/pcmutil"
 	"io"
-	"log"
 
+	"github.com/pkg/errors"
 	"layeh.com/gopus"
 )
 
@@ -19,7 +19,7 @@ type GopusEncoder struct {
 func NewGopusEncoder(s io.Reader) (*GopusEncoder, error) {
 	enc, err := gopus.NewEncoder(48000, 2, gopus.Voip)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error creating gopus encoder")
 	}
 
 	return &GopusEncoder{
@@ -35,8 +35,7 @@ func (e *GopusEncoder) EncodeNext() ([]byte, error) {
 	_, err := pcmutil.ReadPCM(*e.source, &pcm)
 	// Read from the source
 	if err != nil && err != io.EOF {
-		log.Printf("Error reading from source: %s\n", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Error reading from source")
 	}
 
 	// Encode

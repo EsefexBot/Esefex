@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -15,17 +16,17 @@ var (
 )
 
 func (c *CommandHandlers) List(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	uids, err := c.db.GetSoundUIDs(i.GuildID)
+	uids, err := c.dbs.SoundDB.GetSoundUIDs(i.GuildID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting sound UIDs")
 	}
 	// log.Printf("List: %v", uids)
 
 	var metas = make([]sounddb.SoundMeta, 0, len(uids))
 	for _, uid := range uids {
-		meta, err := c.db.GetSoundMeta(uid)
+		meta, err := c.dbs.SoundDB.GetSoundMeta(uid)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Error getting sound meta")
 		}
 		metas = append(metas, meta)
 	}

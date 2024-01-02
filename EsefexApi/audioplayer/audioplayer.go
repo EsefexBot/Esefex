@@ -1,7 +1,14 @@
 package audioplayer
 
-import "esefexapi/sounddb"
+import (
+	"esefexapi/sounddb"
+
+	"github.com/pkg/errors"
+)
 
 type IAudioPlayer interface {
-	PlaySound(uid sounddb.SoundUID, guildID string, userID string) error
+	PlaySoundInsecure(uid sounddb.SoundUID, guildID string, userID string) error
+	PlaySound(soundID string, userID string) error
 }
+
+var UserNotInVC = errors.New("User is not in a voice channel")

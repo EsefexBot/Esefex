@@ -3,7 +3,8 @@ package audioprocessing
 import (
 	"encoding/binary"
 	"io"
-	// "sync"
+
+	"github.com/pkg/errors"
 )
 
 type S16leMixReader struct {
@@ -40,7 +41,7 @@ func (s *S16leMixReader) Read(p []byte) (n int, err error) {
 				shorts = append(shorts, short)
 				remainingSources = append(remainingSources, s.sources[j])
 			} else if err != io.EOF {
-				return 0, err
+				return 0, errors.Wrap(err, "Error reading from source")
 			}
 		}
 

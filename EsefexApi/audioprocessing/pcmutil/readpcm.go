@@ -3,6 +3,8 @@ package pcmutil
 import (
 	"encoding/binary"
 	"io"
+
+	"github.com/pkg/errors"
 )
 
 // ReadPCM reads PCM data from r and stores it in buf.
@@ -15,7 +17,7 @@ func ReadPCM(r io.Reader, buf *[]int16) (int, error) {
 	for i := range *buf {
 		err := binary.Read(r, binary.LittleEndian, &(*buf)[i])
 		if err != nil {
-			return i, err
+			return i, errors.Wrap(err, "Error reading from source")
 		}
 	}
 

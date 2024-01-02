@@ -16,13 +16,12 @@ func main() {
 	log.Printf("Config: %+v", cfg)
 
 	cfg = &config.Config{
-		Test: "test",
 		HttpApi: config.HttpApi{
 			Port:           8080,
 			Domain:         "http://localhost",
 			CustomProtocol: "esefex",
 		},
-		FileDatabase: config.FileDatabase{
+		FileSoundDB: config.FileSoundDatabase{
 			Location: "/tmp/esefexapi",
 		},
 		Bot: config.Bot{},

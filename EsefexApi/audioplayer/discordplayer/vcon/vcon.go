@@ -3,10 +3,12 @@ package vcon
 import (
 	"esefexapi/audioprocessing"
 	"esefexapi/sounddb"
+
 	"log"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 type VCon struct {
@@ -22,16 +24,14 @@ type VCon struct {
 func NewVCon(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, channelID string) (*VCon, error) {
 	vc, err := dc.ChannelVoiceJoin(guildID, channelID, false, true)
 	if err != nil {
-		log.Printf("Error joining voice channel: %s\n", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Error joining voice channel")
 	}
 
 	mixer := audioprocessing.NewS16leMixReader()
 
 	enc, err := audioprocessing.NewGopusEncoder(mixer)
 	if err != nil {
-		log.Printf("Error creating encoder: %s\n", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Error creating encoder")
 	}
 
 	return &VCon{
@@ -61,16 +61,24 @@ func (a *VCon) Run() {
 			// log.Println("Looping...")
 			select {
 			case sound := <-a.playSound:
-				log.Printf("Playing sound %s\n", sound)
+				// log.Printf("Playing sound %s\n", sound)
+				ok, err := a.db.SoundExists(sound)
+				if err != nil {
+					log.Printf("Error checking if sound exists: %+v\n", err)
+					continue
+				} else if !ok {
+					log.Printf("Sound does not exist: %+v\n", sound)
+					continue
+				}
 				pcm, err := a.db.GetSoundPcm(sound)
 				if err != nil {
-					log.Println(err)
+					log.Printf("Error getting sound pcm: %+v\n", err)
 					continue
 				}
 
 				s := audioprocessing.NewS16leReferenceReaderFromRef(pcm)
 				a.mixer.AddSource(s)
-				log.Println("Added sound to mixer")
+				// log.Println("Added sound to mixer")
 			case <-a.stop:
 				return
 			default:
@@ -79,7 +87,7 @@ func (a *VCon) Run() {
 				if !a.mixer.Empty() {
 					buf, err := a.enc.EncodeNext()
 					if err != nil {
-						log.Println(err)
+						log.Printf("Error encoding next: %+v\n", err)
 					}
 					a.vc.OpusSend <- buf
 				}
@@ -95,4 +103,8 @@ func (a *VCon) Close() {
 	close(a.stop)
 	a.vc.Speaking(false)
 	a.vc.Disconnect()
+}
+
+func (a *VCon) IsPlaying() bool {
+	return !a.mixer.Empty()
 }

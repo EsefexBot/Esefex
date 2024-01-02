@@ -3,13 +3,15 @@ package dbcache
 import (
 	"esefexapi/sounddb"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
-var _ sounddb.ISoundDB = &DBCache{}
+var _ sounddb.ISoundDB = &SoundDBCache{}
 
 // DB Cache loads all sounds into memory and caches them.
-// DBCache implements db.SoundDB
-type DBCache struct {
+// SoundDBCache implements db.SoundDB
+type SoundDBCache struct {
 	sounds map[sounddb.SoundUID]*CachedSound
 	db     sounddb.ISoundDB
 	rw     sync.RWMutex
@@ -20,9 +22,9 @@ type CachedSound struct {
 	Meta sounddb.SoundMeta
 }
 
-// NewDBCache creates a new DBCache.
-func NewDBCache(db sounddb.ISoundDB) *DBCache {
-	c := &DBCache{
+// NewSoundDBCache creates a new DBCache.
+func NewSoundDBCache(db sounddb.ISoundDB) *SoundDBCache {
+	c := &SoundDBCache{
 		sounds: make(map[sounddb.SoundUID]*CachedSound),
 		db:     db,
 	}
@@ -31,13 +33,13 @@ func NewDBCache(db sounddb.ISoundDB) *DBCache {
 }
 
 // AddSound implements db.SoundDB.
-func (c *DBCache) AddSound(serverID string, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
+func (c *SoundDBCache) AddSound(serverID string, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
 	uid, err := c.db.AddSound(serverID, name, icon, pcm)
 	if err != nil {
-		return sounddb.SoundUID{}, err
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error adding sound")
 	}
 
 	c.sounds[uid] = &CachedSound{
@@ -54,13 +56,13 @@ func (c *DBCache) AddSound(serverID string, name string, icon sounddb.Icon, pcm 
 }
 
 // DeleteSound implements db.SoundDB.
-func (c *DBCache) DeleteSound(uid sounddb.SoundUID) error {
+func (c *SoundDBCache) DeleteSound(uid sounddb.SoundUID) error {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
 	err := c.db.DeleteSound(uid)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error deleting sound")
 	}
 
 	delete(c.sounds, uid)
@@ -69,7 +71,7 @@ func (c *DBCache) DeleteSound(uid sounddb.SoundUID) error {
 }
 
 // GetServerIDs implements db.SoundDB.
-func (c *DBCache) GetServerIDs() ([]string, error) {
+func (c *SoundDBCache) GetServerIDs() ([]string, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 
@@ -88,43 +90,49 @@ func (c *DBCache) GetServerIDs() ([]string, error) {
 }
 
 // GetSoundMeta implements db.SoundDB.
-func (c *DBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
+func (c *SoundDBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
 	c.rw.RLock()
-	defer c.rw.RUnlock()
 
 	if sound, ok := c.sounds[uid]; ok {
+		c.rw.RUnlock()
 		return sound.Meta, nil
 	}
-
 	c.rw.RUnlock()
 	s, err := c.LoadSound(uid)
+
+	c.rw.RLock()
+	defer c.rw.RUnlock()
 	if err != nil {
-		return sounddb.SoundMeta{}, err
+		return sounddb.SoundMeta{}, errors.Wrap(err, "Error loading sound")
 	}
 
 	return s.Meta, nil
 }
 
 // GetSoundPcm implements db.SoundDB.
-func (c *DBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
+func (c *SoundDBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	c.rw.RLock()
-	defer c.rw.RUnlock()
 
 	if sound, ok := c.sounds[uid]; ok {
+		c.rw.RUnlock()
 		return sound.Data, nil
 	}
 
 	c.rw.RUnlock()
+
 	s, err := c.LoadSound(uid)
+
+	c.rw.RLock()
+	defer c.rw.RUnlock()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error loading sound")
 	}
 
 	return s.Data, nil
 }
 
 // GetSoundUIDs implements db.SoundDB.
-func (c *DBCache) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
+func (c *SoundDBCache) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 
@@ -139,22 +147,22 @@ func (c *DBCache) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
 	return uids, nil
 }
 
-func (c *DBCache) CacheAll() error {
+func (c *SoundDBCache) CacheAll() error {
 	servers, err := c.db.GetServerIDs()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error getting server ids")
 	}
 
 	for _, serverID := range servers {
 		uids, err := c.db.GetSoundUIDs(serverID)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "Error getting sound uids")
 		}
 
 		for _, uid := range uids {
 			_, err := c.LoadSound(uid)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "Error loading sound")
 			}
 		}
 	}
@@ -162,7 +170,7 @@ func (c *DBCache) CacheAll() error {
 	return nil
 }
 
-func (c *DBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
+func (c *SoundDBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
@@ -172,12 +180,12 @@ func (c *DBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
 
 	pcm, err := c.db.GetSoundPcm(uid)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting sound pcm")
 	}
 
 	meta, err := c.db.GetSoundMeta(uid)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting sound meta")
 	}
 
 	s := CachedSound{
@@ -191,7 +199,7 @@ func (c *DBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
 
 }
 
-func (c *DBCache) SoundExists(uid sounddb.SoundUID) (bool, error) {
+func (c *SoundDBCache) SoundExists(uid sounddb.SoundUID) (bool, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 

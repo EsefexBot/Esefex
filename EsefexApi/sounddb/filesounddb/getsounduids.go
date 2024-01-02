@@ -1,4 +1,4 @@
-package filedb
+package filesounddb
 
 import (
 	"esefexapi/sounddb"
@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // GetSoundUIDs implements sounddb.SoundDB.
@@ -18,8 +20,8 @@ func (f *FileDB) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
 
 	files, err := os.ReadDir(path)
 	if err != nil {
-		log.Print(err)
-		return nil, err
+		log.Printf("Error reading directory: %+v", err)
+		return nil, errors.Wrap(err, "Error reading directory")
 	}
 
 	uids := make([]sounddb.SoundUID, 0)

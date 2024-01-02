@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -17,7 +18,7 @@ var (
 func (c *CommandHandlers) Session(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	g, err := s.State.Guild(i.GuildID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting guild")
 	}
 
 	var userChannel string
