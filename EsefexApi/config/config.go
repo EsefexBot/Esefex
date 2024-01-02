@@ -19,7 +19,6 @@ type Config struct {
 
 type HttpApi struct {
 	Port           int    `toml:"port"`
-	Domain         string `toml:"domain"`
 	CustomProtocol string `toml:"custom_protocol"`
 }
 

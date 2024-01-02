@@ -32,6 +32,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	domain := os.Getenv("DOMAIN")
+
 	ds, err := bot.CreateSession()
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +62,7 @@ func main() {
 	plr := discordplayer.NewDiscordPlayer(ds, dbs, cfg.Bot.UseTimeouts, time.Duration(cfg.Bot.Timeout)*time.Second)
 
 	api := api.NewHttpApi(dbs, plr, ds, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
-	bot := bot.NewDiscordBot(ds, dbs, cfg.HttpApi.Domain)
+	bot := bot.NewDiscordBot(ds, dbs, domain)
 
 	log.Println("Components bootstraped, starting...")
 
