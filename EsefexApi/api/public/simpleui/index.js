@@ -22,7 +22,19 @@ async function init() {
 
     sounds.forEach(sound => {
         let soundButton = document.createElement('button');
-        soundButton.innerText = sound.name;
+        soundButton.classList.add('sfxButton');
+
+        let buttonImage = document.createElement('img');
+        buttonImage.src = sound.icon.url;
+        buttonImage.alt = sound.icon.name;
+        buttonImage.classList.add('icon');
+        soundButton.appendChild(buttonImage);
+
+        let buttonLabel = document.createElement('p');
+        buttonLabel.innerText = sound.name;
+        buttonLabel.classList.add('label');
+        soundButton.appendChild(buttonLabel);
+
         soundButton.addEventListener('click', async () => {
             await fetch(`/api/playsound/${sound.id}`, {
                 method: 'POST',

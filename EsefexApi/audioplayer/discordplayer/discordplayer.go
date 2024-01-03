@@ -50,7 +50,7 @@ func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool
 
 	ds.AddHandler(func(s *discordgo.Session, e *discordgo.VoiceStateUpdate) {
 		// check if previous state has a vcon associated with it and close it, make sure that it is not closed twice
-		if e.BeforeUpdate == nil || e.ChannelID != "" {
+		if e.BeforeUpdate == nil || e.ChannelID != "" || e.UserID != s.State.User.ID {
 			return
 		}
 
