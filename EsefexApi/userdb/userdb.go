@@ -5,7 +5,7 @@ import (
 	// "github.com/pkg/errors"
 )
 
-// var ErrUserNotFound = errors.New("User not found")
+// var ErrUserNotFound = fmt.Errorf("User not found")
 
 type IUserDB interface {
 	GetUser(userID string) (opt.Option[*User], error)

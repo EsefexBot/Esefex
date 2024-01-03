@@ -2,8 +2,7 @@ package audioplayer
 
 import (
 	"esefexapi/sounddb"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 type IAudioPlayer interface {
@@ -11,4 +10,4 @@ type IAudioPlayer interface {
 	PlaySound(soundID string, userID string) error
 }
 
-var UserNotInVC = errors.New("User is not in a voice channel")
+var UserNotInVC = fmt.Errorf("User is not in a voice channel")

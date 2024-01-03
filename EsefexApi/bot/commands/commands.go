@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 type CommandHandlers struct {
@@ -50,7 +51,7 @@ func WithErrorHandling(h func(s *discordgo.Session, i *discordgo.InteractionCrea
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("An error has occurred while executing the command: %+v", err),
+					Content: fmt.Sprintf("An error has occurred while executing the command: \n```%+v```", errors.Cause(err)),
 				},
 			})
 		}

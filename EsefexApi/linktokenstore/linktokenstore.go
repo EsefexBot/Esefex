@@ -1,12 +1,12 @@
 package linktokenstore
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 	"time"
 )
 
-var ErrTokenNotFound = errors.New("Token not found")
-var ErrTokenExpired = errors.New("Token expired")
+var ErrTokenNotFound = fmt.Errorf("Token not found")
+var ErrTokenExpired = fmt.Errorf("Token expired")
 
 type ILinkTokenStore interface {
 	// Get a token for a user

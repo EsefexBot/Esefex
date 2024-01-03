@@ -1,9 +1,11 @@
 package bot
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 	"log"
 	"os"
+
+	"github.com/pkg/errors"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -61,7 +63,7 @@ func (b *DiscordBot) DeleteGuildCommands(guildID string) {
 	}
 }
 
-var BotTokenNotSet = errors.New("BOT_TOKEN is not set")
+var BotTokenNotSet = fmt.Errorf("BOT_TOKEN is not set")
 
 func CreateSession() (*discordgo.Session, error) {
 	token := os.Getenv("BOT_TOKEN")

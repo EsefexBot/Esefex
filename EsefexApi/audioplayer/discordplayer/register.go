@@ -3,6 +3,7 @@ package discordplayer
 import (
 	"esefexapi/audioplayer/discordplayer/vcon"
 	"esefexapi/timer"
+	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -27,7 +28,7 @@ func (c *DiscordPlayer) RegisterVcon(serverID string, channelID string) (*VconDa
 	return vd, nil
 }
 
-var VconNotFound = errors.New("VCon not found")
+var VconNotFound = fmt.Errorf("VCon not found")
 
 func (c *DiscordPlayer) UnregisterVcon(channelID string) error {
 	vd, ok := c.vds[ChannelID(channelID)]
