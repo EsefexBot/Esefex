@@ -2,6 +2,7 @@ package discordplayer
 
 import (
 	"esefexapi/audioplayer/discordplayer/vcon"
+	"esefexapi/timer"
 
 	"github.com/pkg/errors"
 )
@@ -12,6 +13,8 @@ func (c *DiscordPlayer) RegisterVcon(serverID string, channelID string) (*VconDa
 		return nil, errors.Wrap(err, "Error creating new VCon")
 	}
 
+	timer.MessageElapsed("Created new VCon")
+
 	vd := &VconData{
 		ChannelID: channelID,
 		ServerID:  serverID,
@@ -19,7 +22,7 @@ func (c *DiscordPlayer) RegisterVcon(serverID string, channelID string) (*VconDa
 	}
 
 	c.vds[ChannelID(channelID)] = vd
-	vc.Run()
+	go vc.Run()
 
 	return vd, nil
 }

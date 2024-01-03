@@ -3,6 +3,7 @@ package discordplayer
 import (
 	"esefexapi/audioplayer"
 	"esefexapi/sounddb"
+	"esefexapi/timer"
 	"esefexapi/util/dcgoutil"
 	"log"
 
@@ -20,10 +21,14 @@ func (c *DiscordPlayer) PlaySound(soundID string, userID string) error {
 	}
 	userVC := OuserVc.Unwrap()
 
+	timer.MessageElapsed("Got user's voice channel")
+
 	vd, err := c.ensureVCon(userVC.GuildID, userID)
 	if err != nil {
 		return errors.Wrap(err, "Error ensuring voice connection")
 	}
+
+	timer.MessageElapsed("Got voice connection")
 
 	vd.vcon.PlaySound(sounddb.SuidFromStrings(userVC.GuildID, soundID))
 	vd.AfkTimeoutIn = vd.AfkTimeoutIn.Add(c.timeout)
