@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"esefexapi/sounddb"
+	"esefexapi/types"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,12 +11,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// api/sounds/<server_id>
+// api/sounds/<guild_id>
 func (h *RouteHandlers) GetSounds(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	server_id := vars["server_id"]
+	guild_id := types.GuildID(vars["guild_id"])
 
-	uids, err := h.dbs.SoundDB.GetSoundUIDs(server_id)
+	uids, err := h.dbs.SoundDB.GetSoundUIDs(guild_id)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error getting sound uids: %+v", err)
 

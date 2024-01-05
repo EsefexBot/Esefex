@@ -3,13 +3,14 @@ package discordplayer
 import (
 	"esefexapi/audioplayer"
 	"esefexapi/timer"
+	"esefexapi/types"
 	"esefexapi/util/dcgoutil"
 
 	"github.com/pkg/errors"
 )
 
-func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*VconData, error) {
-	OusrChan, err := dcgoutil.UserServerVC(c.ds, serverID, userID)
+func (c *DiscordPlayer) ensureVCon(guildID types.GuildID, userID types.UserID) (*VconData, error) {
+	OusrChan, err := dcgoutil.UserGuildVC(c.ds, guildID, userID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting user voice channel")
 	} else if OusrChan.IsNone() {
@@ -19,7 +20,7 @@ func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*VconData, error) {
 
 	timer.MessageElapsed("Got user's voice channel")
 
-	ObotChan, err := dcgoutil.GetBotVC(c.ds, serverID)
+	ObotChan, err := dcgoutil.GetBotVC(c.ds, guildID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting bot voice channel")
 	}
@@ -28,12 +29,12 @@ func (c *DiscordPlayer) ensureVCon(serverID, userID string) (*VconData, error) {
 
 	botInGuild := ObotChan.IsSome()
 	if botInGuild && ObotChan.Unwrap().ChannelID == usrChan.ChannelID {
-		return c.vds[ChannelID(usrChan.ChannelID)], nil
+		return c.vds[types.ChannelID(usrChan.ChannelID)], nil
 	}
 
 	timer.MessageElapsed("Checked if bot is in guild")
 
-	vc, err := c.RegisterVcon(serverID, usrChan.ChannelID)
+	vc, err := c.RegisterVcon(guildID, types.ChannelID(usrChan.ChannelID))
 	if err != nil {
 		return nil, errors.Wrap(err, "Error registering VCon")
 	}

@@ -9,7 +9,7 @@ type LinkDeferData struct {
 	LinkToken string
 }
 
-// link?<server_id>
+// link?<guild_id>
 func (h *RouteHandlers) GetLinkDefer(w http.ResponseWriter, r *http.Request) {
 	linkToken := r.URL.Query().Get("t")
 

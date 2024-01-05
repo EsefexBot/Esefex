@@ -2,6 +2,7 @@ package commands
 
 import (
 	"esefexapi/sounddb"
+	"esefexapi/types"
 	"esefexapi/util"
 	"fmt"
 	"log"
@@ -54,12 +55,12 @@ func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionC
 		return nil, errors.Wrap(err, "Error downloading sound file")
 	}
 
-	uid, err := c.dbs.SoundDB.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), icon, pcm)
+	uid, err := c.dbs.SoundDB.AddSound(types.GuildID(i.GuildID), fmt.Sprint(options["name"].Value), icon, pcm)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error adding sound")
 	}
 
-	log.Printf("Uploaded sound effect %v to server %v", uid.SoundID, i.GuildID)
+	log.Printf("Uploaded sound effect %v to guild %v", uid.SoundID, i.GuildID)
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

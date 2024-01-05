@@ -1,15 +1,24 @@
 package sounddb
 
-func SuidFromStrings(serverId string, soundId string) SoundUID {
-	return SoundUID{
-		ServerID: serverId,
-		SoundID:  soundId,
+import "esefexapi/types"
+
+func SuidFromStrings(guildID string, soundID string) SoundURI {
+	return SoundURI{
+		GuildID: types.GuildID(guildID),
+		SoundID: types.SoundID(soundID),
 	}
 }
 
-func (sMeta SoundMeta) GetUID() SoundUID {
-	return SoundUID{
-		ServerID: sMeta.ServerID,
-		SoundID:  sMeta.SoundID,
+func New(guildID types.GuildID, soundID types.SoundID) SoundURI {
+	return SoundURI{
+		GuildID: guildID,
+		SoundID: soundID,
+	}
+}
+
+func (sMeta SoundMeta) GetUID() SoundURI {
+	return SoundURI{
+		GuildID: sMeta.GuildID,
+		SoundID: sMeta.SoundID,
 	}
 }

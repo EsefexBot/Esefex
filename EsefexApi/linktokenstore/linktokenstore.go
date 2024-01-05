@@ -1,6 +1,7 @@
 package linktokenstore
 
 import (
+	"esefexapi/types"
 	"fmt"
 	"time"
 )
@@ -10,15 +11,15 @@ var ErrTokenExpired = fmt.Errorf("Token expired")
 
 type ILinkTokenStore interface {
 	// Get a token for a user
-	GetToken(userID string) (LinkToken, error)
+	GetToken(userID types.UserID) (LinkToken, error)
 	// Get a user for a token
-	GetUser(tokenStr string) (string, error)
+	GetUser(tokenStr string) (types.UserID, error)
 	// Set a token for a user
-	SetToken(userID string, token LinkToken) error
+	SetToken(userID types.UserID, token LinkToken) error
 	// Delete a token for a user
-	DeleteToken(userID string) error
+	DeleteToken(userID types.UserID) error
 	// Create a new token for a user (the token must be unique)
-	CreateToken(userID string) (LinkToken, error)
+	CreateToken(userID types.UserID) (LinkToken, error)
 	// Validate a token
 	ValidateToken(tokenStr string) (bool, error)
 }

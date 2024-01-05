@@ -3,6 +3,7 @@ package discordplayer
 import (
 	"esefexapi/audioplayer/discordplayer/vcon"
 	"esefexapi/db"
+	"esefexapi/types"
 	"esefexapi/util/dcgoutil"
 	"log"
 
@@ -17,11 +18,9 @@ import (
 var _ service.IService = &DiscordPlayer{}
 var _ audioplayer.IAudioPlayer = &DiscordPlayer{}
 
-type ChannelID string
-
 // DiscordPlayer implements PlaybackManager
 type DiscordPlayer struct {
-	vds         map[ChannelID]*VconData
+	vds         map[types.ChannelID]*VconData
 	ds          *discordgo.Session
 	dbs         db.Databases
 	stop        chan struct{}
@@ -31,15 +30,15 @@ type DiscordPlayer struct {
 }
 
 type VconData struct {
-	ChannelID    string
-	ServerID     string
+	ChannelID    types.ChannelID
+	GuildID      types.GuildID
 	AfkTimeoutIn time.Time
 	vcon         *vcon.VCon
 }
 
 func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool, timeout time.Duration) *DiscordPlayer {
 	dp := &DiscordPlayer{
-		vds:         make(map[ChannelID]*VconData),
+		vds:         make(map[types.ChannelID]*VconData),
 		ds:          ds,
 		dbs:         *dbs,
 		stop:        make(chan struct{}),
@@ -54,9 +53,9 @@ func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool
 			return
 		}
 
-		if _, ok := dp.vds[ChannelID(e.BeforeUpdate.ChannelID)]; ok {
+		if _, ok := dp.vds[types.ChannelID(e.BeforeUpdate.ChannelID)]; ok {
 			log.Printf("Closing VCon: %s", e.BeforeUpdate.ChannelID)
-			dp.UnregisterVcon(e.BeforeUpdate.ChannelID)
+			dp.UnregisterVcon(types.ChannelID(e.BeforeUpdate.ChannelID))
 		}
 	})
 
@@ -66,7 +65,7 @@ func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool
 			return
 		}
 
-		if _, ok := dp.vds[ChannelID(e.BeforeUpdate.ChannelID)]; !ok {
+		if _, ok := dp.vds[types.ChannelID(e.BeforeUpdate.ChannelID)]; !ok {
 			return
 		}
 
@@ -80,7 +79,7 @@ func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool
 
 		if len(users) == 1 {
 			log.Printf("Channel empty, closing vcon: %s", e.BeforeUpdate.ChannelID)
-			dp.UnregisterVcon(e.BeforeUpdate.ChannelID)
+			dp.UnregisterVcon(types.ChannelID(e.BeforeUpdate.ChannelID))
 		}
 	})
 

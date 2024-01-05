@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"esefexapi/types"
 	"fmt"
 	"time"
 
@@ -16,7 +17,7 @@ var (
 )
 
 func (c *CommandHandlers) Link(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	linkToken, err := c.dbs.LinkTokenStore.CreateToken(i.Member.User.ID)
+	linkToken, err := c.dbs.LinkTokenStore.CreateToken(types.UserID(i.Member.User.ID))
 	if err != nil {
 		return nil, errors.Wrap(err, "Error creating link token")
 	}

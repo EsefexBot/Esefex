@@ -22,9 +22,9 @@ func (ps PermissionState) String() string {
 }
 
 type Permissions struct {
-	Sound  SoundPermissions
-	Bot    BotPermissions
-	Server ServerPermissions
+	Sound SoundPermissions
+	Bot   BotPermissions
+	Guild GuildPermissions
 }
 
 type SoundPermissions struct {
@@ -39,7 +39,7 @@ type BotPermissions struct {
 	Leave PermissionState
 }
 
-type ServerPermissions struct {
+type GuildPermissions struct {
 	ManageBot  PermissionState
 	ManageUser PermissionState
 }
@@ -57,7 +57,7 @@ func NewDefault() Permissions {
 			Join:  Allow,
 			Leave: Allow,
 		},
-		Server: ServerPermissions{
+		Guild: GuildPermissions{
 			ManageBot:  Allow,
 			ManageUser: Allow,
 		},
@@ -76,7 +76,7 @@ func NewUnset() Permissions {
 			Join:  Unset,
 			Leave: Unset,
 		},
-		Server: ServerPermissions{
+		Guild: GuildPermissions{
 			ManageBot:  Unset,
 			ManageUser: Unset,
 		},

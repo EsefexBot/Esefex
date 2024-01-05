@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"esefexapi/types"
 	"esefexapi/userdb"
 
 	"github.com/bwmarrin/discordgo"
@@ -14,9 +15,9 @@ var (
 )
 
 func (c *CommandHandlers) Unlink(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	c.dbs.UserDB.DeleteUser(i.Member.User.ID)
+	c.dbs.UserDB.DeleteUser(types.UserID(i.Member.User.ID))
 	c.dbs.UserDB.SetUser(userdb.User{
-		ID:     i.Member.User.ID,
+		ID:     types.UserID(i.Member.User.ID),
 		Tokens: []userdb.Token{},
 	})
 

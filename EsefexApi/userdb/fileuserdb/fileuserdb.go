@@ -2,6 +2,7 @@ package fileuserdb
 
 import (
 	"encoding/json"
+	"esefexapi/types"
 	"esefexapi/userdb"
 	"log"
 	"os"
@@ -14,7 +15,7 @@ import (
 var _ userdb.IUserDB = &FileUserDB{}
 
 type FileUserDB struct {
-	Users    map[string]userdb.User
+	Users    map[types.UserID]userdb.User
 	file     *os.File
 	fileLock sync.Mutex
 }
@@ -46,7 +47,7 @@ func NewFileUserDB(filePath string) (*FileUserDB, error) {
 	_ = json.NewDecoder(file).Decode(&users)
 
 	// create map
-	userMap := make(map[string]userdb.User)
+	userMap := make(map[types.UserID]userdb.User)
 	for _, user := range users {
 		userMap[user.ID] = user
 	}
@@ -67,6 +68,7 @@ func (f *FileUserDB) Close() error {
 func (f *FileUserDB) Save() error {
 	f.fileLock.Lock()
 	defer f.fileLock.Unlock()
+
 	// reset file
 	f.file.Seek(0, 0)
 	f.file.Truncate(0)

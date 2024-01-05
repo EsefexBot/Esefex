@@ -14,9 +14,9 @@ func (ps PermissionState) Merge(otherPS PermissionState) PermissionState {
 
 func (p Permissions) Merge(otherP *Permissions) Permissions {
 	return Permissions{
-		Sound:  p.Sound.Merge(otherP.Sound),
-		Bot:    p.Bot.Merge(otherP.Bot),
-		Server: p.Server.Merge(otherP.Server),
+		Sound: p.Sound.Merge(otherP.Sound),
+		Bot:   p.Bot.Merge(otherP.Bot),
+		Guild: p.Guild.Merge(otherP.Guild),
 	}
 }
 
@@ -36,8 +36,8 @@ func (p BotPermissions) Merge(otherP BotPermissions) BotPermissions {
 	}
 }
 
-func (p ServerPermissions) Merge(otherP ServerPermissions) ServerPermissions {
-	return ServerPermissions{
+func (p GuildPermissions) Merge(otherP GuildPermissions) GuildPermissions {
+	return GuildPermissions{
 		ManageBot:  p.ManageBot.Merge(otherP.ManageBot),
 		ManageUser: p.ManageUser.Merge(otherP.ManageUser),
 	}

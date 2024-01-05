@@ -50,15 +50,15 @@ func (api *HttpApi) run() {
 	cors := api.mw.Cors
 	h := api.handlers
 
-	router.HandleFunc("/api/sounds/{server_id}", cors(h.GetSounds)).Methods("GET")
+	router.HandleFunc("/api/sounds/{guild_id}", cors(h.GetSounds)).Methods("GET")
 
-	router.HandleFunc("/api/server", cors(auth(h.GetServer))).Methods("GET").Headers("Cookie", "")
-	router.HandleFunc("/api/servers", cors(auth(h.GetServers))).Methods("GET").Headers("Cookie", "")
+	router.HandleFunc("/api/guild", cors(auth(h.GetGuild))).Methods("GET").Headers("Cookie", "")
+	router.HandleFunc("/api/guilds", cors(auth(h.GetGuilds))).Methods("GET").Headers("Cookie", "")
 
-	router.HandleFunc("/api/playsound/{user_id}/{server_id}/{sound_id}", cors(h.PostPlaySoundInsecure)).Methods("POST")
+	router.HandleFunc("/api/playsound/{user_id}/{guild_id}/{sound_id}", cors(h.PostPlaySoundInsecure)).Methods("POST")
 	router.HandleFunc("/api/playsound/{sound_id}", cors(auth(h.PostPlaySound))).Methods("POST").Headers("Cookie", "")
 
-	router.HandleFunc("/joinsession/{server_id}", cors(h.GetJoinSession)).Methods("GET")
+	router.HandleFunc("/joinsession/{guild_id}", cors(h.GetJoinSession)).Methods("GET")
 	router.HandleFunc("/link", cors(h.GetLinkDefer)).Methods("GET").Queries("t", "{t}")
 	router.HandleFunc("/api/link", cors(h.GetLinkRedirect)).Methods("GET").Queries("t", "{t}")
 

@@ -11,7 +11,7 @@ type LinkRedirect struct {
 	RedirectUrl string
 }
 
-// api/link?<server_id>
+// api/link?<guild_id>
 func (h *RouteHandlers) GetLinkRedirect(w http.ResponseWriter, r *http.Request) {
 	linkToken := r.URL.Query().Get("t")
 

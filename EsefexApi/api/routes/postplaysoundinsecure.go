@@ -2,6 +2,7 @@ package routes
 
 import (
 	"esefexapi/sounddb"
+	"esefexapi/types"
 	"fmt"
 	"io"
 	"log"
@@ -10,16 +11,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// api/playsound/<user_id>/<server_id>/<sound_id>
+// api/playsound/<user_id>/<guild_id>/<sound_id>
 func (h *RouteHandlers) PostPlaySoundInsecure(w http.ResponseWriter, r *http.Request) {
 	log.Printf("got /playsound request\n")
 
 	vars := mux.Vars(r)
-	user_id := vars["user_id"]
-	server_id := vars["server_id"]
-	sound_id := vars["sound_id"]
+	user_id := types.UserID(vars["user_id"])
+	guild_id := types.GuildID(vars["guild_id"])
+	sound_id := types.SoundID(vars["sound_id"])
 
-	err := h.a.PlaySoundInsecure(sounddb.SuidFromStrings(server_id, sound_id), server_id, user_id)
+	err := h.a.PlaySoundInsecure(sounddb.New(guild_id, sound_id), guild_id, user_id)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error playing sound: %+v", err)
 		log.Println(errorMsg)

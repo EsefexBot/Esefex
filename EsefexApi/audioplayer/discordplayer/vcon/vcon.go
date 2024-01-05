@@ -4,6 +4,7 @@ import (
 	"esefexapi/audioprocessing"
 	"esefexapi/sounddb"
 	"esefexapi/timer"
+	"esefexapi/types"
 	"io"
 
 	"log"
@@ -14,7 +15,7 @@ import (
 )
 
 type VCon struct {
-	playSound chan sounddb.SoundUID
+	playSound chan sounddb.SoundURI
 	stop      chan struct{}
 	mixer     *audioprocessing.S16leMixReader
 	enc       *audioprocessing.GopusEncoder
@@ -23,8 +24,8 @@ type VCon struct {
 	db        sounddb.ISoundDB
 }
 
-func NewVCon(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, channelID string) (*VCon, error) {
-	vc, err := dc.ChannelVoiceJoin(guildID, channelID, false, true)
+func NewVCon(ds *discordgo.Session, db sounddb.ISoundDB, guildID types.GuildID, channelID types.ChannelID) (*VCon, error) {
+	vc, err := ds.ChannelVoiceJoin(guildID.String(), channelID.String(), false, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error joining voice channel")
 	}
@@ -37,17 +38,17 @@ func NewVCon(dc *discordgo.Session, db sounddb.ISoundDB, guildID string, channel
 	}
 
 	return &VCon{
-		playSound: make(chan sounddb.SoundUID),
+		playSound: make(chan sounddb.SoundURI),
 		stop:      make(chan struct{}),
 		mixer:     mixer,
 		enc:       enc,
 		vc:        vc,
-		dc:        dc,
+		dc:        ds,
 		db:        db,
 	}, nil
 }
 
-func (a *VCon) PlaySound(uid sounddb.SoundUID) {
+func (a *VCon) PlaySound(uid sounddb.SoundURI) {
 	// log.Printf("channel: %s\n", a.vc.ChannelID)
 	// log.Print(a.playSound)
 	a.playSound <- uid

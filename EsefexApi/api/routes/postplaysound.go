@@ -2,6 +2,7 @@ package routes
 
 import (
 	"esefexapi/timer"
+	"esefexapi/types"
 	"fmt"
 	"io"
 	"log"
@@ -11,12 +12,12 @@ import (
 )
 
 // api/playsound/<sound_id>
-func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request, userID string) {
+func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request, userID types.UserID) {
 	// log.Printf("got /playsound request\n")
 	timer.SetStart()
 
 	vars := mux.Vars(r)
-	sound_id := vars["sound_id"]
+	sound_id := types.SoundID(vars["sound_id"])
 
 	err := h.a.PlaySound(sound_id, userID)
 	if err != nil {

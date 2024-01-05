@@ -8,12 +8,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// joinsession/<server_id>
+// joinsession/<guild_id>
 func (h *RouteHandlers) GetJoinSession(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	server_id := vars["server_id"]
+	guild_id := vars["guild_id"]
 
-	redirectUrl := fmt.Sprintf("%s://joinsession/%s", h.cProto, server_id)
+	redirectUrl := fmt.Sprintf("%s://joinsession/%s", h.cProto, guild_id)
 	response := fmt.Sprintf(`<meta http-equiv="refresh" content="0; URL=%s" />`, redirectUrl)
 
 	w.Header().Set("Content-Type", "text/html")

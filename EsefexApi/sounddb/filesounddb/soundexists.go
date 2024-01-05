@@ -7,8 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (f *FileDB) SoundExists(uid sounddb.SoundUID) (bool, error) {
-	uids, err := f.GetSoundUIDs(uid.ServerID)
+func (f *FileDB) SoundExists(uid sounddb.SoundURI) (bool, error) {
+	uids, err := f.GetSoundUIDs(uid.GuildID)
 	if err != nil {
 		return false, errors.Wrap(err, "Error getting sound uids")
 	}

@@ -2,6 +2,7 @@ package fileuserdb
 
 import (
 	"esefexapi/opt"
+	"esefexapi/types"
 	"esefexapi/userdb"
 	"esefexapi/util"
 	"log"
@@ -11,9 +12,9 @@ import (
 )
 
 // GetUser implements userdb.UserDB.
-func (f *FileUserDB) GetUser(id string) (opt.Option[*userdb.User], error) {
+func (f *FileUserDB) GetUser(userID types.UserID) (opt.Option[*userdb.User], error) {
 	for _, user := range f.Users {
-		if user.ID == id {
+		if user.ID == userID {
 			return opt.Some(&user), nil
 		}
 	}
@@ -30,8 +31,8 @@ func (f *FileUserDB) SetUser(user userdb.User) error {
 }
 
 // DeleteUser implements userdb.UserDB.
-func (f *FileUserDB) DeleteUser(id string) error {
-	delete(f.Users, id)
+func (f *FileUserDB) DeleteUser(userID types.UserID) error {
+	delete(f.Users, userID)
 
 	go f.Save()
 
@@ -58,7 +59,7 @@ func (f *FileUserDB) GetUserByToken(token userdb.Token) (opt.Option[*userdb.User
 	return opt.None[*userdb.User](), nil
 }
 
-func (f *FileUserDB) NewToken(userID string) (userdb.Token, error) {
+func (f *FileUserDB) NewToken(userID types.UserID) (userdb.Token, error) {
 	token := util.RandomString(util.TokenCharset, 32)
 
 	user, err := f.getOrCreateUser(userID)
@@ -77,7 +78,7 @@ func (f *FileUserDB) NewToken(userID string) (userdb.Token, error) {
 	return userdb.Token(token), nil
 }
 
-func (f *FileUserDB) getOrCreateUser(userID string) (*userdb.User, error) {
+func (f *FileUserDB) getOrCreateUser(userID types.UserID) (*userdb.User, error) {
 	Ouser, err := f.GetUser(userID)
 	if Ouser.IsNone() {
 		f.SetUser(userdb.User{

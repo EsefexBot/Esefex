@@ -50,7 +50,7 @@ func (c *CommandHandlers) Delete(s *discordgo.Session, i *discordgo.InteractionC
 		return nil, errors.Wrap(err, "Error deleting sound")
 	}
 
-	log.Printf("Deleted sound effect %v from server %v", soundID.Value, i.GuildID)
+	log.Printf("Deleted sound effect %v from guild %v", soundID.Value, i.GuildID)
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

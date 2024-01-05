@@ -2,15 +2,16 @@ package discordplayer
 
 import (
 	"esefexapi/sounddb"
+	"esefexapi/types"
 	"log"
 
 	"github.com/pkg/errors"
 )
 
-func (c *DiscordPlayer) PlaySoundInsecure(uid sounddb.SoundUID, serverID, userID string) error {
+func (c *DiscordPlayer) PlaySoundInsecure(uid sounddb.SoundURI, guildID types.GuildID, userID types.UserID) error {
 	log.Printf("Playing sound %s\n", uid)
 
-	vd, err := c.ensureVCon(serverID, userID)
+	vd, err := c.ensureVCon(guildID, userID)
 	if err != nil {
 		return errors.Wrap(err, "Error ensuring voice connection")
 	}
