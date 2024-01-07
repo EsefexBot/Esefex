@@ -29,7 +29,7 @@ func (c *CommandHandlers) Link(s *discordgo.Session, i *discordgo.InteractionCre
 
 	// https://esefex.com/link?<linktoken>
 	linkUrl := fmt.Sprintf("%s/link?t=%s", c.domain, linkToken.Token)
-	expiresIn := linkToken.Expiry.Sub(time.Now())
+	expiresIn := time.Until(linkToken.Expiry)
 	_, err = s.ChannelMessageSend(channel.ID, fmt.Sprintf("Click this link to link your Discord account to Esefex (expires in %d Minutes): \n%s", int(expiresIn.Minutes()), linkUrl))
 	if err != nil {
 		return nil, errors.Wrap(err, "Error sending DM message")

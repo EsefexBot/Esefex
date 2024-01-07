@@ -22,7 +22,10 @@ type FileUserDB struct {
 
 func NewFileUserDB(filePath string) (*FileUserDB, error) {
 	// get file handle
-	os.MkdirAll(path.Dir(filePath), os.ModePerm)
+	err := os.MkdirAll(path.Dir(filePath), os.ModePerm)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error creating directory")
+	}
 
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -61,7 +64,10 @@ func NewFileUserDB(filePath string) (*FileUserDB, error) {
 func (f *FileUserDB) Close() error {
 	log.Println("Closing userdb")
 
-	f.Save()
+	err := f.Save()
+	if err != nil {
+		return errors.Wrap(err, "Error saving userdb")
+	}
 	return f.file.Close()
 }
 
@@ -70,8 +76,14 @@ func (f *FileUserDB) Save() error {
 	defer f.fileLock.Unlock()
 
 	// reset file
-	f.file.Seek(0, 0)
-	f.file.Truncate(0)
+	_, err := f.file.Seek(0, 0)
+	if err != nil {
+		return errors.Wrap(err, "Error seeking to start of file")
+	}
+	err = f.file.Truncate(0)
+	if err != nil {
+		return errors.Wrap(err, "Error truncating file")
+	}
 
 	usrArr := make([]userdb.User, 0, len(f.Users))
 	for _, user := range f.Users {

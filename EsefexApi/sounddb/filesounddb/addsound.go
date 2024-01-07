@@ -28,7 +28,11 @@ func (f *FileDB) AddSound(guildID types.GuildID, name string, icon sounddb.Icon,
 
 	// Make sure the db folder exists
 	path := fmt.Sprintf("%s/%s", f.location, guildID)
-	os.MkdirAll(path, os.ModePerm)
+	err = os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		log.Printf("Error creating guild folder: %+v", err)
+		return sounddb.SoundURI{}, errors.Wrap(err, "Error creating guild folder")
+	}
 
 	// write meta file
 	path = fmt.Sprintf("%s/%s/%s_meta.json", f.location, guildID, sound.SoundID)
@@ -44,7 +48,11 @@ func (f *FileDB) AddSound(guildID types.GuildID, name string, icon sounddb.Icon,
 		return sounddb.SoundURI{}, errors.Wrap(err, "Error marshalling meta")
 	}
 
-	metaFile.Write(metaJson)
+	_, err = metaFile.Write(metaJson)
+	if err != nil {
+		log.Printf("Error writing meta file: %+v", err)
+		return sounddb.SoundURI{}, errors.Wrap(err, "Error writing meta file")
+	}
 	metaFile.Close()
 
 	// write sound file

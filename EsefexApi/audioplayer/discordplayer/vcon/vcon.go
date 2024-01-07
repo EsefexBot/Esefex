@@ -58,7 +58,13 @@ func (a *VCon) PlaySound(uid sounddb.SoundURI) {
 // this is the main loop of the audio queue
 func (a *VCon) Run() {
 	log.Println("Running VCon")
-	a.vc.Speaking(true)
+	err := a.vc.Speaking(true)
+	if err != nil {
+		// TODO: handle this better
+		// for example, if this function returns an error, the vcon should be closed
+		log.Printf("Error setting speaking: %+v\n", err)
+		return
+	}
 
 	for {
 		// log.Println("Looping...")
@@ -106,11 +112,20 @@ func (a *VCon) Run() {
 	}
 }
 
-func (a *VCon) Close() {
+func (a *VCon) Close() error {
 	log.Println("Closing VCon")
 	close(a.stop)
-	a.vc.Speaking(false)
-	a.vc.Disconnect()
+	err := a.vc.Speaking(false)
+	if err != nil {
+		return errors.Wrap(err, "Error stopping speaking")
+	}
+
+	err = a.vc.Disconnect()
+	if err != nil {
+		return errors.Wrap(err, "Error disconnecting")
+	}
+
+	return nil
 }
 
 func (a *VCon) IsPlaying() bool {

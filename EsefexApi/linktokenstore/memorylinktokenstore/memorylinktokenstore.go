@@ -30,7 +30,10 @@ func (m *MemoryLinkTokenStore) CreateToken(userID types.UserID) (linktokenstore.
 				Expiry: time.Now().Add(time.Hour * 24),
 			}
 
-			m.SetToken(userID, token)
+			err = m.SetToken(userID, token)
+			if err != nil {
+				return linktokenstore.LinkToken{}, errors.Wrap(err, "Error setting token")
+			}
 			return token, nil
 		}
 	}
@@ -79,7 +82,10 @@ func (m *MemoryLinkTokenStore) ValidateToken(tokenStr string) (bool, error) {
 	}
 
 	if token.Expiry.Before(time.Now()) {
-		m.DeleteToken(user)
+		err = m.DeleteToken(user)
+		if err != nil {
+			return false, errors.Wrap(err, "Error deleting token")
+		}
 		return false, linktokenstore.ErrTokenExpired
 	}
 

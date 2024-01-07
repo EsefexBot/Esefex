@@ -66,7 +66,11 @@ func (h *RouteHandlers) GetLinkRedirect(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	h.dbs.LinkTokenStore.DeleteToken(userID)
+	err = h.dbs.LinkTokenStore.DeleteToken(userID)
+	if err != nil {
+		log.Printf("Error deleting link token: %s", err)
+		http.Error(w, fmt.Sprintf("Error deleting link token: %s", err), http.StatusInternalServerError)
+	}
 
 	log.Printf("got /joinsession request\n")
 }

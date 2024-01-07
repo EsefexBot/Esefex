@@ -24,13 +24,17 @@ type CachedSound struct {
 }
 
 // NewSoundDBCache creates a new DBCache.
-func NewSoundDBCache(db sounddb.ISoundDB) *SoundDBCache {
+func NewSoundDBCache(db sounddb.ISoundDB) (*SoundDBCache, error) {
 	c := &SoundDBCache{
 		sounds: make(map[sounddb.SoundURI]*CachedSound),
 		db:     db,
 	}
-	c.CacheAll()
-	return c
+	err := c.CacheAll()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error caching all sounds")
+	}
+
+	return c, nil
 }
 
 // AddSound implements db.SoundDB.

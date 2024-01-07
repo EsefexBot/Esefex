@@ -28,6 +28,11 @@ func (h *RouteHandlers) PostPlaySound(w http.ResponseWriter, r *http.Request, us
 		return
 	}
 
-	io.WriteString(w, "Play sound!\n")
+	_, err = io.WriteString(w, "Play sound!\n")
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
 	timer.MessageElapsed("Played sound")
 }

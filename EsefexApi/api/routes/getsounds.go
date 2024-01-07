@@ -49,7 +49,11 @@ func (h *RouteHandlers) GetSounds(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
-	log.Println("got /sounds request")
+	// log.Println("got /sounds request")
 }

@@ -48,16 +48,22 @@ func WithErrorHandling(h func(s *discordgo.Session, i *discordgo.InteractionCrea
 		if err != nil {
 			log.Printf("Cannot execute command: %+v", err)
 
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: fmt.Sprintf("An error has occurred while executing the command: \n```%+v```", errors.Cause(err)),
 				},
 			})
+			if err != nil {
+				log.Printf("Cannot respond to interaction: %+v", err)
+			}
 		}
 
 		if r != nil {
-			s.InteractionRespond(i.Interaction, r)
+			err = s.InteractionRespond(i.Interaction, r)
+			if err != nil {
+				log.Printf("Cannot respond to interaction: %+v", err)
+			}
 		}
 	}
 }

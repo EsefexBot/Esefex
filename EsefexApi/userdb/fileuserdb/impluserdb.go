@@ -25,7 +25,12 @@ func (f *FileUserDB) GetUser(userID types.UserID) (opt.Option[*userdb.User], err
 func (f *FileUserDB) SetUser(user userdb.User) error {
 	f.Users[user.ID] = user
 
-	go f.Save()
+	go func() {
+		err := f.Save()
+		if err != nil {
+			log.Printf("Error saving userdb: %+v", err)
+		}
+	}()
 
 	return nil
 }
@@ -34,7 +39,12 @@ func (f *FileUserDB) SetUser(user userdb.User) error {
 func (f *FileUserDB) DeleteUser(userID types.UserID) error {
 	delete(f.Users, userID)
 
-	go f.Save()
+	go func() {
+		err := f.Save()
+		if err != nil {
+			log.Printf("Error saving userdb: %+v", err)
+		}
+	}()
 
 	return nil
 }
@@ -68,12 +78,20 @@ func (f *FileUserDB) NewToken(userID types.UserID) (userdb.Token, error) {
 	}
 
 	user.Tokens = append(user.Tokens, userdb.Token(token))
-	f.SetUser(*user)
+	err = f.SetUser(*user)
+	if err != nil {
+		return "", errors.Wrap(err, "Error setting user")
+	}
 
 	log.Printf("New token for user %s: %s\n", userID, token)
 	log.Printf("%v", f)
 
-	go f.Save()
+	go func() {
+		err := f.Save()
+		if err != nil {
+			log.Printf("Error saving userdb: %+v", err)
+		}
+	}()
 
 	return userdb.Token(token), nil
 }
@@ -81,10 +99,14 @@ func (f *FileUserDB) NewToken(userID types.UserID) (userdb.Token, error) {
 func (f *FileUserDB) getOrCreateUser(userID types.UserID) (*userdb.User, error) {
 	Ouser, err := f.GetUser(userID)
 	if Ouser.IsNone() {
-		f.SetUser(userdb.User{
+		err = f.SetUser(userdb.User{
 			ID:     userID,
 			Tokens: []userdb.Token{},
 		})
+		if err != nil {
+			return nil, errors.Wrap(err, "Error setting user")
+		}
+
 		Ouser, err = f.GetUser(userID)
 	}
 	if err != nil {

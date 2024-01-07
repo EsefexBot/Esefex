@@ -20,7 +20,10 @@ func (f *FileDB) GetSoundMeta(uid sounddb.SoundURI) (sounddb.SoundMeta, error) {
 	var sound sounddb.SoundMeta
 
 	byteValue, _ := io.ReadAll(metaFile)
-	json.Unmarshal(byteValue, &sound)
+	err = json.Unmarshal(byteValue, &sound)
+	if err != nil {
+		return sounddb.SoundMeta{}, err
+	}
 	metaFile.Close()
 
 	return sound, nil

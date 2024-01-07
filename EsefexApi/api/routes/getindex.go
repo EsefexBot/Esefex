@@ -7,5 +7,5 @@ import (
 
 // /
 func (h *RouteHandlers) GetIndex(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Index!\n")
+	_, _ = io.WriteString(w, "Index!\n")
 }

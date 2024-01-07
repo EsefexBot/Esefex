@@ -55,7 +55,10 @@ func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool
 
 		if _, ok := dp.vds[types.ChannelID(e.BeforeUpdate.ChannelID)]; ok {
 			log.Printf("Closing VCon: %s", e.BeforeUpdate.ChannelID)
-			dp.UnregisterVcon(types.ChannelID(e.BeforeUpdate.ChannelID))
+			err := dp.UnregisterVcon(types.ChannelID(e.BeforeUpdate.ChannelID))
+			if err != nil {
+				log.Printf("Error unregistering vcon: %+v", err)
+			}
 		}
 	})
 
@@ -79,7 +82,10 @@ func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool
 
 		if len(users) == 1 {
 			log.Printf("Channel empty, closing vcon: %s", e.BeforeUpdate.ChannelID)
-			dp.UnregisterVcon(types.ChannelID(e.BeforeUpdate.ChannelID))
+			err := dp.UnregisterVcon(types.ChannelID(e.BeforeUpdate.ChannelID))
+			if err != nil {
+				log.Printf("Error unregistering vcon: %+v", err)
+			}
 		}
 	})
 

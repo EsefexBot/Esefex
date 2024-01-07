@@ -72,14 +72,17 @@ func NewS16leCacheReaderFromPCM(pcm []int16) *S16leCacheReader {
 	return reader
 }
 
-func NewS16leCacheReaderFromFile(p string) *S16leCacheReader {
+func NewS16leCacheReaderFromFile(p string) (*S16leCacheReader, error) {
 	f, err := os.Open(p)
 	if err != nil {
 		panic(err)
 	}
 
 	reader := &S16leCacheReader{}
-	reader.LoadFromReader(f)
+	err = reader.LoadFromReader(f)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error loading from reader")
+	}
 
-	return reader
+	return reader, nil
 }

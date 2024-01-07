@@ -69,6 +69,7 @@ func (api *HttpApi) run() {
 
 	log.Printf("Webserver started on port %d (http://localhost:%d)\n", api.apiPort, api.apiPort)
 
+	// nolint:errcheck
 	go http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", api.apiPort), router)
 
 	close(api.ready)

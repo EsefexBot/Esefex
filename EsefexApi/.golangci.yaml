@@ -1,0 +1,22 @@
+linters:
+  # enable-all: true
+  disable:
+    - forbidigo
+    - golint
+    - depguard
+    - varnamelen
+    - ifshort
+    - nosnakecase
+    - deadcode
+    - varcheck
+    - exhaustivestruct
+    - maligned
+    - interfacer
+    - scopelint
+    - structcheck
+
+run:
+  skip-files:
+    - ".+_testing.go$" # skip files for quick testing of fuctionality
+  skip-dirs:
+    - "cmd/testing"

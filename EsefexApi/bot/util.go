@@ -22,45 +22,60 @@ func (b *DiscordBot) RegisterComandHandlers() {
 }
 
 // Call after opening the session
-func (b *DiscordBot) RegisterComands() {
+func (b *DiscordBot) RegisterComands() error {
 	ds := b.Session
 
 	for _, v := range b.cmdh.Commands {
 		_, err := ds.ApplicationCommandCreate(ds.State.User.ID, "", v)
 		if err != nil {
-			log.Printf("Cannot create '%v' command: %v", v.Name, err)
+			return errors.Wrapf(err, "Cannot create '%v' command", v.Name)
 		}
 
 		log.Printf("Registered '%v' command", v.Name)
 	}
+
+	return nil
 }
 
-func (b *DiscordBot) DeleteAllCommands() {
+func (b *DiscordBot) DeleteAllCommands() error {
 	ds := b.Session
 
 	log.Println("Deleting all commands...")
 
 	for _, g := range ds.State.Guilds {
-		b.DeleteGuildCommands(g.ID)
+		err := b.DeleteGuildCommands(g.ID)
+		if err != nil {
+			return errors.Wrapf(err, "Cannot delete commands for guild '%v'", g.ID)
+		}
 	}
 
-	b.DeleteGuildCommands("")
+	err := b.DeleteGuildCommands("")
+	if err != nil {
+		return errors.Wrap(err, "Cannot delete global commands")
+	}
 
 	log.Println("Deleted all commands")
+
+	return nil
 }
 
-func (b *DiscordBot) DeleteGuildCommands(guildID string) {
+func (b *DiscordBot) DeleteGuildCommands(guildID string) error {
 	ds := b.Session
 
 	cmds, err := ds.ApplicationCommands(ds.State.User.ID, guildID)
 	if err != nil {
-		log.Printf("Cannot get commands for guild '%v': %v", guildID, err)
+		return errors.Wrapf(err, "Cannot get commands for guild '%v'", guildID)
 	}
 
 	for _, v := range cmds {
-		ds.ApplicationCommandDelete(ds.State.User.ID, guildID, v.ID)
+		err = ds.ApplicationCommandDelete(ds.State.User.ID, guildID, v.ID)
+		if err != nil {
+			return errors.Wrapf(err, "Cannot delete '%v' command", v.Name)
+		}
 		log.Printf("Deleted '%v' command", v.Name)
 	}
+
+	return nil
 }
 
 var BotTokenNotSet = fmt.Errorf("BOT_TOKEN is not set")

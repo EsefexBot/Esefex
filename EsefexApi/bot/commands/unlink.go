@@ -15,11 +15,18 @@ var (
 )
 
 func (c *CommandHandlers) Unlink(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	c.dbs.UserDB.DeleteUser(types.UserID(i.Member.User.ID))
-	c.dbs.UserDB.SetUser(userdb.User{
+	err := c.dbs.UserDB.DeleteUser(types.UserID(i.Member.User.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.dbs.UserDB.SetUser(userdb.User{
 		ID:     types.UserID(i.Member.User.ID),
 		Tokens: []userdb.Token{},
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

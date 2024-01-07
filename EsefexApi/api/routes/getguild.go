@@ -3,6 +3,7 @@ package routes
 import (
 	"esefexapi/types"
 	"esefexapi/util/dcgoutil"
+	"log"
 	"net/http"
 )
 
@@ -21,5 +22,9 @@ func (h *RouteHandlers) GetGuild(w http.ResponseWriter, r *http.Request, userID 
 	}
 
 	guildID := Ovs.Unwrap().GuildID
-	w.Write([]byte(guildID))
+	_, err = w.Write([]byte(guildID))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

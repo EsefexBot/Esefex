@@ -11,7 +11,9 @@ import (
 	"esefexapi/sounddb/filesounddb"
 	"esefexapi/userdb/fileuserdb"
 	"esefexapi/util"
+	. "esefexapi/util/must"
 
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -19,39 +21,32 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func init() {
-	godotenv.Load()
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-}
-
 func main() {
 	log.Printf("Starting Esefex API with PID: %d", os.Getpid())
 
+	Must(godotenv.Load())
+
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	cfg, err := config.LoadConfig("config.toml")
-	if err != nil {
-		log.Fatal(err)
-	}
+	Must(err)
 
 	domain := os.Getenv("DOMAIN")
 
 	ds, err := bot.CreateSession()
-	if err != nil {
-		log.Fatal(err)
-	}
+	Must(err)
 
 	sdb, err := filesounddb.NewFileDB(cfg.FileSoundDB.Location)
-	if err != nil {
-		log.Fatal(err)
-	}
+	Must(err)
 
-	sdbc := dbcache.NewSoundDBCache(sdb)
+	sdbc, err := dbcache.NewSoundDBCache(sdb)
+	Must(err)
 
 	udb, err := fileuserdb.NewFileUserDB(cfg.FileUserDB.Location)
-	if err != nil {
-		log.Fatal(err)
-	}
+	Must(err)
 
-	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(time.Minute * 5)
+	verT := time.Duration(cfg.VerificationExpiry * float32(time.Minute))
+	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(verT)
 
 	dbs := &db.Databases{
 		SoundDB:        sdbc,
@@ -59,7 +54,8 @@ func main() {
 		LinkTokenStore: ldb,
 	}
 
-	plr := discordplayer.NewDiscordPlayer(ds, dbs, cfg.Bot.UseTimeouts, time.Duration(cfg.Bot.Timeout)*time.Second)
+	botT := time.Duration(cfg.Bot.Timeout * float32(time.Minute))
+	plr := discordplayer.NewDiscordPlayer(ds, dbs, cfg.Bot.UseTimeouts, botT)
 
 	api := api.NewHttpApi(dbs, plr, ds, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
 	bot := bot.NewDiscordBot(ds, dbs, domain)
@@ -73,7 +69,7 @@ func main() {
 	log.Println("All components started successfully :)")
 	log.Println("Press Ctrl+C to exit")
 	<-util.Interrupt()
-	println()
+	fmt.Println()
 	log.Println("Gracefully shutting down...")
 
 	<-api.Stop()

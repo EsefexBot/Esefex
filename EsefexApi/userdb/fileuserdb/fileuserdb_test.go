@@ -70,10 +70,12 @@ func TestFileUserDB(t *testing.T) {
 	assert.Equal(t, &user1, user.Unwrap())
 
 	err = udb.DeleteUser("1")
+	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(udb.Users))
 
 	Ouser, err := udb.GetUser("1")
+	assert.Nil(t, err)
 	assert.True(t, Ouser.IsNone())
 
 	err = udb.DeleteUser("2")

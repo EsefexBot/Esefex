@@ -28,5 +28,8 @@ func (h *RouteHandlers) PostPlaySoundInsecure(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	io.WriteString(w, "Play sound!\n")
+	_, err = io.WriteString(w, "Play sound!\n")
+	if err != nil {
+		log.Println(err)
+	}
 }

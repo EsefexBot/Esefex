@@ -35,5 +35,9 @@ func (h *RouteHandlers) GetGuilds(w http.ResponseWriter, r *http.Request, userID
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	_, err = w.Write(js)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

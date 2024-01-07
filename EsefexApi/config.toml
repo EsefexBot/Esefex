@@ -1,3 +1,5 @@
+verification_expiry = 5.0 # minutes
+
 [http_api]
 port = 8080
 custom_protocol = "esefex"
