@@ -1,91 +1,92 @@
 package permissions
 
 import (
+	"esefexapi/opt"
 	"esefexapi/types"
 	"slices"
 )
 
-type PermissionType int
-
-const (
-	User PermissionType = iota
-	Role
-	Channel
-)
-
-func (pt PermissionType) String() string {
-	switch pt {
-	case User:
-		return "user"
-	case Role:
-		return "role"
-	case Channel:
-		return "channel"
-	default:
-		return "unknown"
-	}
-}
-
 type PermissionStack struct {
-	User    map[types.UserID]Permissions
-	Role    map[types.RoleID]Permissions
-	Channel map[types.ChannelID]Permissions
+	user    map[types.UserID]Permissions
+	role    map[types.RoleID]Permissions
+	channel map[types.ChannelID]Permissions
 }
 
 func NewPermissionStack() *PermissionStack {
 	return &PermissionStack{
-		User:    make(map[types.UserID]Permissions),
-		Role:    make(map[types.RoleID]Permissions),
-		Channel: make(map[types.ChannelID]Permissions),
+		user:    make(map[types.UserID]Permissions),
+		role:    make(map[types.RoleID]Permissions),
+		channel: make(map[types.ChannelID]Permissions),
 	}
+}
+
+func (ps *PermissionStack) GetUser(userID types.UserID) Permissions {
+	if u, ok := ps.user[userID]; ok {
+		return u
+	}
+	return NewUnset()
+}
+
+func (ps *PermissionStack) GetRole(roleID types.RoleID) Permissions {
+	if r, ok := ps.role[roleID]; ok {
+		return r
+	}
+	return NewUnset()
+}
+
+func (ps *PermissionStack) GetChannel(channelID types.ChannelID) Permissions {
+	if c, ok := ps.channel[channelID]; ok {
+		return c
+	}
+	return NewUnset()
 }
 
 func (ps *PermissionStack) SetUser(user types.UserID, p Permissions) {
-	ps.User[user] = p
+	ps.user[user] = p
 }
 
 func (ps *PermissionStack) SetRole(role types.RoleID, p Permissions) {
-	ps.Role[role] = p
+	ps.role[role] = p
 }
 
 func (ps *PermissionStack) SetChannel(channel types.ChannelID, p Permissions) {
-	ps.Channel[channel] = p
+	ps.channel[channel] = p
 }
 
 func (ps *PermissionStack) UnsetUser(user types.UserID) {
-	delete(ps.User, user)
+	delete(ps.user, user)
 }
 
 func (ps *PermissionStack) UnsetRole(role types.RoleID) {
-	delete(ps.Role, role)
+	delete(ps.role, role)
 }
 
 func (ps *PermissionStack) UnsetChannel(channel types.ChannelID) {
-	delete(ps.Channel, channel)
+	delete(ps.channel, channel)
 }
 
 func (ps *PermissionStack) UpdateUser(user types.UserID, p Permissions) {
-	if _, ok := ps.User[user]; !ok {
-		ps.User[user] = NewUnset()
+	if _, ok := ps.user[user]; !ok {
+		ps.user[user] = NewUnset()
 	}
 
-	ps.User[user] = ps.User[user].Merge(&p)
+	ps.user[user] = ps.user[user].MergeParent(p)
 }
 
 func (ps *PermissionStack) UpdateRole(role types.RoleID, p Permissions) {
-	if _, ok := ps.Role[role]; !ok {
-		ps.Role[role] = NewUnset()
+	if _, ok := ps.role[role]; !ok {
+		ps.role[role] = NewUnset()
 	}
 
-	ps.Role[role] = ps.Role[role].Merge(&p)
+	ps.role[role] = ps.role[role].MergeParent(p)
 }
 
 func (ps *PermissionStack) UpdateChannel(channel types.ChannelID, p Permissions) {
-	if _, ok := ps.Channel[channel]; !ok {
-		ps.Channel[channel] = NewUnset()
+	if _, ok := ps.channel[channel]; !ok {
+		ps.channel[channel] = NewUnset()
 	}
 
-	ps.Channel[channel] = ps.Channel[channel].Merge(&p)
+	ps.channel[channel] = ps.channel[channel].MergeParent(p)
 }
 
 // Query returns the permission state for a given user, role, and channel by merging them together.
@@ -93,18 +94,21 @@ func (ps *PermissionStack) UpdateChannel(channel types.ChannelID, p Permissions)
 // This means that if a user has a permission set, it will override the channel and role permissions.
 // If a channel has a permission set, it will override the role permissions.
 // roles is a list of roles that the user has in order of precedence.
-func (ps *PermissionStack) Query(user types.UserID, roles []types.RoleID, channel types.ChannelID) Permissions {
-	userPS := ps.User[user]
+func (ps *PermissionStack) Query(user types.UserID, roles []types.RoleID, channel opt.Option[types.ChannelID]) Permissions {
+	userPS := ps.user[user]
 
 	slices.Reverse(roles)
 	rolesPS := NewUnset()
 	for _, role := range roles {
-		r := ps.Role[role]
-		rolesPS = rolesPS.Merge(&r)
+		r := ps.role[role]
+		rolesPS = rolesPS.MergeParent(r)
 	}
 
-	channelPS := ps.Channel[channel]
+	var channelPS Permissions = NewUnset()
+	if channel.IsSome() {
+		channelPS = ps.channel[channel.Unwrap()]
+	}
 
-	return NewDefault().Merge(&rolesPS).Merge(&channelPS).Merge(&userPS)
+	return NewUnset().MergeParent(rolesPS).MergeParent(channelPS).MergeParent(userPS)
 
 }

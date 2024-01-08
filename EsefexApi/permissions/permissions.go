@@ -21,6 +21,10 @@ func (ps PermissionState) String() string {
 	}
 }
 
+func (ps PermissionState) Allowed() bool {
+	return ps == Allow
+}
+
 type Permissions struct {
 	Sound SoundPermissions
 	Bot   BotPermissions
@@ -45,7 +49,7 @@ type GuildPermissions struct {
 }
 
 // Default returns a Permissions struct with all permissions set to Allow.
-func NewDefault() Permissions {
+func NewAllow() Permissions {
 	return Permissions{
 		Sound: SoundPermissions{
 			Play:   Allow,
@@ -79,6 +83,25 @@ func NewUnset() Permissions {
 		Guild: GuildPermissions{
 			ManageBot:  Unset,
 			ManageUser: Unset,
+		},
+	}
+}
+
+func NewDeny() Permissions {
+	return Permissions{
+		Sound: SoundPermissions{
+			Play:   Deny,
+			Upload: Deny,
+			Modify: Deny,
+			Delete: Deny,
+		},
+		Bot: BotPermissions{
+			Join:  Deny,
+			Leave: Deny,
+		},
+		Guild: GuildPermissions{
+			ManageBot:  Deny,
+			ManageUser: Deny,
 		},
 	}
 }

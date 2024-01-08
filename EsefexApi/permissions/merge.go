@@ -1,8 +1,8 @@
 package permissions
 
-// Merge returns the permission state that results from merging two permission states.
+// MergeParent returns the permission state that results from merging two permission states.
 // otherPS has precedence over ps.
-func (ps PermissionState) Merge(otherPS PermissionState) PermissionState {
+func (ps PermissionState) MergeParent(otherPS PermissionState) PermissionState {
 	if otherPS == Allow {
 		return Allow
 	} else if otherPS == Deny {
@@ -12,33 +12,33 @@ func (ps PermissionState) Merge(otherPS PermissionState) PermissionState {
 	}
 }
 
-func (p Permissions) Merge(otherP *Permissions) Permissions {
+func (p Permissions) MergeParent(otherP Permissions) Permissions {
 	return Permissions{
-		Sound: p.Sound.Merge(otherP.Sound),
-		Bot:   p.Bot.Merge(otherP.Bot),
-		Guild: p.Guild.Merge(otherP.Guild),
+		Sound: p.Sound.MergeParent(otherP.Sound),
+		Bot:   p.Bot.MergeParent(otherP.Bot),
+		Guild: p.Guild.MergeParent(otherP.Guild),
 	}
 }
 
-func (p SoundPermissions) Merge(otherP SoundPermissions) SoundPermissions {
+func (p SoundPermissions) MergeParent(otherP SoundPermissions) SoundPermissions {
 	return SoundPermissions{
-		Play:   p.Play.Merge(otherP.Play),
-		Upload: p.Upload.Merge(otherP.Upload),
-		Modify: p.Modify.Merge(otherP.Modify),
-		Delete: p.Delete.Merge(otherP.Delete),
+		Play:   p.Play.MergeParent(otherP.Play),
+		Upload: p.Upload.MergeParent(otherP.Upload),
+		Modify: p.Modify.MergeParent(otherP.Modify),
+		Delete: p.Delete.MergeParent(otherP.Delete),
 	}
 }
 
-func (p BotPermissions) Merge(otherP BotPermissions) BotPermissions {
+func (p BotPermissions) MergeParent(otherP BotPermissions) BotPermissions {
 	return BotPermissions{
-		Join:  p.Join.Merge(otherP.Join),
-		Leave: p.Leave.Merge(otherP.Leave),
+		Join:  p.Join.MergeParent(otherP.Join),
+		Leave: p.Leave.MergeParent(otherP.Leave),
 	}
 }
 
-func (p GuildPermissions) Merge(otherP GuildPermissions) GuildPermissions {
+func (p GuildPermissions) MergeParent(otherP GuildPermissions) GuildPermissions {
 	return GuildPermissions{
-		ManageBot:  p.ManageBot.Merge(otherP.ManageBot),
-		ManageUser: p.ManageUser.Merge(otherP.ManageUser),
+		ManageBot:  p.ManageBot.MergeParent(otherP.ManageBot),
+		ManageUser: p.ManageUser.MergeParent(otherP.ManageUser),
 	}
 }
