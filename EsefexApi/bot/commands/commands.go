@@ -39,6 +39,9 @@ func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
 	ch.Commands["unlink"] = UnlinkCommand
 	ch.Handlers["unlink"] = WithErrorHandling(ch.Unlink)
 
+	ch.Commands["permissions"] = PermissionCommand
+	ch.Handlers["permissions"] = WithErrorHandling(ch.Permission)
+
 	return ch
 }
 
