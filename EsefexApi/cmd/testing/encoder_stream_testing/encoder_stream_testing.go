@@ -7,7 +7,11 @@ import (
 )
 
 func main() {
-	src := audioprocessing.NewS16leCacheReaderFromFile("testsounds/test1.s16le")
+	src, err := audioprocessing.NewS16leCacheReaderFromFile("testsounds/test1.s16le")
+	if err != nil {
+		panic(err)
+	}
+
 	enc, err := audioprocessing.NewOpusCliEncoder(src)
 	if err != nil {
 		panic(err)

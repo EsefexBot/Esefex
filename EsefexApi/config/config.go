@@ -8,18 +8,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-var instance *Config
-
 type Config struct {
-	HttpApi     HttpApi           `toml:"http_api"`
-	FileSoundDB FileSoundDatabase `toml:"file_sound_database"`
-	FileUserDB  FileUserDatabase  `toml:"file_user_database"`
-	Bot         Bot               `toml:"bot"`
+	VerificationExpiry float32           `toml:"verification_expiry"`
+	HttpApi            HttpApi           `toml:"http_api"`
+	FileSoundDB        FileSoundDatabase `toml:"file_sound_database"`
+	FileUserDB         FileUserDatabase  `toml:"file_user_database"`
+	Bot                Bot               `toml:"bot"`
 }
 
 type HttpApi struct {
 	Port           int    `toml:"port"`
-	Domain         string `toml:"domain"`
 	CustomProtocol string `toml:"custom_protocol"`
 }
 

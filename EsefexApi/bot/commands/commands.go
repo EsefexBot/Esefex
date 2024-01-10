@@ -6,16 +6,17 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 type CommandHandlers struct {
-	dbs      db.Databases
+	dbs      *db.Databases
 	domain   string
 	Commands map[string]*discordgo.ApplicationCommand
 	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-func NewCommandHandlers(dbs db.Databases, domain string) *CommandHandlers {
+func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
 	ch := &CommandHandlers{
 		dbs:      dbs,
 		domain:   domain,
@@ -26,9 +27,6 @@ func NewCommandHandlers(dbs db.Databases, domain string) *CommandHandlers {
 	ch.Commands["upload"] = UploadCommand
 	ch.Handlers["upload"] = WithErrorHandling(ch.Upload)
 
-	ch.Commands["session"] = SessionCommand
-	ch.Handlers["session"] = WithErrorHandling(ch.Session)
-
 	ch.Commands["list"] = ListCommand
 	ch.Handlers["list"] = WithErrorHandling(ch.List)
 
@@ -37,6 +35,12 @@ func NewCommandHandlers(dbs db.Databases, domain string) *CommandHandlers {
 
 	ch.Commands["link"] = LinkCommand
 	ch.Handlers["link"] = WithErrorHandling(ch.Link)
+
+	ch.Commands["unlink"] = UnlinkCommand
+	ch.Handlers["unlink"] = WithErrorHandling(ch.Unlink)
+
+	ch.Commands["permissions"] = PermissionCommand
+	ch.Handlers["permissions"] = WithErrorHandling(ch.Permission)
 
 	return ch
 }
@@ -47,16 +51,22 @@ func WithErrorHandling(h func(s *discordgo.Session, i *discordgo.InteractionCrea
 		if err != nil {
 			log.Printf("Cannot execute command: %+v", err)
 
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("An error has occurred while executing the command: %+v", err),
+					Content: fmt.Sprintf("An error has occurred while executing the command: \n```%+v```", errors.Cause(err)),
 				},
 			})
+			if err != nil {
+				log.Printf("Cannot respond to interaction: %+v", err)
+			}
 		}
 
 		if r != nil {
-			s.InteractionRespond(i.Interaction, r)
+			err = s.InteractionRespond(i.Interaction, r)
+			if err != nil {
+				log.Printf("Cannot respond to interaction: %+v", err)
+			}
 		}
 	}
 }

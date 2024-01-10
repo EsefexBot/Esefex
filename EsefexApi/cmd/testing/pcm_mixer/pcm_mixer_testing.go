@@ -18,7 +18,7 @@ func main() {
 		}
 
 		cacheReader := audioprocessing.S16leCacheReader{}
-		cacheReader.LoadFromReader(file)
+		err = cacheReader.LoadFromReader(file)
 		mixReader.AddSource(&cacheReader)
 	}
 

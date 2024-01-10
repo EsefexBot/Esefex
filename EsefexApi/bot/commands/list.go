@@ -2,6 +2,7 @@ package commands
 
 import (
 	"esefexapi/sounddb"
+	"esefexapi/types"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
@@ -11,12 +12,12 @@ import (
 var (
 	ListCommand = &discordgo.ApplicationCommand{
 		Name:        "list",
-		Description: "List all sound effects in the server",
+		Description: "List all sound effects in the guild",
 	}
 )
 
 func (c *CommandHandlers) List(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	uids, err := c.dbs.SoundDB.GetSoundUIDs(i.GuildID)
+	uids, err := c.dbs.SoundDB.GetSoundUIDs(types.GuildID(i.GuildID))
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting sound UIDs")
 	}
@@ -35,7 +36,7 @@ func (c *CommandHandlers) List(s *discordgo.Session, i *discordgo.InteractionCre
 		return &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "There are no sounds in this server",
+				Content: "There are no sounds in this guild",
 			},
 		}, nil
 	}
@@ -44,7 +45,7 @@ func (c *CommandHandlers) List(s *discordgo.Session, i *discordgo.InteractionCre
 		return &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("There is 1 sound in this server: \n%s", fmtMetaList(metas)),
+				Content: fmt.Sprintf("There is 1 sound in this guild: \n%s", fmtMetaList(metas)),
 			},
 		}, nil
 	}
@@ -52,7 +53,7 @@ func (c *CommandHandlers) List(s *discordgo.Session, i *discordgo.InteractionCre
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("There are %d sounds in this server: \n%s", len(metas), fmtMetaList(metas)),
+			Content: fmt.Sprintf("There are %d sounds in this guild: \n%s", len(metas), fmtMetaList(metas)),
 		},
 	}, nil
 }

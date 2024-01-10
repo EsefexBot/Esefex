@@ -1,7 +1,7 @@
+verification_expiry = 5.0 # minutes
+
 [http_api]
 port = 8080
-domain = "http://159.89.111.82:8080"
-# domain = "http://localhost:8080"
 custom_protocol = "esefex"
 
 [file_sound_database]
@@ -12,4 +12,4 @@ location = "./data/users/users.json"
 
 [bot]
 use_timeouts = false
-timeout = 60 # minutes
+timeout = 60.0 # minutes

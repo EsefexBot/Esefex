@@ -2,6 +2,7 @@ package fileuserdb
 
 import (
 	"encoding/json"
+	"esefexapi/types"
 	"esefexapi/userdb"
 	"log"
 	"os"
@@ -14,14 +15,17 @@ import (
 var _ userdb.IUserDB = &FileUserDB{}
 
 type FileUserDB struct {
-	Users    map[string]userdb.User
+	Users    map[types.UserID]userdb.User
 	file     *os.File
 	fileLock sync.Mutex
 }
 
 func NewFileUserDB(filePath string) (*FileUserDB, error) {
 	// get file handle
-	os.MkdirAll(path.Dir(filePath), os.ModePerm)
+	err := os.MkdirAll(path.Dir(filePath), os.ModePerm)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error creating directory")
+	}
 
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -46,7 +50,7 @@ func NewFileUserDB(filePath string) (*FileUserDB, error) {
 	_ = json.NewDecoder(file).Decode(&users)
 
 	// create map
-	userMap := make(map[string]userdb.User)
+	userMap := make(map[types.UserID]userdb.User)
 	for _, user := range users {
 		userMap[user.ID] = user
 	}
@@ -60,16 +64,26 @@ func NewFileUserDB(filePath string) (*FileUserDB, error) {
 func (f *FileUserDB) Close() error {
 	log.Println("Closing userdb")
 
-	f.Save()
+	err := f.Save()
+	if err != nil {
+		return errors.Wrap(err, "Error saving userdb")
+	}
 	return f.file.Close()
 }
 
 func (f *FileUserDB) Save() error {
 	f.fileLock.Lock()
 	defer f.fileLock.Unlock()
+
 	// reset file
-	f.file.Seek(0, 0)
-	f.file.Truncate(0)
+	_, err := f.file.Seek(0, 0)
+	if err != nil {
+		return errors.Wrap(err, "Error seeking to start of file")
+	}
+	err = f.file.Truncate(0)
+	if err != nil {
+		return errors.Wrap(err, "Error truncating file")
+	}
 
 	usrArr := make([]userdb.User, 0, len(f.Users))
 	for _, user := range f.Users {

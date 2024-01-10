@@ -70,5 +70,5 @@ func main() {
 
 	// os.WriteFile("test.mp3", buf, os.ModePerm)
 
-	// filedb.AddSound("testserver", "test", ":sus:", buf)
+	// filedb.AddSound("testguild", "test", ":sus:", buf)
 }

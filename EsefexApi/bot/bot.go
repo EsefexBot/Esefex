@@ -20,7 +20,7 @@ type DiscordBot struct {
 	ready   chan struct{}
 }
 
-func NewDiscordBot(s *discordgo.Session, dbs db.Databases, domain string) *DiscordBot {
+func NewDiscordBot(s *discordgo.Session, dbs *db.Databases, domain string) *DiscordBot {
 	return &DiscordBot{
 		Session: s,
 		cmdh:    commands.NewCommandHandlers(dbs, domain),
@@ -50,8 +50,17 @@ func (b *DiscordBot) run() {
 	<-ready
 
 	log.Println("Registering commands...")
-	b.RegisterComands()
-	defer b.DeleteAllCommands()
+	err = b.RegisterComands()
+	if err != nil {
+		log.Printf("Cannot register commands: %+v", err)
+	}
+
+	defer func() {
+		err = b.DeleteAllCommands()
+		if err != nil {
+			log.Printf("Cannot delete commands: %+v", err)
+		}
+	}()
 
 	log.Println("Bot Ready.")
 	close(b.ready)

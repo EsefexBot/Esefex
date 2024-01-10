@@ -1,6 +1,8 @@
 package fileuserdb
 
 import (
+	"esefexapi/opt"
+	"esefexapi/types"
 	"esefexapi/userdb"
 	"esefexapi/util"
 	"log"
@@ -10,29 +12,39 @@ import (
 )
 
 // GetUser implements userdb.UserDB.
-func (f *FileUserDB) GetUser(id string) (*userdb.User, error) {
+func (f *FileUserDB) GetUser(userID types.UserID) (opt.Option[*userdb.User], error) {
 	for _, user := range f.Users {
-		if user.ID == id {
-			return &user, nil
+		if user.ID == userID {
+			return opt.Some(&user), nil
 		}
 	}
-	return nil, userdb.ErrUserNotFound
+	return opt.None[*userdb.User](), nil
 }
 
 // AddUser implements userdb.UserDB.
 func (f *FileUserDB) SetUser(user userdb.User) error {
 	f.Users[user.ID] = user
 
-	go f.Save()
+	go func() {
+		err := f.Save()
+		if err != nil {
+			log.Printf("Error saving userdb: %+v", err)
+		}
+	}()
 
 	return nil
 }
 
 // DeleteUser implements userdb.UserDB.
-func (f *FileUserDB) DeleteUser(id string) error {
-	delete(f.Users, id)
+func (f *FileUserDB) DeleteUser(userID types.UserID) error {
+	delete(f.Users, userID)
 
-	go f.Save()
+	go func() {
+		err := f.Save()
+		if err != nil {
+			log.Printf("Error saving userdb: %+v", err)
+		}
+	}()
 
 	return nil
 }
@@ -47,16 +59,17 @@ func (f *FileUserDB) GetAllUsers() ([]*userdb.User, error) {
 }
 
 // GetUserByToken implements userdb.UserDB.
-func (f *FileUserDB) GetUserByToken(token userdb.Token) (*userdb.User, error) {
+func (f *FileUserDB) GetUserByToken(token userdb.Token) (opt.Option[*userdb.User], error) {
 	for _, user := range f.Users {
 		if slices.Contains(user.Tokens, token) {
-			return &user, nil
+			return opt.Some(&user), nil
 		}
 	}
-	return nil, userdb.ErrUserNotFound
+
+	return opt.None[*userdb.User](), nil
 }
 
-func (f *FileUserDB) NewToken(userID string) (userdb.Token, error) {
+func (f *FileUserDB) NewToken(userID types.UserID) (userdb.Token, error) {
 	token := util.RandomString(util.TokenCharset, 32)
 
 	user, err := f.getOrCreateUser(userID)
@@ -65,27 +78,39 @@ func (f *FileUserDB) NewToken(userID string) (userdb.Token, error) {
 	}
 
 	user.Tokens = append(user.Tokens, userdb.Token(token))
-	f.SetUser(*user)
+	err = f.SetUser(*user)
+	if err != nil {
+		return "", errors.Wrap(err, "Error setting user")
+	}
 
 	log.Printf("New token for user %s: %s\n", userID, token)
 	log.Printf("%v", f)
 
-	go f.Save()
+	go func() {
+		err := f.Save()
+		if err != nil {
+			log.Printf("Error saving userdb: %+v", err)
+		}
+	}()
 
 	return userdb.Token(token), nil
 }
 
-func (f *FileUserDB) getOrCreateUser(userID string) (*userdb.User, error) {
-	user, err := f.GetUser(userID)
-	if err == userdb.ErrUserNotFound {
-		f.SetUser(userdb.User{
+func (f *FileUserDB) getOrCreateUser(userID types.UserID) (*userdb.User, error) {
+	Ouser, err := f.GetUser(userID)
+	if Ouser.IsNone() {
+		err = f.SetUser(userdb.User{
 			ID:     userID,
 			Tokens: []userdb.Token{},
 		})
-		user, err = f.GetUser(userID)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error setting user")
+		}
+
+		Ouser, err = f.GetUser(userID)
 	}
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting user")
 	}
-	return user, nil
+	return Ouser.Unwrap(), nil
 }

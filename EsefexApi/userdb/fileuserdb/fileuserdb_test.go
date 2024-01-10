@@ -58,7 +58,7 @@ func TestFileUserDB(t *testing.T) {
 	user, err := udb.GetUser("1")
 	assert.Nil(t, err)
 
-	assert.Equal(t, &user1, user)
+	assert.Equal(t, &user1, user.Unwrap())
 
 	users, err := udb.GetAllUsers()
 	assert.Nil(t, err)
@@ -67,14 +67,16 @@ func TestFileUserDB(t *testing.T) {
 
 	user, err = udb.GetUserByToken("1")
 	assert.Nil(t, err)
-	assert.Equal(t, &user1, user)
+	assert.Equal(t, &user1, user.Unwrap())
 
 	err = udb.DeleteUser("1")
+	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(udb.Users))
 
-	user, err = udb.GetUser("1")
-	assert.Equal(t, err, userdb.ErrUserNotFound)
+	Ouser, err := udb.GetUser("1")
+	assert.Nil(t, err)
+	assert.True(t, Ouser.IsNone())
 
 	err = udb.DeleteUser("2")
 	assert.Nil(t, err)

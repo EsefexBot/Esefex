@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	// "log"
 	"net/http"
 	"os/exec"
 	"regexp"
@@ -30,6 +31,14 @@ func Download2PCM(url string) ([]int16, error) {
 
 	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "audio/mpeg" {
 		return nil, errors.Wrapf(err, "Error downloading sound: %v", resp.StatusCode)
+	}
+
+	// reject if content length is too large
+
+	var maxFileSize int64 = 5_000_000
+
+	if resp.ContentLength > maxFileSize {
+		return nil, fmt.Errorf("file is too large (%v bytes > %v bytes)", resp.ContentLength, maxFileSize)
 	}
 
 	cmd := exec.Command("ffmpeg", "-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-f", "s16le", "-ac", "2", "-ar", "48000", "-")

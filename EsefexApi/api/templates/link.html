@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link to Esefex</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin-top: 10px;
+            height: 3rem;
+            width: 10rem;
+            font-size: 1rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+   <h1>Link to Esefex?</h1> 
+   <p>Click the button below to link with Esefex:</p>
+   <button id="confirm" onclick="window.location.href = '/api/link?t={{.LinkToken}}'"><b>Link!</b></button>
+</body>
+</html>
