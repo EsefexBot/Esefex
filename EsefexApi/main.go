@@ -68,17 +68,19 @@ func main() {
 	<-bot.Start()
 	<-plr.Start()
 
+	defer func() {
+		<-api.Stop()
+		<-bot.Stop()
+		<-plr.Stop()
+
+		udb.Close()
+
+		log.Println("All components stopped, exiting...")
+	}()
+
 	log.Println("All components started successfully :)")
 	log.Println("Press Ctrl+C to exit")
 	<-util.Interrupt()
 	println()
 	log.Println("Gracefully shutting down...")
-
-	<-api.Stop()
-	<-bot.Stop()
-	<-plr.Stop()
-
-	udb.Close()
-
-	log.Println("All components stopped, exiting...")
 }
