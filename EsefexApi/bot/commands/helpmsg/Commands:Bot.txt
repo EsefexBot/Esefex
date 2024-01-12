@@ -1,0 +1,21 @@
+**Commands: Bot**
+Bot commands are used to control the bot.
+
+**`/bot invite`**
+Generate an invite link for the bot. Use this if you want to invite the bot to your server.
+
+**`/bot ping`**
+Check the bot's latency.
+
+**`/bot stats`**
+Get some stats about the bot.
+
+**`/bot join`**
+Join the voice channel you are in.
+
+**`/bot leave`**
+Leave the voice channel you are in.
+
+**`/bot config`**
+Configure the bot for your server.
+For more information, use the `/help Commands:Bot:Config` command or visit the [wiki](https://github.com/EsefexBot/Esefex/wiki).

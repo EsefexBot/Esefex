@@ -1,0 +1,5 @@
+**UI**
+Esefex allows you to easily play sounds using either the Web or the Desktop UI. 
+The Web UI is available at http://localhost:8080/, the Desktop UI is can be downloaded from the [releases](https://github.com/EsefexBot/Esefex/releases) page.
+The Desktop UI is a standalone application that can be used to play sounds without having to open a browser. 
+It also allows you to set a global hotkey to play a sound. Otherwise it is very similar to the Web UI.

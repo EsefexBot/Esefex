@@ -1,0 +1,18 @@
+**Command: Permission**
+The permission commands are used to manage the permissions of the user. The bot uses its own permission system that works similarly to the one in Discord.
+There is a list of permissions that can be set to either `Allow`, `Deny`, or `Unset`.
+A set of permissions can be assigned to a user, role, or channel. The order of precedence is `User > Channel > Role`, exaclty like in Discord. 
+This means that if a user has a permission set to `Allow`, but the channel has it set to `Deny`, the user will not be able to perform that command in that channel. 
+Having a permission set to `Unset` is the same as not having it set at all.
+
+**`/permission set`**
+This command is used to set the permission value for a user, role, or channel.
+
+**`/permission get`**
+This command is used to get the permission value for a user, role, or channel.
+
+**`/permission clear`**
+This command is used to clear all permissions for a user, role, or channel.
+
+**`/permission list`**
+This command is used to list all permissions for a user, role, or channel.

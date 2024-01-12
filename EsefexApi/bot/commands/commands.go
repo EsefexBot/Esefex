@@ -35,23 +35,20 @@ func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
 		Handlers: map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
 	}
 
-	// ch.Commands["upload"] = UploadCommand
-	// ch.Handlers["upload"] = WithErrorHandling(ch.Upload)
+	ch.Commands["bot"] = BotCommand
+	ch.Handlers["bot"] = WithErrorHandling(ch.Bot)
 
-	// ch.Commands["list"] = ListCommand
-	// ch.Handlers["list"] = WithErrorHandling(ch.List)
+	ch.Commands["help"] = HelpCommand
+	ch.Handlers["help"] = WithErrorHandling(ch.Help)
 
-	// ch.Commands["delete"] = DeleteCommand
-	// ch.Handlers["delete"] = WithErrorHandling(ch.Delete)
+	ch.Commands["permission"] = PermissionCommand
+	ch.Handlers["permission"] = WithErrorHandling(ch.Permission)
 
-	// ch.Commands["link"] = LinkCommand
-	// ch.Handlers["link"] = WithErrorHandling(ch.Link)
+	ch.Commands["sound"] = SoundCommand
+	ch.Handlers["sound"] = WithErrorHandling(ch.Sound)
 
-	// ch.Commands["unlink"] = UnlinkCommand
-	// ch.Handlers["unlink"] = WithErrorHandling(ch.Unlink)
-
-	ch.Commands["permissions"] = PermissionCommand
-	ch.Handlers["permissions"] = WithErrorHandling(ch.Permission)
+	ch.Commands["user"] = UserCommand
+	ch.Handlers["user"] = WithErrorHandling(ch.User)
 
 	return ch
 }
@@ -82,9 +79,7 @@ func WithErrorHandling(h func(s *discordgo.Session, i *discordgo.InteractionCrea
 	}
 }
 
-func OptionsMap(i *discordgo.InteractionCreate) map[string]*discordgo.ApplicationCommandInteractionDataOption {
-	options := i.ApplicationCommandData().Options
-
+func OptionsMap(options []*discordgo.ApplicationCommandInteractionDataOption) map[string]*discordgo.ApplicationCommandInteractionDataOption {
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
 	for _, opt := range options {
 		optionMap[opt.Name] = opt

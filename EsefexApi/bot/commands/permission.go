@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/davecgh/go-spew/spew"
@@ -104,6 +105,7 @@ var PermissionCommand = &discordgo.ApplicationCommand{
 }
 
 func (c *CommandHandlers) Permission(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
+	log.Println("Permission command called with options:")
 	spew.Dump(i.ApplicationCommandData().Options)
 
 	return nil, errors.Wrap(fmt.Errorf("not implemented"), "permission")

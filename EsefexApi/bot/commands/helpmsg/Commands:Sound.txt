@@ -1,0 +1,16 @@
+**Commands: Sound**
+The sound commands can be used to play and manage sounds.
+Sounds exist per guild, so you can have different sounds on different servers.
+
+**`/sound upload`**
+Upload a sound file to the bot. The file must be one of the following formats: mp3, wav, ogg, flac, m4a, aac.
+The file must be smaller than 5MB.
+
+**`/sound delete`**
+Delete a sound file from the bot.
+
+**`/sound play`**
+Play a sound file in the current voice channel. If the bot is not in your voice channel, it will join it.
+
+**`/sound list`**
+List all available sounds.
