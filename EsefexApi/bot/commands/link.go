@@ -9,12 +9,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	LinkCommand = &discordgo.ApplicationCommand{
-		Name:        "link",
-		Description: "Link your Discord account to Esefex",
-	}
-)
+var LinkCommand = &discordgo.ApplicationCommand{
+	Name:        "link",
+	Description: "Link your Discord account to Esefex",
+}
 
 func (c *CommandHandlers) Link(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	linkToken, err := c.dbs.LinkTokenStore.CreateToken(types.UserID(i.Member.User.ID))

@@ -9,20 +9,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	DeleteCommand = &discordgo.ApplicationCommand{
-		Name:        "delete",
-		Description: "Delete a sound effect",
-		Options: []*discordgo.ApplicationCommandOption{
-			{
-				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "sound-id",
-				Description: "The sound effect to delete",
-				Required:    true,
-			},
+var DeleteCommand = &discordgo.ApplicationCommand{
+	Name:        "delete",
+	Description: "Delete a sound effect",
+	Options: []*discordgo.ApplicationCommandOption{
+		{
+			Type:        discordgo.ApplicationCommandOptionString,
+			Name:        "sound-id",
+			Description: "The sound effect to delete",
+			Required:    true,
 		},
-	}
-)
+	},
+}
 
 func (c *CommandHandlers) Delete(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	options := OptionsMap(i)

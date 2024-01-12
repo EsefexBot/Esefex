@@ -7,12 +7,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var (
-	UnlinkCommand = &discordgo.ApplicationCommand{
-		Name:        "unlink",
-		Description: "Unlink your Discord account from Esefex. Useful if you think your account has been compromised.",
-	}
-)
+var UnlinkCommand = &discordgo.ApplicationCommand{
+	Name:        "unlink",
+	Description: "Unlink your Discord account from Esefex. Useful if you think your account has been compromised.",
+}
 
 func (c *CommandHandlers) Unlink(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	err := c.dbs.UserDB.DeleteUser(types.UserID(i.Member.User.ID))

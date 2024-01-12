@@ -9,12 +9,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	ListCommand = &discordgo.ApplicationCommand{
-		Name:        "list",
-		Description: "List all sound effects in the guild",
-	}
-)
+var ListCommand = &discordgo.ApplicationCommand{
+	Name:        "list",
+	Description: "List all sound effects in the guild",
+}
 
 func (c *CommandHandlers) List(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	uids, err := c.dbs.SoundDB.GetSoundUIDs(types.GuildID(i.GuildID))

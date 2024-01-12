@@ -9,6 +9,17 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Command struct {
+	ApplicationCommand discordgo.ApplicationCommand
+	Handler            func(s *discordgo.Session, i *discordgo.InteractionCreate)
+}
+
+type SubcommandGroup struct {
+	Name        string
+	Description string
+	Commands    []*Command
+}
+
 type CommandHandlers struct {
 	dbs      *db.Databases
 	domain   string
@@ -24,20 +35,20 @@ func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
 		Handlers: map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
 	}
 
-	ch.Commands["upload"] = UploadCommand
-	ch.Handlers["upload"] = WithErrorHandling(ch.Upload)
+	// ch.Commands["upload"] = UploadCommand
+	// ch.Handlers["upload"] = WithErrorHandling(ch.Upload)
 
-	ch.Commands["list"] = ListCommand
-	ch.Handlers["list"] = WithErrorHandling(ch.List)
+	// ch.Commands["list"] = ListCommand
+	// ch.Handlers["list"] = WithErrorHandling(ch.List)
 
-	ch.Commands["delete"] = DeleteCommand
-	ch.Handlers["delete"] = WithErrorHandling(ch.Delete)
+	// ch.Commands["delete"] = DeleteCommand
+	// ch.Handlers["delete"] = WithErrorHandling(ch.Delete)
 
-	ch.Commands["link"] = LinkCommand
-	ch.Handlers["link"] = WithErrorHandling(ch.Link)
+	// ch.Commands["link"] = LinkCommand
+	// ch.Handlers["link"] = WithErrorHandling(ch.Link)
 
-	ch.Commands["unlink"] = UnlinkCommand
-	ch.Handlers["unlink"] = WithErrorHandling(ch.Unlink)
+	// ch.Commands["unlink"] = UnlinkCommand
+	// ch.Handlers["unlink"] = WithErrorHandling(ch.Unlink)
 
 	ch.Commands["permissions"] = PermissionCommand
 	ch.Handlers["permissions"] = WithErrorHandling(ch.Permission)

@@ -11,32 +11,30 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	UploadCommand = &discordgo.ApplicationCommand{
-		Name:        "upload",
-		Description: "Upload a sound effect to the bot",
-		Options: []*discordgo.ApplicationCommandOption{
-			{
-				Type:        discordgo.ApplicationCommandOptionAttachment,
-				Name:        "sound-file",
-				Description: "The sound file to upload",
-				Required:    true,
-			},
-			{
-				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "name",
-				Description: "The name of the sound effect",
-				Required:    true,
-			},
-			{
-				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "icon",
-				Description: "The icon to use for the sound effect",
-				Required:    true,
-			},
+var UploadCommand = &discordgo.ApplicationCommand{
+	Name:        "upload",
+	Description: "Upload a sound effect to the bot",
+	Options: []*discordgo.ApplicationCommandOption{
+		{
+			Type:        discordgo.ApplicationCommandOptionAttachment,
+			Name:        "sound-file",
+			Description: "The sound file to upload",
+			Required:    true,
 		},
-	}
-)
+		{
+			Type:        discordgo.ApplicationCommandOptionString,
+			Name:        "name",
+			Description: "The name of the sound effect",
+			Required:    true,
+		},
+		{
+			Type:        discordgo.ApplicationCommandOptionString,
+			Name:        "icon",
+			Description: "The icon to use for the sound effect",
+			Required:    true,
+		},
+	},
+}
 
 func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	options := OptionsMap(i)
