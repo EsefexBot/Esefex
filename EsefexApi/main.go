@@ -7,6 +7,7 @@ import (
 	"esefexapi/config"
 	"esefexapi/db"
 	"esefexapi/linktokenstore/memorylinktokenstore"
+	"esefexapi/permissiondb/filepermisssiondb"
 	"esefexapi/sounddb/dbcache"
 	"esefexapi/sounddb/filesounddb"
 	"esefexapi/userdb/fileuserdb"
@@ -36,14 +37,16 @@ func main() {
 	ds, err := bot.CreateSession()
 	Must(err)
 
-	sdb, err := filesounddb.NewFileDB(cfg.FileSoundDB.Location)
+	sdb, err := filesounddb.NewFileDB(cfg.Database.SounddbLocation)
 	Must(err)
 
 	sdbc, err := dbcache.NewSoundDBCache(sdb)
 	Must(err)
 
-	udb, err := fileuserdb.NewFileUserDB(cfg.FileUserDB.Location)
+	udb, err := fileuserdb.NewFileUserDB(cfg.Database.UserdbLocation)
 	Must(err)
+
+	fpdb, err := filepermisssiondb.NewFilePermissionDB(cfg.Database.Permissiondblocation)
 
 	verT := time.Duration(cfg.VerificationExpiry * float32(time.Minute))
 	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(verT)
@@ -52,6 +55,7 @@ func main() {
 		SoundDB:        sdbc,
 		UserDB:         udb,
 		LinkTokenStore: ldb,
+		PremissionDB:   fpdb,
 	}
 
 	botT := time.Duration(cfg.Bot.Timeout * float32(time.Minute))

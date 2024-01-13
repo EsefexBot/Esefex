@@ -1,5 +1,26 @@
 package permissions
 
+type PermissionType int
+
+const (
+	User PermissionType = iota
+	Role
+	Channel
+)
+
+func (pt PermissionType) String() string {
+	switch pt {
+	case User:
+		return "user"
+	case Role:
+		return "role"
+	case Channel:
+		return "channel"
+	default:
+		return "unknown"
+	}
+}
+
 type PermissionState int
 
 const (

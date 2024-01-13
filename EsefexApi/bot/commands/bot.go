@@ -59,7 +59,7 @@ func (c *CommandHandlers) Bot(s *discordgo.Session, i *discordgo.InteractionCrea
 	case "config":
 		return c.BotConfig(s, i)
 	default:
-		return nil, errors.Wrap(fmt.Errorf("Not implemented"), "Bot")
+		return nil, errors.Wrap(fmt.Errorf("Unknown subcommand %s", i.ApplicationCommandData().Options[0].Name), "Error handling user command")
 	}
 }
 

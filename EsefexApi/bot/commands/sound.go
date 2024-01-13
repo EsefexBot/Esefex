@@ -77,6 +77,8 @@ func (c *CommandHandlers) Sound(s *discordgo.Session, i *discordgo.InteractionCr
 		return c.SoundList(s, i)
 	case "play":
 		return c.SoundPlay(s, i)
+	default:
+		return nil, errors.Wrap(fmt.Errorf("Unknown subcommand %s", i.ApplicationCommandData().Options[0].Name), "Error handling user command")
 	}
 
 	log.Println("User command called with options:")

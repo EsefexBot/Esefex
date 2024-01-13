@@ -9,11 +9,10 @@ import (
 )
 
 type Config struct {
-	VerificationExpiry float32           `toml:"verification_expiry"`
-	HttpApi            HttpApi           `toml:"http_api"`
-	FileSoundDB        FileSoundDatabase `toml:"file_sound_database"`
-	FileUserDB         FileUserDatabase  `toml:"file_user_database"`
-	Bot                Bot               `toml:"bot"`
+	VerificationExpiry float32  `toml:"verification_expiry"`
+	HttpApi            HttpApi  `toml:"http_api"`
+	Database           Database `toml:"database"`
+	Bot                Bot      `toml:"bot"`
 }
 
 type HttpApi struct {
@@ -21,12 +20,10 @@ type HttpApi struct {
 	CustomProtocol string `toml:"custom_protocol"`
 }
 
-type FileSoundDatabase struct {
-	Location string `toml:"location"`
-}
-
-type FileUserDatabase struct {
-	Location string `toml:"location"`
+type Database struct {
+	SounddbLocation      string `toml:"sounddb_location"`
+	UserdbLocation       string `toml:"userdb_location"`
+	Permissiondblocation string `toml:"permissiondb_location"`
 }
 
 type Bot struct {

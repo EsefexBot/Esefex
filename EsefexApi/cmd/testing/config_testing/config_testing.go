@@ -20,8 +20,8 @@ func main() {
 			Port:           8080,
 			CustomProtocol: "esefex",
 		},
-		FileSoundDB: config.FileSoundDatabase{
-			Location: "/tmp/esefexapi",
+		Database: config.Database{
+			SounddbLocation: "/tmp/esefexapi/sounddb",
 		},
 		Bot: config.Bot{},
 	}
