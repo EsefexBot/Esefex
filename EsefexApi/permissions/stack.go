@@ -71,6 +71,8 @@ func (ps *PermissionStack) UpdateUser(user types.UserID, p Permissions) {
 	}
 
 	ps.User[user] = ps.User[user].MergeParent(p)
+
+	ps.clean()
 }
 
 func (ps *PermissionStack) UpdateRole(role types.RoleID, p Permissions) {
@@ -79,6 +81,8 @@ func (ps *PermissionStack) UpdateRole(role types.RoleID, p Permissions) {
 	}
 
 	ps.Role[role] = ps.Role[role].MergeParent(p)
+
+	ps.clean()
 }
 
 func (ps *PermissionStack) UpdateChannel(channel types.ChannelID, p Permissions) {
@@ -87,6 +91,29 @@ func (ps *PermissionStack) UpdateChannel(channel types.ChannelID, p Permissions)
 	}
 
 	ps.Channel[channel] = ps.Channel[channel].MergeParent(p)
+
+	ps.clean()
+}
+
+// clean removes all permissions that are just unset.
+func (ps *PermissionStack) clean() {
+	for user, p := range ps.User {
+		if p == NewUnset() {
+			delete(ps.User, user)
+		}
+	}
+
+	for role, p := range ps.Role {
+		if p == NewUnset() {
+			delete(ps.Role, role)
+		}
+	}
+
+	for channel, p := range ps.Channel {
+		if p == NewUnset() {
+			delete(ps.Channel, channel)
+		}
+	}
 }
 
 // Query returns the permission state for a given user, role, and channel by merging them together.

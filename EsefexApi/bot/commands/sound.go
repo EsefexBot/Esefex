@@ -8,7 +8,6 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 )
 
@@ -80,11 +79,6 @@ func (c *CommandHandlers) Sound(s *discordgo.Session, i *discordgo.InteractionCr
 	default:
 		return nil, errors.Wrap(fmt.Errorf("Unknown subcommand %s", i.ApplicationCommandData().Options[0].Name), "Error handling user command")
 	}
-
-	log.Println("User command called with options:")
-	spew.Dump(i.ApplicationCommandData().Options)
-
-	return nil, errors.Wrap(fmt.Errorf("Not implemented"), "Sound")
 }
 
 func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {

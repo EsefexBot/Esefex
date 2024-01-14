@@ -1,11 +1,12 @@
 package commands
 
 import (
+	"esefexapi/db"
 	"esefexapi/permissions"
 	"esefexapi/sounddb"
 	"esefexapi/types"
+	"esefexapi/util/refl"
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/bwmarrin/discordgo"
@@ -25,13 +26,12 @@ func fmtMetaList(metas []sounddb.SoundMeta) string {
 
 // checks if its a user, role or channel
 func extractTypeFromString(s *discordgo.Session, g types.GuildID, str string) (PermissionSet, error) {
-	regex, err := regexp.Compile(`^<(@|#|@&)(\d+)>$|^(@everyone)$|^(\d+)$`)
+	regex, err := regexp.Compile(`^<(@|#|@&)(\d+)>$|^(@?everyone)$|^(\d+)$`)
 	if err != nil {
 		return PermissionSet{}, errors.Wrap(err, "Error compiling regex")
 	}
 
 	matches := regex.FindStringSubmatch(str)
-	log.Printf("%d matches: %#v", len(matches), matches)
 
 	if len(matches) != 5 {
 		return PermissionSet{}, errors.Wrap(fmt.Errorf("Invalid id %s", str), "Error extracting type from string")
@@ -55,7 +55,7 @@ func extractTypeFromString(s *discordgo.Session, g types.GuildID, str string) (P
 		}, nil
 	}
 
-	if matches[3] == "@everyone" {
+	if matches[3] != "" {
 		return PermissionSet{
 			PermissionType: permissions.Role,
 			ID:             "everyone",
@@ -116,23 +116,38 @@ func formatPermissions(p permissions.Permissions) (string, error) {
 
 	resp := "**Sound**\n"
 	resp += fmt.Sprintf("```%s\n", mdlang)
-	resp += fmt.Sprintf("Play:       %s\n", p.Sound.Play.String())
-	resp += fmt.Sprintf("Upload:     %s\n", p.Sound.Upload.String())
-	resp += fmt.Sprintf("Modify:     %s\n", p.Sound.Modify.String())
-	resp += fmt.Sprintf("Delete:     %s\n", p.Sound.Delete.String())
+	resp += fmt.Sprintf("Sound.Play:       %s\n", p.Sound.Play.String())
+	resp += fmt.Sprintf("Sound.Upload:     %s\n", p.Sound.Upload.String())
+	resp += fmt.Sprintf("Sound.Modify:     %s\n", p.Sound.Modify.String())
+	resp += fmt.Sprintf("Sound.Delete:     %s\n", p.Sound.Delete.String())
 	resp += "```"
 
 	resp += "\n**Bot**\n"
 	resp += fmt.Sprintf("```%s\n", mdlang)
-	resp += fmt.Sprintf("Join:       %s\n", p.Bot.Join.String())
-	resp += fmt.Sprintf("Leave:      %s\n", p.Bot.Leave.String())
+	resp += fmt.Sprintf("Bot.Join:         %s\n", p.Bot.Join.String())
+	resp += fmt.Sprintf("Bot.Leave:        %s\n", p.Bot.Leave.String())
 	resp += "```"
 
 	resp += "\n**Guild**\n"
 	resp += fmt.Sprintf("```%s\n", mdlang)
-	resp += fmt.Sprintf("ManageBot:  %s\n", p.Guild.ManageBot.String())
-	resp += fmt.Sprintf("ManageUser: %s\n", p.Guild.ManageUser.String())
+	resp += fmt.Sprintf("Guild.ManageBot:  %s\n", p.Guild.ManageBot.String())
+	resp += fmt.Sprintf("Guild.ManageUser: %s\n", p.Guild.ManageUser.String())
 	resp += "```"
+
+	return resp, nil
+}
+
+func formatPermissionsCompact(p permissions.Permissions) (string, error) {
+	ppaths := refl.FindAllPaths(p)
+
+	resp := ""
+	for _, ppath := range ppaths {
+		ps, err := refl.GetNestedFieldValue(p, ppath)
+		if err != nil {
+			return "", errors.Wrap(err, "Error getting permission")
+		}
+		resp += ps.(permissions.PermissionState).Emoji()
+	}
 
 	return resp, nil
 }
@@ -140,4 +155,52 @@ func formatPermissions(p permissions.Permissions) (string, error) {
 type PermissionSet struct {
 	PermissionType permissions.PermissionType
 	ID             string
+}
+
+func getPermissions(s *discordgo.Session, dbs *db.Databases, g types.GuildID, id string) (permissions.Permissions, error) {
+	ty, err := extractTypeFromString(s, g, id)
+	if err != nil {
+		return permissions.Permissions{}, errors.Wrap(err, "Error extracting type from string")
+	}
+
+	var p permissions.Permissions
+
+	switch ty.PermissionType {
+	case permissions.User:
+		p, err = dbs.PermissionDB.GetUser(types.UserID(ty.ID))
+	case permissions.Role:
+		p, err = dbs.PermissionDB.GetRole(types.RoleID(ty.ID))
+	case permissions.Channel:
+		p, err = dbs.PermissionDB.GetChannel(types.ChannelID(ty.ID))
+	}
+
+	if err != nil {
+		return permissions.Permissions{}, errors.Wrap(err, "Error getting permissions")
+	}
+
+	return p, nil
+}
+
+func getPermission(p permissions.Permissions, key string) (permissions.PermissionState, error) {
+	v, err := refl.GetNestedFieldValue(p, key)
+	if err != nil {
+		return permissions.Unset, errors.Wrap(err, "Error getting nested field value")
+	}
+
+	return v.(permissions.PermissionState), nil
+}
+
+func getPathOptions() []*discordgo.ApplicationCommandOptionChoice {
+	util := refl.FindAllPaths(permissions.NewUnset())
+
+	var options []*discordgo.ApplicationCommandOptionChoice
+
+	for _, u := range util {
+		options = append(options, &discordgo.ApplicationCommandOptionChoice{
+			Name:  u,
+			Value: u,
+		})
+	}
+
+	return options
 }

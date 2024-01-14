@@ -11,5 +11,5 @@ type Databases struct {
 	SoundDB        sounddb.ISoundDB
 	UserDB         userdb.IUserDB
 	LinkTokenStore linktokenstore.ILinkTokenStore
-	PremissionDB   permissiondb.PermissionDB
+	PermissionDB   permissiondb.PermissionDB
 }

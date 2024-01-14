@@ -11,34 +11,60 @@ const (
 func (pt PermissionType) String() string {
 	switch pt {
 	case User:
-		return "user"
+		return "User"
 	case Role:
-		return "role"
+		return "Role"
 	case Channel:
-		return "channel"
+		return "Channel"
 	default:
-		return "unknown"
+		return "Unknown"
 	}
 }
 
 type PermissionState int
 
 const (
-	Allow PermissionState = iota
+	Unset PermissionState = iota
+	Allow
 	Deny
-	Unset
 )
+
+func PSFromString(str string) PermissionState {
+	switch str {
+	case "Allow":
+		return Allow
+	case "Deny":
+		return Deny
+	case "Unset":
+		return Unset
+	default:
+		return Unset
+	}
+}
 
 func (ps PermissionState) String() string {
 	switch ps {
 	case Allow:
-		return "allow"
+		return "Allow"
 	case Deny:
-		return "deny"
+		return "Deny"
 	case Unset:
-		return "unset"
+		return "Unset"
 	default:
-		return "unknown"
+		return "Unknown"
+	}
+}
+
+func (ps PermissionState) Emoji() string {
+	switch ps {
+	case Allow:
+		return "✅"
+	case Deny:
+		return "❌"
+	case Unset:
+		return "  "
+	default:
+		return "❓"
 	}
 }
 

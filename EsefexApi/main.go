@@ -55,7 +55,7 @@ func main() {
 		SoundDB:        sdbc,
 		UserDB:         udb,
 		LinkTokenStore: ldb,
-		PremissionDB:   fpdb,
+		PermissionDB:   fpdb,
 	}
 
 	botT := time.Duration(cfg.Bot.Timeout * float32(time.Minute))
