@@ -64,17 +64,14 @@ func NewFileUserDB(filePath string) (*FileUserDB, error) {
 func (f *FileUserDB) Close() error {
 	log.Println("Closing userdb")
 
-	err := f.Save()
+	err := f.save()
 	if err != nil {
 		return errors.Wrap(err, "Error saving userdb")
 	}
 	return f.file.Close()
 }
 
-func (f *FileUserDB) Save() error {
-	f.fileLock.Lock()
-	defer f.fileLock.Unlock()
-
+func (f FileUserDB) save() error {
 	// reset file
 	_, err := f.file.Seek(0, 0)
 	if err != nil {

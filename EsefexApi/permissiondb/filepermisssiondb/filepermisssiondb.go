@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"esefexapi/permissiondb"
 	"esefexapi/permissions"
+	"esefexapi/util"
+	"log"
 	"os"
 	"sync"
 
@@ -13,49 +15,83 @@ import (
 var _ permissiondb.PermissionDB = &FilePermissionDB{}
 
 type FilePermissionDB struct {
-	filePath string
-	rw       *sync.RWMutex
-	stack    *permissions.PermissionStack
+	file  *os.File
+	rw    *sync.RWMutex
+	stack permissions.PermissionStack
 }
 
 func NewFilePermissionDB(path string) (*FilePermissionDB, error) {
-	fpdb := &FilePermissionDB{
-		filePath: path,
-		rw:       &sync.RWMutex{},
-		stack:    permissions.NewPermissionStack(),
+	log.Printf("Creating FileDB at %s", path)
+	file, err := util.EnsureFile(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error ensuring file")
 	}
-	err := fpdb.load()
-	return fpdb, err
+
+	fpdb := &FilePermissionDB{
+		file:  file,
+		rw:    &sync.RWMutex{},
+		stack: permissions.NewPermissionStack(),
+	}
+	err = fpdb.load()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error loading permission stack")
+	}
+
+	return fpdb, nil
 }
 
 // load loads the permission stack from the file.
 func (f *FilePermissionDB) load() error {
-	file, err := os.Open(f.filePath)
-	if err != nil {
-		return errors.Wrap(err, "Error opening file")
-	}
-	defer file.Close()
+	f.rw.Lock()
+	defer f.rw.Unlock()
 
-	err = json.NewDecoder(file).Decode(f.stack)
+	// reset file
+	_, err := f.file.Seek(0, 0)
 	if err != nil {
-		return errors.Wrap(err, "Error decoding permission stack")
+		return errors.Wrap(err, "Error seeking to start of file")
+	}
+
+	// read file
+	var perms permissions.PermissionStack
+	err = json.NewDecoder(f.file).Decode(&perms)
+	if err != nil {
+		log.Printf("Error decoding file, creating empty permission stack: (%v)", err)
+		f.stack = permissions.NewPermissionStack()
+	} else {
+		f.stack = perms
 	}
 
 	return nil
 }
 
-// save saves the permission stack to the file.
-// TODO: Make this work
-func (f *FilePermissionDB) save() error {
-	file, err := os.OpenFile(f.filePath, os.O_RDWR|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "Error opening file")
-	}
-	defer file.Close()
+func (f *FilePermissionDB) Close() error {
+	f.rw.Lock()
+	defer f.rw.Unlock()
+	log.Println("Closing file permissiondb")
 
-	err = json.NewEncoder(file).Encode(f.stack)
+	err := f.save()
 	if err != nil {
-		return errors.Wrap(err, "Error encoding permission stack")
+		return errors.Wrap(err, "Error saving permissiondb")
+	}
+	return f.file.Close()
+}
+
+// save saves the permission stack to the file.
+// It assumes that the lock is already held.
+func (f FilePermissionDB) save() error {
+	// reset file
+	_, err := f.file.Seek(0, 0)
+	if err != nil {
+		return errors.Wrap(err, "Error seeking to start of file")
+	}
+	err = f.file.Truncate(0)
+	if err != nil {
+		return errors.Wrap(err, "Error truncating file")
+	}
+
+	err = json.NewEncoder(f.file).Encode(f.stack)
+	if err != nil {
+		return errors.Wrap(err, "Error encoding file")
 	}
 
 	return nil

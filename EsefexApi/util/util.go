@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 	"github.com/samber/lo"
 )
 
@@ -57,4 +59,18 @@ func RandomString(charset []rune, length int) string {
 	}
 
 	return string(str)
+}
+
+func EnsureFile(p string) (*os.File, error) {
+	err := os.MkdirAll(path.Dir(p), os.ModePerm)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error creating directory")
+	}
+
+	file, err := os.OpenFile(p, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error opening file")
+	}
+
+	return file, nil
 }

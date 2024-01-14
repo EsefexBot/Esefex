@@ -12,8 +12,8 @@ type PermissionStack struct {
 	Channel map[types.ChannelID]Permissions
 }
 
-func NewPermissionStack() *PermissionStack {
-	return &PermissionStack{
+func NewPermissionStack() PermissionStack {
+	return PermissionStack{
 		User:    make(map[types.UserID]Permissions),
 		Role:    make(map[types.RoleID]Permissions),
 		Channel: make(map[types.ChannelID]Permissions),

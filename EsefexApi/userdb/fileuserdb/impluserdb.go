@@ -26,7 +26,7 @@ func (f *FileUserDB) SetUser(user userdb.User) error {
 	f.Users[user.ID] = user
 
 	go func() {
-		err := f.Save()
+		err := f.save()
 		if err != nil {
 			log.Printf("Error saving userdb: %+v", err)
 		}
@@ -40,7 +40,7 @@ func (f *FileUserDB) DeleteUser(userID types.UserID) error {
 	delete(f.Users, userID)
 
 	go func() {
-		err := f.Save()
+		err := f.save()
 		if err != nil {
 			log.Printf("Error saving userdb: %+v", err)
 		}
@@ -87,7 +87,7 @@ func (f *FileUserDB) NewToken(userID types.UserID) (userdb.Token, error) {
 	log.Printf("%v", f)
 
 	go func() {
-		err := f.Save()
+		err := f.save()
 		if err != nil {
 			log.Printf("Error saving userdb: %+v", err)
 		}

@@ -47,6 +47,7 @@ func main() {
 	Must(err)
 
 	fpdb, err := filepermisssiondb.NewFilePermissionDB(cfg.Database.Permissiondblocation)
+	Must(err)
 
 	verT := time.Duration(cfg.VerificationExpiry * float32(time.Minute))
 	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(verT)
@@ -76,6 +77,7 @@ func main() {
 		<-plr.Stop()
 
 		udb.Close()
+		fpdb.Close()
 
 		log.Println("All components stopped, exiting...")
 	}()
