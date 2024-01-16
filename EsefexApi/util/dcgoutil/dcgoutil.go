@@ -7,6 +7,7 @@ import (
 	"esefexapi/types"
 
 	"github.com/bwmarrin/discordgo"
+
 	// "github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 )
@@ -152,4 +153,17 @@ func UserGuilds(ds *discordgo.Session, userID types.UserID) ([]*discordgo.Guild,
 	}
 
 	return guilds, nil
+}
+
+func UserHasPermissions(member *discordgo.Member, perms int64) (bool, error) {
+	return member.Permissions&perms == perms, nil
+}
+
+func UserIsOwner(ds *discordgo.Session, guildID types.GuildID, userID types.UserID) (bool, error) {
+	guild, err := ds.Guild(guildID.String())
+	if err != nil {
+		return false, errors.Wrap(err, "Error getting guild")
+	}
+
+	return guild.OwnerID == userID.String(), nil
 }

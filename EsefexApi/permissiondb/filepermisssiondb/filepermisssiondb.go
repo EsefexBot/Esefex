@@ -9,6 +9,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 )
 
@@ -18,9 +19,10 @@ type FilePermissionDB struct {
 	file  *os.File
 	rw    *sync.RWMutex
 	stack permissions.PermissionStack
+	ds    *discordgo.Session
 }
 
-func NewFilePermissionDB(path string) (*FilePermissionDB, error) {
+func NewFilePermissionDB(path string, ds *discordgo.Session) (*FilePermissionDB, error) {
 	log.Printf("Creating FileDB at %s", path)
 	file, err := util.EnsureFile(path)
 	if err != nil {
@@ -31,6 +33,7 @@ func NewFilePermissionDB(path string) (*FilePermissionDB, error) {
 		file:  file,
 		rw:    &sync.RWMutex{},
 		stack: permissions.NewPermissionStack(),
+		ds:    ds,
 	}
 	err = fpdb.load()
 	if err != nil {

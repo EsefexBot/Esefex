@@ -84,7 +84,6 @@ func (f *FileUserDB) NewToken(userID types.UserID) (userdb.Token, error) {
 	}
 
 	log.Printf("New token for user %s: %s\n", userID, token)
-	log.Printf("%v", f)
 
 	go func() {
 		err := f.save()

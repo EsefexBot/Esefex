@@ -65,8 +65,9 @@ func TestMerge(t *testing.T) {
 			Leave: Unset,
 		},
 		Guild: GuildPermissions{
-			ManageBot:  Deny,
-			ManageUser: Unset,
+			UseSlashCommands: Unset,
+			ManageBot:        Deny,
+			ManageUser:       Unset,
 		},
 	}
 

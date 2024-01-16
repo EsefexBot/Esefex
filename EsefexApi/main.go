@@ -46,7 +46,7 @@ func main() {
 	udb, err := fileuserdb.NewFileUserDB(cfg.Database.UserdbLocation)
 	Must(err)
 
-	fpdb, err := filepermisssiondb.NewFilePermissionDB(cfg.Database.Permissiondblocation)
+	fpdb, err := filepermisssiondb.NewFilePermissionDB(cfg.Database.Permissiondblocation, ds)
 	Must(err)
 
 	verT := time.Duration(cfg.VerificationExpiry * float32(time.Minute))

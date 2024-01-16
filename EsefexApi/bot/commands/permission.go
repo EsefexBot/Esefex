@@ -198,7 +198,7 @@ func (c *CommandHandlers) PermissionListAll(s *discordgo.Session, i *discordgo.I
 		}
 
 		resp += fmt.Sprintf("%s: ", uname)
-		resp += pstr
+		resp += fmt.Sprintf("`%s`", pstr)
 		resp += "\n"
 	}
 

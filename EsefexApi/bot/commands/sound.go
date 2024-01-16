@@ -69,13 +69,13 @@ var SoundCommand = &discordgo.ApplicationCommand{
 func (c *CommandHandlers) Sound(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	switch i.ApplicationCommandData().Options[0].Name {
 	case "upload":
-		return c.SoundUpload(s, i)
+		return c.mw.CheckPerms(c.SoundUpload, "Sound.Upload")(s, i)
 	case "delete":
-		return c.SoundDelete(s, i)
+		return c.mw.CheckPerms(c.SoundDelete, "Sound.Delete")(s, i)
 	case "list":
 		return c.SoundList(s, i)
 	case "play":
-		return c.SoundPlay(s, i)
+		return c.mw.CheckPerms(c.SoundPlay, "Sound.Play")(s, i)
 	default:
 		return nil, errors.Wrap(fmt.Errorf("Unknown subcommand %s", i.ApplicationCommandData().Options[0].Name), "Error handling user command")
 	}

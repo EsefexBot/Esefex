@@ -15,4 +15,5 @@ type PermissionDB interface {
 	GetUsers() ([]types.UserID, error)
 	GetRoles() ([]types.RoleID, error)
 	GetChannels() ([]types.ChannelID, error)
+	Query(user types.UserID, guild types.GuildID) (permissions.Permissions, error)
 }

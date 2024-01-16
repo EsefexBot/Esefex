@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"esefexapi/bot/commands/cmdhandler"
+	"esefexapi/bot/commands/middleware"
 	"esefexapi/db"
 	"fmt"
 	"log"
@@ -23,37 +25,39 @@ type SubcommandGroup struct {
 type CommandHandlers struct {
 	dbs      *db.Databases
 	domain   string
+	mw       *middleware.CommandMiddleware
 	Commands map[string]*discordgo.ApplicationCommand
 	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
 func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
-	ch := &CommandHandlers{
+	c := &CommandHandlers{
 		dbs:      dbs,
 		domain:   domain,
+		mw:       middleware.NewCommandMiddleware(dbs),
 		Commands: map[string]*discordgo.ApplicationCommand{},
 		Handlers: map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
 	}
 
-	ch.Commands["bot"] = BotCommand
-	ch.Handlers["bot"] = WithErrorHandling(ch.Bot)
+	c.Commands["bot"] = BotCommand
+	c.Handlers["bot"] = WithErrorHandling(c.mw.CheckPerms(c.Bot, "Guild.UseSlashCommands"))
 
-	ch.Commands["help"] = HelpCommand
-	ch.Handlers["help"] = WithErrorHandling(ch.Help)
+	c.Commands["help"] = HelpCommand
+	c.Handlers["help"] = WithErrorHandling(c.mw.CheckPerms(c.Help, "Guild.UseSlashCommands"))
 
-	ch.Commands["permission"] = PermissionCommand
-	ch.Handlers["permission"] = WithErrorHandling(ch.Permission)
+	c.Commands["permission"] = PermissionCommand
+	c.Handlers["permission"] = WithErrorHandling(c.mw.CheckPerms(c.Permission, "Guild.UseSlashCommands", "Guild.ManageUser"))
 
-	ch.Commands["sound"] = SoundCommand
-	ch.Handlers["sound"] = WithErrorHandling(ch.Sound)
+	c.Commands["sound"] = SoundCommand
+	c.Handlers["sound"] = WithErrorHandling(c.mw.CheckPerms(c.Sound, "Guild.UseSlashCommands"))
 
-	ch.Commands["user"] = UserCommand
-	ch.Handlers["user"] = WithErrorHandling(ch.User)
+	c.Commands["user"] = UserCommand
+	c.Handlers["user"] = WithErrorHandling(c.mw.CheckPerms(c.User, "Guild.UseSlashCommands"))
 
-	return ch
+	return c
 }
 
-func WithErrorHandling(h func(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error)) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func WithErrorHandling(h cmdhandler.CommandHandlerWithErr) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		r, err := h(s, i)
 		if err != nil {

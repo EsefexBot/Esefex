@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"esefexapi/types"
+	"context"
 	"esefexapi/userdb"
 	"fmt"
 	"log"
@@ -9,7 +9,7 @@ import (
 )
 
 // Auth middleware checks if the user is authenticated and injects the user into the request context
-func (m *Middleware) Auth(next func(w http.ResponseWriter, r *http.Request, userID types.UserID)) func(w http.ResponseWriter, r *http.Request) {
+func (m *Middleware) Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user_token, err := r.Cookie("User-Token")
 		if err != nil {
@@ -29,6 +29,8 @@ func (m *Middleware) Auth(next func(w http.ResponseWriter, r *http.Request, user
 			return
 		}
 
-		next(w, r, Ouser.Unwrap().ID)
+		// Inject the user into the request context
+		ctx := context.WithValue(r.Context(), "user", Ouser)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

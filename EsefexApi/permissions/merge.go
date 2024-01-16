@@ -38,7 +38,8 @@ func (p BotPermissions) MergeParent(otherP BotPermissions) BotPermissions {
 
 func (p GuildPermissions) MergeParent(otherP GuildPermissions) GuildPermissions {
 	return GuildPermissions{
-		ManageBot:  p.ManageBot.MergeParent(otherP.ManageBot),
-		ManageUser: p.ManageUser.MergeParent(otherP.ManageUser),
+		ManageBot:        p.ManageBot.MergeParent(otherP.ManageBot),
+		ManageUser:       p.ManageUser.MergeParent(otherP.ManageUser),
+		UseSlashCommands: p.UseSlashCommands.MergeParent(otherP.UseSlashCommands),
 	}
 }

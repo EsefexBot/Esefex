@@ -91,8 +91,9 @@ type BotPermissions struct {
 }
 
 type GuildPermissions struct {
-	ManageBot  PermissionState
-	ManageUser PermissionState
+	UseSlashCommands PermissionState
+	ManageBot        PermissionState
+	ManageUser       PermissionState
 }
 
 // Default returns a Permissions struct with all permissions set to Allow.
@@ -109,8 +110,9 @@ func NewAllow() Permissions {
 			Leave: Allow,
 		},
 		Guild: GuildPermissions{
-			ManageBot:  Allow,
-			ManageUser: Allow,
+			UseSlashCommands: Allow,
+			ManageBot:        Allow,
+			ManageUser:       Allow,
 		},
 	}
 }
@@ -128,8 +130,9 @@ func NewUnset() Permissions {
 			Leave: Unset,
 		},
 		Guild: GuildPermissions{
-			ManageBot:  Unset,
-			ManageUser: Unset,
+			UseSlashCommands: Unset,
+			ManageBot:        Unset,
+			ManageUser:       Unset,
 		},
 	}
 }
@@ -147,8 +150,29 @@ func NewDeny() Permissions {
 			Leave: Deny,
 		},
 		Guild: GuildPermissions{
-			ManageBot:  Deny,
-			ManageUser: Deny,
+			UseSlashCommands: Deny,
+			ManageBot:        Deny,
+			ManageUser:       Deny,
+		},
+	}
+}
+
+func NewEveryoneDefault() Permissions {
+	return Permissions{
+		Sound: SoundPermissions{
+			Play:   Allow,
+			Upload: Deny,
+			Modify: Deny,
+			Delete: Deny,
+		},
+		Bot: BotPermissions{
+			Join:  Allow,
+			Leave: Deny,
+		},
+		Guild: GuildPermissions{
+			UseSlashCommands: Allow,
+			ManageBot:        Deny,
+			ManageUser:       Deny,
 		},
 	}
 }
