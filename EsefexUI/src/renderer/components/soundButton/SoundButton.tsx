@@ -5,9 +5,11 @@ interface SoundButtonProps {
   sound: Sound;
 }
 
-function SoundButton(props: SoundButtonProps) {
-  const { sound } = props;
+// always name the props "props", helps with collaberation, easier to identify
 
+function SoundButton(props: SoundButtonProps) {
+  // destructure props if needed
+  const { sound } = props;
   return (
     <Button w={100} h={100}>
       <img src={sound.icon} alt="test" />

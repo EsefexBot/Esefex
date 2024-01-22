@@ -1,6 +1,7 @@
 import { Group, Image, Title } from '@mantine/core';
 import './Header.css';
 
+// dont use a react-fragment if only one element is wrapped --> unneccesairy code
 function Header() {
   return (
     <Group grow>
