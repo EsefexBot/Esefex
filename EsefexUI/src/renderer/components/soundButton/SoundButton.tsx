@@ -1,5 +1,5 @@
 import { Button } from '@mantine/core';
-import { Sound } from '../../models/Sound';
+import { Sound } from '../../models';
 
 interface SoundButtonProps {
   sound: Sound;
