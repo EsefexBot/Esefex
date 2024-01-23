@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { Badge, Button } from '@mantine/core';
+import {
+  IconCircleFilled,
+  IconPlayerPlayFilled,
+  IconStarFilled,
+} from '@tabler/icons-react';
+import { ThemeIcon } from '@mantine/core';
 import { Sound } from '../../models/Sound';
 import './SoundButton.css';
 import config from '../../config.json';
@@ -28,14 +33,31 @@ function SoundButton(props: SoundButtonProps) {
   // destructure props if needed
   return (
     <div className="sound-button">
-      <div className="sound-button-wrapper">
+      <div className="sound-button-wrapper top-wrapper">
         <img className="sound-icon" src={sound.icon} alt={sound.name} />
         <span className="sound-name">{sound.name}</span>
-        <img className="sound-play-button" src={sound.icon} alt={sound.name} />
+        <ThemeIcon
+          variant="light"
+          radius="xs"
+          size="lg"
+          color="#fff"
+          onClick={playSound}
+        >
+          <IconPlayerPlayFilled style={{ width: '70%', height: '70%' }} />
+        </ThemeIcon>
       </div>
-      <div className="sound-button-wrapper">
-        <EsefexBadge />
-        <EsefexBadge />
+      <div className="sound-button-wrapper bottom-wrapper">
+        <EsefexBadge type="favourite" onClick={() => null}>
+          <ThemeIcon variant="light" radius="lg" size="sm" color="yellow">
+            <IconStarFilled style={{ width: '70%', height: '70%' }} />
+          </ThemeIcon>
+        </EsefexBadge>
+        <EsefexBadge type="key-bind" onClick={() => null}>
+          <ThemeIcon variant="light" radius="lg" size="sm" color="white">
+            <IconCircleFilled style={{ width: '70%', height: '70%' }} />
+          </ThemeIcon>
+          <span>CTRL + X</span>
+        </EsefexBadge>
       </div>
     </div>
   );
