@@ -12,6 +12,7 @@ import config from "./config.json";
 import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import { showErrorNotification } from './components/notifications';
+import { authHeaders } from './authentication/Authentication';
 
 let testSound: Sound = {
   id:"617007869",
@@ -29,12 +30,12 @@ function Hello() {
   },[]);
 
   const getData = () => {
-    axios.get(config.apiUrl + "api/sounds/" + serverId)
+    axios.get(config.apiUrl + "api/sounds/" + serverId, authHeaders)
     .then((response) => {
       setSounds(response.data);
     }).catch((error) => {
       showErrorNotification(error);
-      setSounds([testSound,testSound])
+      setSounds([testSound,testSound]);
     });
   };
 
