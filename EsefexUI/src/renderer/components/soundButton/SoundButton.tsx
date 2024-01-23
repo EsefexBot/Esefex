@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { Button } from '@mantine/core';
+import { Badge, Button } from '@mantine/core';
 import { Sound } from '../../models/Sound';
 import './SoundButton.css';
 import config from '../../config.json';
 import { showErrorNotification } from '../notifications';
+import EsefexBadge from '../Badge/EsefexBadge';
 
 interface SoundButtonProps {
   sound: Sound;
@@ -26,9 +27,17 @@ function SoundButton(props: SoundButtonProps) {
 
   // destructure props if needed
   return (
-    <Button w={100} h={100}>
-      <img src={sound.icon} alt="test" />
-    </Button>
+    <div className="sound-button">
+      <div className="sound-button-wrapper">
+        <img className="sound-icon" src={sound.icon} alt={sound.name} />
+        <span className="sound-name">{sound.name}</span>
+        <img className="sound-play-button" src={sound.icon} alt={sound.name} />
+      </div>
+      <div className="sound-button-wrapper">
+        <EsefexBadge />
+        <EsefexBadge />
+      </div>
+    </div>
   );
 }
 
