@@ -1,13 +1,13 @@
 package commands
 
 import (
-	// "esefexapi/util"
-	"esefexapi/filedb"
+	"esefexapi/sounddb"
 	"esefexapi/util"
 	"fmt"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -37,27 +37,33 @@ var (
 	}
 )
 
-func Upload(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	options := i.ApplicationCommandData().Options
+func (c *CommandHandlers) Upload(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
+	options := OptionsMap(i)
 
-	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-	for _, opt := range options {
-		optionMap[opt.Name] = opt
+	iconOption := options["icon"]
+	icon, err := sounddb.ExtractIcon(fmt.Sprint(iconOption.Value))
+	if err != nil {
+		return nil, errors.Wrap(err, "Error extracting icon")
 	}
 
-	icon := optionMap["icon"]
-	iconURL := util.ExtractIconUrl(icon)
-
-	soundFile := optionMap["sound-file"]
+	soundFile := options["sound-file"]
 	soundFileUrl := i.ApplicationCommandData().Resolved.Attachments[fmt.Sprint(soundFile.Value)].URL
 
-	filedb.AddSound(i.GuildID, fmt.Sprint(optionMap["name"].Value), iconURL, soundFileUrl)
+	pcm, err := util.Download2PCM(soundFileUrl)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error downloading sound file")
+	}
 
-	log.Printf("Uploaded sound effect %v to server %v", optionMap["name"].Value, i.GuildID)
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	uid, err := c.dbs.SoundDB.AddSound(i.GuildID, fmt.Sprint(options["name"].Value), icon, pcm)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error adding sound")
+	}
+
+	log.Printf("Uploaded sound effect %v to server %v", uid.SoundID, i.GuildID)
+	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Uploaded sound effect",
+			Content: fmt.Sprintf("Uploaded sound effect %s %s", uid.SoundID, icon.Name),
 		},
-	})
+	}, nil
 }

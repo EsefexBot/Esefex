@@ -1,0 +1,11 @@
+services:
+  api:
+    image: jokil/esefexapi:latest
+    env_file:
+      - .env.github
+    ports:
+      - "8080:8080"
+    volumes:
+      - db-data:/api/data
+volumes:
+  db-data: {}

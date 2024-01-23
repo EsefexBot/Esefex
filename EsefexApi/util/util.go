@@ -2,11 +2,13 @@ package util
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"io"
-	"net/http"
+	"math/rand"
 	"os"
 	"regexp"
+	"strings"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/samber/lo"
 )
 
 func PathExists(path string) bool {
@@ -36,27 +38,23 @@ func GetSoundURL(guildID, name string) string {
 	return fmt.Sprintf("https://cdn.discordapp.com/attachments/%v/%v.mp3", guildID, name)
 }
 
-func DownloadSound(url string, path string) error {
-	out, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
+func GetEmojiURL(emoji string) string {
+	runes := []rune(emoji)
 
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+	name := strings.Join(lo.Map(runes, func(r rune, index int) string { return fmt.Sprintf("%x", r) }), "-")
 
-	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "audio/mpeg" {
-		return fmt.Errorf("status code error: %v", resp.StatusCode)
-	}
+	url := fmt.Sprintf("https://raw.githubusercontent.com/twitter/twemoji/master/assets/svg/%s.svg", name)
 
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
+	return url
+}
+
+var TokenCharset = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+func RandomString(charset []rune, length int) string {
+	str := make([]rune, 32)
+	for i := range str {
+		str[i] = charset[rand.Intn(len(charset))]
 	}
 
-	return nil
+	return string(str)
 }

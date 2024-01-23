@@ -3,7 +3,6 @@
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
 
-
 body {
   --mantine-color-body: #000;
   position: relative;

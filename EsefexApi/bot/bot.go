@@ -1,36 +1,69 @@
 package bot
 
 import (
-	"esefexapi/appcontext"
-	"esefexapi/bot/actions"
+	"esefexapi/bot/commands"
+	"esefexapi/db"
+	"esefexapi/service"
+
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func Run(c *appcontext.Context) {
-	log.Println("Starting bot...")
+var _ service.IService = &DiscordBot{}
 
-	s := c.DiscordSession
+// DiscordBot implements Service
+type DiscordBot struct {
+	Session *discordgo.Session
+	cmdh    *commands.CommandHandlers
+	stop    chan struct{}
+	ready   chan struct{}
+}
 
-	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
-	})
-
-	err := s.Open()
-	if err != nil {
-		log.Fatalf("Cannot open the session: %v", err)
+func NewDiscordBot(s *discordgo.Session, dbs *db.Databases, domain string) *DiscordBot {
+	return &DiscordBot{
+		Session: s,
+		cmdh:    commands.NewCommandHandlers(dbs, domain),
+		stop:    make(chan struct{}, 1),
+		ready:   make(chan struct{}),
 	}
-	defer s.Close()
+}
 
-	log.Println("Adding commands...")
-	RegisterComands(s)
+func (b *DiscordBot) run() {
+	defer close(b.stop)
+	log.Println("Starting bot...")
+	defer log.Println("Bot stopped")
 
-	go actions.ListenForApiRequests(s, c)
+	ds := b.Session
+	ds.Identify.Intents = discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsGuildMembers | discordgo.IntentsGuildPresences
+
+	ready := b.WaitReady()
+	log.Println("Registering command handlers...")
+	b.RegisterComandHandlers()
+
+	err := ds.Open()
+	if err != nil {
+		log.Fatalf("Cannot open the session: %+v", err)
+	}
+	defer ds.Close()
+
+	<-ready
+
+	log.Println("Registering commands...")
+	b.RegisterComands()
+	defer b.DeleteAllCommands()
 
 	log.Println("Bot Ready.")
-	<-c.Channels.Stop
+	close(b.ready)
+	<-b.stop
+}
 
-	// defer actions.LeaveAllChannels(s)
-	defer DeleteAllCommands(s)
+func (b *DiscordBot) Start() <-chan struct{} {
+	go b.run()
+	return b.ready
+}
+
+func (b *DiscordBot) Stop() <-chan struct{} {
+	b.stop <- struct{}{}
+	return b.stop
 }

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -144,7 +145,7 @@ func loadSound() error {
 	file, err := os.Open("airhorn.dca")
 	if err != nil {
 		fmt.Println("Error opening dca file :", err)
-		return err
+		return errors.Wrap(err, "Error opening dca file")
 	}
 
 	var opuslen int16
@@ -157,14 +158,14 @@ func loadSound() error {
 		if err == io.EOF || err == io.ErrUnexpectedEOF {
 			err := file.Close()
 			if err != nil {
-				return err
+				return errors.Wrap(err, "Error closing file")
 			}
 			return nil
 		}
 
 		if err != nil {
 			fmt.Println("Error reading from dca file :", err)
-			return err
+			return errors.Wrap(err, "Error reading from dca file")
 		}
 
 		// Read encoded pcm from dca file.
@@ -174,7 +175,7 @@ func loadSound() error {
 		// Should not be any end of file errors
 		if err != nil {
 			fmt.Println("Error reading from dca file :", err)
-			return err
+			return errors.Wrap(err, "Error reading from dca file")
 		}
 
 		// Append encoded pcm data to the buffer.
@@ -188,7 +189,7 @@ func playSound(s *discordgo.Session, guildID, channelID string) (err error) {
 	// Join the provided voice channel.
 	vc, err := s.ChannelVoiceJoin(guildID, channelID, false, true)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error joining voice channel")
 	}
 
 	// Sleep for a specified amount of time before playing the sound

@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"io"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
 type S16leCacheReader struct {
@@ -38,7 +40,7 @@ func (s *S16leCacheReader) LoadFromReader(reader io.Reader) (err error) {
 			bytes = append(bytes, byte(short))
 			bytes = append(bytes, byte(short>>8))
 		} else if err != io.EOF {
-			return err
+			return errors.Wrap(err, "Error reading from reader")
 		} else {
 			break
 		}
@@ -55,6 +57,17 @@ func NewS16leCacheReader() *S16leCacheReader {
 func NewS16leCacheReaderFromBytes(b []byte) *S16leCacheReader {
 	reader := &S16leCacheReader{}
 	reader.Load(b)
+
+	return reader
+}
+
+func NewS16leCacheReaderFromPCM(pcm []int16) *S16leCacheReader {
+	reader := &S16leCacheReader{}
+
+	for _, short := range pcm {
+		reader.bytes = append(reader.bytes, byte(short))
+		reader.bytes = append(reader.bytes, byte(short>>8))
+	}
 
 	return reader
 }
