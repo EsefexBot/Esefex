@@ -1,15 +1,20 @@
-import { Button } from "@mantine/core";
-import { FC } from "react";
-import { Sound } from "../../models/Sound";
+import { Button } from '@mantine/core';
+import { Sound } from '../../models';
 
 interface SoundButtonProps {
-    sound: Sound;
+  sound: Sound;
 }
 
-export const SoundButton: FC<SoundButtonProps> = ({sound}) => {
-    return (
-        <>
-            <Button w={100} h={100} bg="#1A1A1A" radius={25}><img src={sound.icon}/></Button>
-        </>
-    );
+// always name the props "props", helps with collaberation, easier to identify
+
+function SoundButton(props: SoundButtonProps) {
+  // destructure props if needed
+  const { sound } = props;
+  return (
+    <Button w={100} h={100}>
+      <img src={sound.icon} alt="test" />
+    </Button>
+  );
 }
+
+export default SoundButton;
