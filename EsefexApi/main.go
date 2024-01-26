@@ -26,7 +26,10 @@ import (
 func main() {
 	log.Printf("Starting Esefex API with PID: %d", os.Getpid())
 
-	Must(godotenv.Load())
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file, assuming all variables are set in the environment")
+	}
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
