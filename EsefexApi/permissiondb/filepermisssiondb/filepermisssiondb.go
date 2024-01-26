@@ -108,7 +108,7 @@ func (f *FilePermissionDB) ensureGuild(guild types.GuildID) *permissions.Permiss
 		ps := permissions.NewPermissionStack()
 
 		f.stacks[guild] = &ps
-		ps.SetChannel(types.ChannelID("everyone"), permissions.NewEveryoneDefault())
+		ps.SetRole(types.RoleID("everyone"), permissions.NewEveryoneDefault())
 		go f.save()
 	}
 

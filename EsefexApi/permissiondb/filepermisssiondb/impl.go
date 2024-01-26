@@ -64,7 +64,7 @@ func (f *FilePermissionDB) GetUsers(guildID types.GuildID) ([]types.UserID, erro
 	defer f.rw.RUnlock()
 
 	var users []types.UserID
-	for k := range f.ensureGuild(guildID).User {
+	for k := range f.ensureGuild(guildID).Users {
 		users = append(users, k)
 	}
 
@@ -76,7 +76,7 @@ func (f *FilePermissionDB) GetRoles(guildID types.GuildID) ([]types.RoleID, erro
 	defer f.rw.RUnlock()
 
 	var roles []types.RoleID
-	for k := range f.ensureGuild(guildID).Role {
+	for k := range f.ensureGuild(guildID).Roles {
 		roles = append(roles, k)
 	}
 
@@ -88,7 +88,7 @@ func (f *FilePermissionDB) GetChannels(guildID types.GuildID) ([]types.ChannelID
 	defer f.rw.RUnlock()
 
 	var channels []types.ChannelID
-	for k := range f.ensureGuild(guildID).Channel {
+	for k := range f.ensureGuild(guildID).Channels {
 		channels = append(channels, k)
 	}
 
