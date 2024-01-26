@@ -94,3 +94,10 @@ func (f *FilePermissionDB) GetChannels(guildID types.GuildID) ([]types.ChannelID
 
 	return channels, nil
 }
+
+func (f *FilePermissionDB) GetGuild(guildID types.GuildID) *permissions.PermissionStack {
+	f.rw.RLock()
+	defer f.rw.RUnlock()
+
+	return f.ensureGuild(guildID)
+}

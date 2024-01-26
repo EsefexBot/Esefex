@@ -131,8 +131,8 @@ func formatPermissions(p permissions.Permissions) (string, error) {
 
 	resp += "\n**Guild**\n"
 	resp += fmt.Sprintf("```%s\n", mdlang)
-	resp += fmt.Sprintf("Guild.ManageBot:  %s\n", p.Guild.ManageBot.String())
-	resp += fmt.Sprintf("Guild.ManageUser: %s\n", p.Guild.ManageUser.String())
+	resp += fmt.Sprintf("Guild.BotManage:  %s\n", p.Guild.BotManage.String())
+	resp += fmt.Sprintf("Guild.UserManage: %s\n", p.Guild.UserManage.String())
 	resp += "```"
 
 	return resp, nil
@@ -147,7 +147,7 @@ func formatPermissionsCompact(p permissions.Permissions) (string, error) {
 		if err != nil {
 			return "", errors.Wrap(err, "Error getting permission")
 		}
-		parts = append(parts, ps.(permissions.PermissionState).Emoji())
+		parts = append(parts, ps.(permissions.PermissionState).String())
 	}
 
 	return strings.Join(parts, "|"), nil

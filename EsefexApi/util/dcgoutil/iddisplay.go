@@ -1,4 +1,4 @@
-package util
+package dcgoutil
 
 import (
 	"esefexapi/types"

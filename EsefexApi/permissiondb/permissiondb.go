@@ -16,4 +16,5 @@ type PermissionDB interface {
 	GetRoles(guild types.GuildID) ([]types.RoleID, error)
 	GetChannels(guild types.GuildID) ([]types.ChannelID, error)
 	Query(guild types.GuildID, user types.UserID) (permissions.Permissions, error)
+	GetGuild(types.GuildID) *permissions.PermissionStack
 }

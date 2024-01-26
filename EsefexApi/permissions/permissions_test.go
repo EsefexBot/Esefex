@@ -49,7 +49,7 @@ func TestMerge(t *testing.T) {
 	p2 := NewUnset()
 
 	p1.Sound.Play = Deny
-	p1.Guild.ManageBot = Deny
+	p1.Guild.BotManage = Deny
 
 	p2.Sound.Play = Allow
 
@@ -65,9 +65,9 @@ func TestMerge(t *testing.T) {
 			Leave: Unset,
 		},
 		Guild: GuildPermissions{
-			UseSlashCommands: Unset,
-			ManageBot:        Deny,
-			ManageUser:       Unset,
+			UseCmds:    Unset,
+			BotManage:  Deny,
+			UserManage: Unset,
 		},
 	}
 

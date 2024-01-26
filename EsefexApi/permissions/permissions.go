@@ -62,7 +62,7 @@ func (ps PermissionState) Emoji() string {
 	case Deny:
 		return "❌"
 	case Unset:
-		return "  "
+		return "//"
 	default:
 		return "❓"
 	}
@@ -91,9 +91,9 @@ type BotPermissions struct {
 }
 
 type GuildPermissions struct {
-	UseSlashCommands PermissionState
-	ManageBot        PermissionState
-	ManageUser       PermissionState
+	UseCmds    PermissionState
+	BotManage  PermissionState
+	UserManage PermissionState
 }
 
 // Default returns a Permissions struct with all permissions set to Allow.
@@ -110,9 +110,9 @@ func NewAllow() Permissions {
 			Leave: Allow,
 		},
 		Guild: GuildPermissions{
-			UseSlashCommands: Allow,
-			ManageBot:        Allow,
-			ManageUser:       Allow,
+			UseCmds:    Allow,
+			BotManage:  Allow,
+			UserManage: Allow,
 		},
 	}
 }
@@ -130,9 +130,9 @@ func NewUnset() Permissions {
 			Leave: Unset,
 		},
 		Guild: GuildPermissions{
-			UseSlashCommands: Unset,
-			ManageBot:        Unset,
-			ManageUser:       Unset,
+			UseCmds:    Unset,
+			BotManage:  Unset,
+			UserManage: Unset,
 		},
 	}
 }
@@ -150,9 +150,9 @@ func NewDeny() Permissions {
 			Leave: Deny,
 		},
 		Guild: GuildPermissions{
-			UseSlashCommands: Deny,
-			ManageBot:        Deny,
-			ManageUser:       Deny,
+			UseCmds:    Deny,
+			BotManage:  Deny,
+			UserManage: Deny,
 		},
 	}
 }
@@ -170,9 +170,9 @@ func NewEveryoneDefault() Permissions {
 			Leave: Deny,
 		},
 		Guild: GuildPermissions{
-			UseSlashCommands: Allow,
-			ManageBot:        Deny,
-			ManageUser:       Deny,
+			UseCmds:    Allow,
+			BotManage:  Deny,
+			UserManage: Deny,
 		},
 	}
 }

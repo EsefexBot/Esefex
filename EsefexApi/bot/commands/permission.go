@@ -3,13 +3,12 @@ package commands
 import (
 	"esefexapi/permissions"
 	"esefexapi/types"
-	"esefexapi/util"
+	"esefexapi/util/dcgoutil"
 	"esefexapi/util/refl"
 	"fmt"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 )
 
@@ -152,6 +151,8 @@ func (c *CommandHandlers) PermissionSet(s *discordgo.Session, i *discordgo.Inter
 
 	guildID := types.GuildID(i.GuildID)
 
+	log.Printf("Permissiondb is nul? %v", c.dbs.PermissionDB == nil)
+
 	switch ty.PermissionType {
 	case permissions.User:
 		err = c.dbs.PermissionDB.UpdateUser(guildID, types.UserID(ty.ID), p)
@@ -175,99 +176,14 @@ func (c *CommandHandlers) PermissionSet(s *discordgo.Session, i *discordgo.Inter
 
 // TODO: Better alignment for the list all command (maybe use a table?)
 func (c *CommandHandlers) PermissionListAll(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	resp := "Permissions for all users, channels and roles:\n"
 
-	resp += "**Users**\n"
 	guildID := types.GuildID(i.GuildID)
-	uids, err := c.dbs.PermissionDB.GetUsers(guildID)
+	tabl, err := c.dbs.PermissionDB.GetGuild(guildID).FmtStack(s, guildID)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error getting users")
-	}
-	if len(uids) == 0 {
-		resp += "`No users found.`\n"
-	}
-	for _, uid := range uids {
-		p, err := getPermissions(s, c.dbs, types.GuildID(i.GuildID), uid.String())
-		if err != nil {
-			return nil, errors.Wrap(err, "Error getting permissions")
-		}
-
-		pstr, err := formatPermissionsCompact(p)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error formatting permissions")
-		}
-
-		uname, err := util.UserIDName(s, uid)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error getting user")
-		}
-
-		resp += fmt.Sprintf("%s: ", uname)
-		resp += fmt.Sprintf("`%s`", pstr)
-		resp += "\n"
+		return nil, errors.Wrap(err, "Error formatting permissions")
 	}
 
-	resp += "**Roles**\n"
-	rids, err := c.dbs.PermissionDB.GetRoles(guildID)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error getting roles")
-	}
-	if len(rids) == 0 {
-		resp += "`No roles found.`\n"
-	}
-	for _, rid := range rids {
-		p, err := getPermissions(s, c.dbs, types.GuildID(i.GuildID), rid.String())
-		if err != nil {
-			return nil, errors.Wrap(err, "Error getting permissions")
-		}
-
-		pstr, err := formatPermissionsCompact(p)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error formatting permissions")
-		}
-
-		rmention, err := util.RoleIDName(s, types.GuildID(i.GuildID), rid)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error getting role")
-		}
-
-		resp += fmt.Sprintf("%s: ", rmention)
-		resp += fmt.Sprintf("`%s`", pstr)
-		resp += "\n"
-	}
-
-	resp += "**Channels**\n"
-	cids, err := c.dbs.PermissionDB.GetChannels(guildID)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error getting channels")
-	}
-	if len(cids) == 0 {
-		resp += "`No channels found.`\n"
-	}
-
-	for _, cid := range cids {
-		p, err := getPermissions(s, c.dbs, types.GuildID(i.GuildID), cid.String())
-		if err != nil {
-			return nil, errors.Wrap(err, "Error getting permissions")
-		}
-
-		log.Printf("%v", cid)
-		spew.Dump(p)
-
-		pstr, err := formatPermissionsCompact(p)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error formatting permissions")
-		}
-
-		cmention, err := util.ChannelIDMention(s, types.GuildID(i.GuildID), cid)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error getting channel")
-		}
-
-		resp += fmt.Sprintf("%s: ", cmention)
-		resp += fmt.Sprintf("`%s`", pstr)
-		resp += "\n"
-	}
+	resp := fmt.Sprintf("Permissions for all users, channels and roles:```%s```", tabl)
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -300,11 +216,11 @@ func (c *CommandHandlers) PermissionGet(s *discordgo.Session, i *discordgo.Inter
 	var name string
 	switch ty.PermissionType {
 	case permissions.User:
-		name, err = util.UserIDName(s, types.UserID(ty.ID))
+		name, err = dcgoutil.UserIDName(s, types.UserID(ty.ID))
 	case permissions.Role:
-		name, err = util.RoleIDName(s, types.GuildID(i.GuildID), types.RoleID(ty.ID))
+		name, err = dcgoutil.RoleIDName(s, types.GuildID(i.GuildID), types.RoleID(ty.ID))
 	case permissions.Channel:
-		name, err = util.ChannelIDMention(s, types.GuildID(i.GuildID), types.ChannelID(ty.ID))
+		name, err = dcgoutil.ChannelIDMention(s, types.GuildID(i.GuildID), types.ChannelID(ty.ID))
 	}
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting name")
@@ -331,11 +247,11 @@ func (c *CommandHandlers) PermissionClear(s *discordgo.Session, i *discordgo.Int
 	var name string
 	switch ty.PermissionType {
 	case permissions.User:
-		name, err = util.UserIDName(s, types.UserID(ty.ID))
+		name, err = dcgoutil.UserIDName(s, types.UserID(ty.ID))
 	case permissions.Role:
-		name, err = util.RoleIDName(s, types.GuildID(i.GuildID), types.RoleID(ty.ID))
+		name, err = dcgoutil.RoleIDName(s, types.GuildID(i.GuildID), types.RoleID(ty.ID))
 	case permissions.Channel:
-		name, err = util.ChannelIDMention(s, types.GuildID(i.GuildID), types.ChannelID(ty.ID))
+		name, err = dcgoutil.ChannelIDMention(s, types.GuildID(i.GuildID), types.ChannelID(ty.ID))
 	}
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting name")
@@ -384,11 +300,11 @@ func (c *CommandHandlers) PermissionList(s *discordgo.Session, i *discordgo.Inte
 	var name string
 	switch ty.PermissionType {
 	case permissions.User:
-		name, err = util.UserIDName(s, types.UserID(ty.ID))
+		name, err = dcgoutil.UserIDName(s, types.UserID(ty.ID))
 	case permissions.Role:
-		name, err = util.RoleIDName(s, types.GuildID(i.GuildID), types.RoleID(ty.ID))
+		name, err = dcgoutil.RoleIDName(s, types.GuildID(i.GuildID), types.RoleID(ty.ID))
 	case permissions.Channel:
-		name, err = util.ChannelIDMention(s, types.GuildID(i.GuildID), types.ChannelID(ty.ID))
+		name, err = dcgoutil.ChannelIDMention(s, types.GuildID(i.GuildID), types.ChannelID(ty.ID))
 	}
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting name")

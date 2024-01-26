@@ -74,3 +74,18 @@ func EnsureFile(p string) (*os.File, error) {
 
 	return file, nil
 }
+
+func ToGenericArray(arr ...interface{}) []interface{} {
+	return arr
+}
+
+func FirstNRunes(s string, n int) string {
+	i := 0
+	for j := range s {
+		if i == n {
+			return s[:j]
+		}
+		i++
+	}
+	return s
+}
