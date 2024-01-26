@@ -4,6 +4,7 @@ import (
 	"esefexapi/api"
 	"esefexapi/audioplayer/discordplayer"
 	"esefexapi/bot"
+	"esefexapi/bot/commands/cmdhashstore"
 	"esefexapi/config"
 	"esefexapi/db"
 	"esefexapi/linktokenstore/memorylinktokenstore"
@@ -52,11 +53,14 @@ func main() {
 	verT := time.Duration(cfg.VerificationExpiry * float32(time.Minute))
 	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(verT)
 
+	fcmhs := cmdhashstore.NewFileCmdHashStore(cfg.Database.CmdHashStoreLocation)
+
 	dbs := &db.Databases{
 		SoundDB:        sdbc,
 		UserDB:         udb,
 		LinkTokenStore: ldb,
 		PermissionDB:   fpdb,
+		CmdHashStore:   fcmhs,
 	}
 
 	botT := time.Duration(cfg.Bot.Timeout * float32(time.Minute))

@@ -24,6 +24,7 @@ type Database struct {
 	SounddbLocation      string `toml:"sounddb_location"`
 	UserdbLocation       string `toml:"userdb_location"`
 	Permissiondblocation string `toml:"permissiondb_location"`
+	CmdHashStoreLocation string `toml:"cmd_hash_store_location"`
 }
 
 type Bot struct {

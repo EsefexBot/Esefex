@@ -14,18 +14,18 @@ var _ service.IService = &DiscordBot{}
 
 // DiscordBot implements Service
 type DiscordBot struct {
-	Session *discordgo.Session
-	cmdh    *commands.CommandHandlers
-	stop    chan struct{}
-	ready   chan struct{}
+	ds    *discordgo.Session
+	cmdh  *commands.CommandHandlers
+	stop  chan struct{}
+	ready chan struct{}
 }
 
-func NewDiscordBot(s *discordgo.Session, dbs *db.Databases, domain string) *DiscordBot {
+func NewDiscordBot(ds *discordgo.Session, dbs *db.Databases, domain string) *DiscordBot {
 	return &DiscordBot{
-		Session: s,
-		cmdh:    commands.NewCommandHandlers(dbs, domain),
-		stop:    make(chan struct{}, 1),
-		ready:   make(chan struct{}),
+		ds:    ds,
+		cmdh:  commands.NewCommandHandlers(ds, dbs, domain),
+		stop:  make(chan struct{}, 1),
+		ready: make(chan struct{}),
 	}
 }
 
@@ -34,12 +34,12 @@ func (b *DiscordBot) run() {
 	log.Println("Starting bot...")
 	defer log.Println("Bot stopped")
 
-	ds := b.Session
+	ds := b.ds
 	ds.Identify.Intents = discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsGuildMembers | discordgo.IntentsGuildPresences
 
 	ready := b.WaitReady()
-	log.Println("Registering command handlers...")
-	b.RegisterComandHandlers()
+
+	b.cmdh.RegisterComandHandlers()
 
 	err := ds.Open()
 	if err != nil {
@@ -49,18 +49,10 @@ func (b *DiscordBot) run() {
 
 	<-ready
 
-	log.Println("Registering commands...")
-	err = b.RegisterComands()
+	err = b.cmdh.UpdateApplicationCommands()
 	if err != nil {
-		log.Printf("Cannot register commands: %+v", err)
+		log.Printf("Cannot update command handlers: %+v", err)
 	}
-
-	defer func() {
-		err = b.DeleteAllCommands()
-		if err != nil {
-			log.Printf("Cannot delete commands: %+v", err)
-		}
-	}()
 
 	log.Println("Bot Ready.")
 	close(b.ready)

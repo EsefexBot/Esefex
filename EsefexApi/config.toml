@@ -8,6 +8,7 @@ custom_protocol = "esefex"
 sounddb_location = "./data/sounds"
 userdb_location = "./data/users/users.json"
 permissiondb_location = "./data/permissions/permissions.json"
+cmd_hash_store_location = "./data/commands/cmd_hash.json"
 
 [bot]
 use_timeouts = false

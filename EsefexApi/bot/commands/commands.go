@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"crypto/sha256"
+	"encoding/json"
 	"esefexapi/bot/commands/cmdhandler"
 	"esefexapi/bot/commands/middleware"
 	"esefexapi/db"
@@ -23,6 +25,7 @@ type SubcommandGroup struct {
 }
 
 type CommandHandlers struct {
+	ds       *discordgo.Session
 	dbs      *db.Databases
 	domain   string
 	mw       *middleware.CommandMiddleware
@@ -30,8 +33,9 @@ type CommandHandlers struct {
 	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-func NewCommandHandlers(dbs *db.Databases, domain string) *CommandHandlers {
+func NewCommandHandlers(ds *discordgo.Session, dbs *db.Databases, domain string) *CommandHandlers {
 	c := &CommandHandlers{
+		ds:       ds,
 		dbs:      dbs,
 		domain:   domain,
 		mw:       middleware.NewCommandMiddleware(dbs),
@@ -90,4 +94,17 @@ func OptionsMap(options []*discordgo.ApplicationCommandInteractionDataOption) ma
 	}
 
 	return optionMap
+}
+
+// ApplicationCommandsHash returns a hash of the application commands
+// This is used to determine if the commands need to be updated
+// The hash is based on the CommandHandlers.Commands field
+func (c *CommandHandlers) ApplicationCommandsHash() (string, error) {
+	data, err := json.Marshal(c.Commands)
+	if err != nil {
+		return "", err
+	}
+
+	hash := sha256.Sum256(data)
+	return fmt.Sprintf("%x", hash), nil
 }
