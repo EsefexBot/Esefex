@@ -7,7 +7,6 @@ import (
 	"esefexapi/util/dcgoutil"
 	"esefexapi/util/refl"
 	"fmt"
-	"log"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -25,14 +24,13 @@ func (m *CommandMiddleware) CheckPerms(next cmdhandler.CommandHandlerWithErr, pe
 		if err != nil {
 			return nil, errors.Wrap(err, "Error checking user permissions")
 		}
-		log.Println("hasPerms:", hasPerms)
 
 		if hasPerms || isOwner {
 			return next(s, i)
 		}
 
 		// check if user has permissions
-		p, err := m.dbs.PermissionDB.Query(types.UserID(i.Member.User.ID), types.GuildID(i.GuildID))
+		p, err := m.dbs.PermissionDB.Query(types.GuildID(i.GuildID), types.UserID(i.Member.User.ID))
 		if err != nil {
 			return nil, errors.Wrap(err, "Error querying permissions")
 		}

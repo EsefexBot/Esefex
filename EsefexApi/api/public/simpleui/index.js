@@ -1,6 +1,5 @@
 async function init() {
     const soundsDiv = document.getElementById('sounds');
-    const userTokenInput = document.getElementById('userTokenInput');
 
     let guildRequest = await fetch('/api/guild', {
         method: 'GET',

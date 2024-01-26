@@ -10,7 +10,7 @@ import (
 )
 
 // Query implements permissiondb.PermissionDB.
-func (f *FilePermissionDB) Query(user types.UserID, guild types.GuildID) (permissions.Permissions, error) {
+func (f *FilePermissionDB) Query(guild types.GuildID, user types.UserID) (permissions.Permissions, error) {
 	f.rw.RLock()
 	defer f.rw.RUnlock()
 
@@ -30,9 +30,9 @@ func (f *FilePermissionDB) Query(user types.UserID, guild types.GuildID) (permis
 	}
 
 	if userChannel.IsNone() {
-		return f.stack.Query(user, roles, opt.None[types.ChannelID]()), nil
+		return f.ensureGuild(guild).Query(user, roles, opt.None[types.ChannelID]()), nil
 	} else {
 		chanID := types.ChannelID(userChannel.Unwrap().ChannelID)
-		return f.stack.Query(user, roles, opt.Some(chanID)), nil
+		return f.ensureGuild(guild).Query(user, roles, opt.Some(chanID)), nil
 	}
 }

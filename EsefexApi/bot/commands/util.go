@@ -8,6 +8,7 @@ import (
 	"esefexapi/util/refl"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -140,16 +141,16 @@ func formatPermissions(p permissions.Permissions) (string, error) {
 func formatPermissionsCompact(p permissions.Permissions) (string, error) {
 	ppaths := refl.FindAllPaths(p)
 
-	resp := ""
+	parts := make([]string, 0, len(ppaths))
 	for _, ppath := range ppaths {
 		ps, err := refl.GetNestedFieldValue(p, ppath)
 		if err != nil {
 			return "", errors.Wrap(err, "Error getting permission")
 		}
-		resp += ps.(permissions.PermissionState).Emoji()
+		parts = append(parts, ps.(permissions.PermissionState).Emoji())
 	}
 
-	return resp, nil
+	return strings.Join(parts, "|"), nil
 }
 
 type PermissionSet struct {
@@ -157,21 +158,20 @@ type PermissionSet struct {
 	ID             string
 }
 
-func getPermissions(s *discordgo.Session, dbs *db.Databases, g types.GuildID, id string) (permissions.Permissions, error) {
-	ty, err := extractTypeFromString(s, g, id)
+func getPermissions(s *discordgo.Session, dbs *db.Databases, guildID types.GuildID, id string) (permissions.Permissions, error) {
+	ty, err := extractTypeFromString(s, guildID, id)
 	if err != nil {
 		return permissions.Permissions{}, errors.Wrap(err, "Error extracting type from string")
 	}
-
 	var p permissions.Permissions
 
 	switch ty.PermissionType {
 	case permissions.User:
-		p, err = dbs.PermissionDB.GetUser(types.UserID(ty.ID))
+		p, err = dbs.PermissionDB.GetUser(guildID, types.UserID(ty.ID))
 	case permissions.Role:
-		p, err = dbs.PermissionDB.GetRole(types.RoleID(ty.ID))
+		p, err = dbs.PermissionDB.GetRole(guildID, types.RoleID(ty.ID))
 	case permissions.Channel:
-		p, err = dbs.PermissionDB.GetChannel(types.ChannelID(ty.ID))
+		p, err = dbs.PermissionDB.GetChannel(guildID, types.ChannelID(ty.ID))
 	}
 
 	if err != nil {

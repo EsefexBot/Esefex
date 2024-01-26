@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"esefexapi/permissiondb"
 	"esefexapi/permissions"
+	"esefexapi/types"
 	"esefexapi/util"
 	"log"
 	"os"
@@ -16,10 +17,10 @@ import (
 var _ permissiondb.PermissionDB = &FilePermissionDB{}
 
 type FilePermissionDB struct {
-	file  *os.File
-	rw    *sync.RWMutex
-	stack permissions.PermissionStack
-	ds    *discordgo.Session
+	file   *os.File
+	rw     *sync.RWMutex
+	stacks map[types.GuildID]*permissions.PermissionStack
+	ds     *discordgo.Session
 }
 
 func NewFilePermissionDB(path string, ds *discordgo.Session) (*FilePermissionDB, error) {
@@ -30,10 +31,10 @@ func NewFilePermissionDB(path string, ds *discordgo.Session) (*FilePermissionDB,
 	}
 
 	fpdb := &FilePermissionDB{
-		file:  file,
-		rw:    &sync.RWMutex{},
-		stack: permissions.NewPermissionStack(),
-		ds:    ds,
+		file:   file,
+		rw:     &sync.RWMutex{},
+		stacks: make(map[types.GuildID]*permissions.PermissionStack),
+		ds:     ds,
 	}
 	err = fpdb.load()
 	if err != nil {
@@ -55,13 +56,13 @@ func (f *FilePermissionDB) load() error {
 	}
 
 	// read file
-	var perms permissions.PermissionStack
+	var perms map[types.GuildID]*permissions.PermissionStack
 	err = json.NewDecoder(f.file).Decode(&perms)
 	if err != nil {
 		log.Printf("Error decoding file, creating empty permission stack: (%v)", err)
-		f.stack = permissions.NewPermissionStack()
+		f.stacks = make(map[types.GuildID]*permissions.PermissionStack)
 	} else {
-		f.stack = perms
+		f.stacks = perms
 	}
 
 	return nil
@@ -92,10 +93,24 @@ func (f FilePermissionDB) save() error {
 		return errors.Wrap(err, "Error truncating file")
 	}
 
-	err = json.NewEncoder(f.file).Encode(f.stack)
+	err = json.NewEncoder(f.file).Encode(f.stacks)
 	if err != nil {
 		return errors.Wrap(err, "Error encoding file")
 	}
 
 	return nil
+}
+
+// ensureGuild ensures that the guild exists in the permission stack.
+// It assumes that the lock is already held.
+func (f *FilePermissionDB) ensureGuild(guild types.GuildID) *permissions.PermissionStack {
+	if _, ok := f.stacks[guild]; !ok {
+		ps := permissions.NewPermissionStack()
+
+		f.stacks[guild] = &ps
+		ps.SetChannel(types.ChannelID("everyone"), permissions.NewEveryoneDefault())
+		go f.save()
+	}
+
+	return f.stacks[guild]
 }

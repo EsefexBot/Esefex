@@ -77,6 +77,10 @@ func RoleIDMention(ds *discordgo.Session, g types.GuildID, r types.RoleID) (stri
 }
 
 func ChannelIDMention(ds *discordgo.Session, g types.GuildID, c types.ChannelID) (string, error) {
+	if c == "everyone" {
+		return "`@everyone`", nil
+	}
+
 	channels, err := ds.GuildChannels(g.String())
 	if err != nil {
 		return "", errors.Wrap(err, "Error getting channels")

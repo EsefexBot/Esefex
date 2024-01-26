@@ -26,7 +26,7 @@ func (m *Middleware) Permission(next http.Handler, perms ...string) http.Handler
 			return
 		}
 
-		p, err := m.dbs.PermissionDB.Query(user.ID, types.GuildID(userChan.Unwrap().ChannelID))
+		p, err := m.dbs.PermissionDB.Query(types.GuildID(userChan.Unwrap().ChannelID), user.ID)
 		if err != nil {
 			errorMsg := "Error querying permissions: " + err.Error()
 			http.Error(w, errorMsg, http.StatusInternalServerError)

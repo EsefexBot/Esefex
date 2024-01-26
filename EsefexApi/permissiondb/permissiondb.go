@@ -6,14 +6,14 @@ import (
 )
 
 type PermissionDB interface {
-	GetUser(userID types.UserID) (permissions.Permissions, error)
-	GetRole(roleID types.RoleID) (permissions.Permissions, error)
-	GetChannel(channelID types.ChannelID) (permissions.Permissions, error)
-	UpdateUser(userID types.UserID, p permissions.Permissions) error
-	UpdateRole(roleID types.RoleID, p permissions.Permissions) error
-	UpdateChannel(channelID types.ChannelID, p permissions.Permissions) error
-	GetUsers() ([]types.UserID, error)
-	GetRoles() ([]types.RoleID, error)
-	GetChannels() ([]types.ChannelID, error)
-	Query(user types.UserID, guild types.GuildID) (permissions.Permissions, error)
+	GetUser(guild types.GuildID, userID types.UserID) (permissions.Permissions, error)
+	GetRole(guild types.GuildID, roleID types.RoleID) (permissions.Permissions, error)
+	GetChannel(guild types.GuildID, channelID types.ChannelID) (permissions.Permissions, error)
+	UpdateUser(guild types.GuildID, userID types.UserID, p permissions.Permissions) error
+	UpdateRole(guild types.GuildID, roleID types.RoleID, p permissions.Permissions) error
+	UpdateChannel(guild types.GuildID, channelID types.ChannelID, p permissions.Permissions) error
+	GetUsers(guild types.GuildID) ([]types.UserID, error)
+	GetRoles(guild types.GuildID) ([]types.RoleID, error)
+	GetChannels(guild types.GuildID) ([]types.ChannelID, error)
+	Query(guild types.GuildID, user types.UserID) (permissions.Permissions, error)
 }
