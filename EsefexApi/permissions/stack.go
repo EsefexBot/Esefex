@@ -137,5 +137,4 @@ func (ps *PermissionStack) Query(user types.UserID, roles []types.RoleID, channe
 	}
 
 	return NewUnset().MergeParent(rolesPS).MergeParent(channelPS).MergeParent(userPS)
-
 }
