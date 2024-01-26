@@ -5,3 +5,46 @@ body {
     line-height: 1.42857143;
     color: #333;
 }
+
+button {
+    margin-top: 10px;
+    height: 2rem;
+    /* width: 10rem; */
+    font-size: 1rem;
+    color: #333;
+    /* background-color: #f5f5f5; */
+    border: 1px solid #929292;
+    border-radius: 3px;
+    margin: 0.25rem;
+    transition: 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: rgb(192, 192, 192);
+}
+
+button:active {
+    background-color: rgb(94, 94, 94);
+}
+
+.sfxButton {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#sounds {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.icon {
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.label {
+    margin-left: 0.5rem;
+}
+

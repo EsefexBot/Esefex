@@ -2,6 +2,7 @@ package filesounddb
 
 import (
 	"esefexapi/sounddb"
+	"esefexapi/types"
 	"fmt"
 	"log"
 	"math/rand"
@@ -20,7 +21,7 @@ func TestFileDB(t *testing.T) {
 		Url:  "https://raw.githubusercontent.com/EsefexBot/Esefex/main/EsefexApi/test/staticfiles/icon.webp",
 	}
 
-	serverID := "server1"
+	guildID := types.GuildID("guild1")
 	soundName := "sound1"
 	soundPcm := []int16{115, 117, 115}
 
@@ -29,12 +30,12 @@ func TestFileDB(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Test that we can add a sound
-	uid, err := db.AddSound(serverID, soundName, icon, soundPcm)
+	uid, err := db.AddSound(guildID, soundName, icon, soundPcm)
 	assert.Nil(t, err)
 
-	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_meta.json", location, serverID, uid.SoundID))
+	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_meta.json", location, guildID, uid.SoundID))
 	assert.Nil(t, err)
-	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_sound.s16le", location, serverID, uid.SoundID))
+	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_sound.s16le", location, guildID, uid.SoundID))
 	assert.Nil(t, err)
 
 	// Test that the sound exists
@@ -46,10 +47,10 @@ func TestFileDB(t *testing.T) {
 	sound, err := db.GetSoundMeta(uid)
 	assert.Nil(t, err)
 	assert.Equal(t, sound, sounddb.SoundMeta{
-		SoundID:  uid.SoundID,
-		ServerID: serverID,
-		Name:     soundName,
-		Icon:     icon,
+		SoundID: uid.SoundID,
+		GuildID: guildID,
+		Name:    soundName,
+		Icon:    icon,
 	})
 
 	// Test that we can get the sound pcm
@@ -57,15 +58,15 @@ func TestFileDB(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, &soundPcm, soundPcm2)
 
-	// Test that we can get the server ids
-	ids, err := db.GetServerIDs()
+	// Test that we can get the guild ids
+	ids, err := db.GetGuildIDs()
 	assert.Nil(t, err)
-	assert.Equal(t, []string{serverID}, ids)
+	assert.Equal(t, []types.GuildID{guildID}, ids)
 
 	// Test that we can get the sound uids
-	uids, err := db.GetSoundUIDs(serverID)
+	uids, err := db.GetSoundUIDs(guildID)
 	assert.Nil(t, err)
-	assert.Equal(t, []sounddb.SoundUID{uid}, uids)
+	assert.Equal(t, []sounddb.SoundURI{uid}, uids)
 
 	// Test that we can delete the sound
 	err = db.DeleteSound(uid)

@@ -2,7 +2,7 @@ package audioprocessing
 
 import (
 	"io"
-	"log"
+	// "log"
 )
 
 type S16leReferenceReader struct {
@@ -12,7 +12,7 @@ type S16leReferenceReader struct {
 
 func (s *S16leReferenceReader) Read(p []byte) (n int, err error) {
 	if s.cursor >= len(*s.data)*2 {
-		log.Println("EOF")
+		// log.Println("EOF")
 		return 0, io.EOF
 	}
 

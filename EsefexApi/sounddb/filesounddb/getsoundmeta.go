@@ -9,8 +9,8 @@ import (
 )
 
 // GetSoundMeta implements sounddb.SoundDB.
-func (f *FileDB) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
-	path := fmt.Sprintf("%s/%s/%s_meta.json", f.location, uid.ServerID, uid.SoundID)
+func (f *FileDB) GetSoundMeta(uid sounddb.SoundURI) (sounddb.SoundMeta, error) {
+	path := fmt.Sprintf("%s/%s/%s_meta.json", f.location, uid.GuildID, uid.SoundID)
 	metaFile, err := os.Open(path)
 
 	if err != nil {
@@ -20,7 +20,10 @@ func (f *FileDB) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
 	var sound sounddb.SoundMeta
 
 	byteValue, _ := io.ReadAll(metaFile)
-	json.Unmarshal(byteValue, &sound)
+	err = json.Unmarshal(byteValue, &sound)
+	if err != nil {
+		return sounddb.SoundMeta{}, err
+	}
 	metaFile.Close()
 
 	return sound, nil

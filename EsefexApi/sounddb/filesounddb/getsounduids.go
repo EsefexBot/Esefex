@@ -2,6 +2,7 @@ package filesounddb
 
 import (
 	"esefexapi/sounddb"
+	"esefexapi/types"
 	"esefexapi/util"
 	"fmt"
 	"log"
@@ -12,10 +13,10 @@ import (
 )
 
 // GetSoundUIDs implements sounddb.SoundDB.
-func (f *FileDB) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
-	path := fmt.Sprintf("%s/%s", f.location, serverID)
+func (f *FileDB) GetSoundUIDs(guildID types.GuildID) ([]sounddb.SoundURI, error) {
+	path := fmt.Sprintf("%s/%s", f.location, guildID)
 	if !util.PathExists(path) {
-		return make([]sounddb.SoundUID, 0), nil
+		return make([]sounddb.SoundURI, 0), nil
 	}
 
 	files, err := os.ReadDir(path)
@@ -24,14 +25,14 @@ func (f *FileDB) GetSoundUIDs(serverID string) ([]sounddb.SoundUID, error) {
 		return nil, errors.Wrap(err, "Error reading directory")
 	}
 
-	uids := make([]sounddb.SoundUID, 0)
+	uids := make([]sounddb.SoundURI, 0)
 
 	for _, file := range files {
 		name := file.Name()
 		nameSplits := strings.Split(name, "_")
 
 		if len(nameSplits) == 2 && nameSplits[1] == "meta.json" {
-			uids = append(uids, sounddb.SuidFromStrings(serverID, nameSplits[0]))
+			uids = append(uids, sounddb.SuidFromStrings(guildID.String(), nameSplits[0]))
 		}
 	}
 

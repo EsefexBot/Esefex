@@ -1,0 +1,19 @@
+**General Information**
+Esefex is a bot based soundboard that allows you to play sounds in your voice channel. 
+It is currently in development and is not yet ready for public use. 
+If you would like to contribute, please contact me on Discord `@jo_kil`.
+
+**Getting Started**
+To get started, use the `/user link` command to link your Discord account to Esefex.
+This is required for the bot to know who you are and what permissions you have.
+It will not save any personal information about you, only your Discord ID and your username.
+You can unlink your account at any time by using the `/user unlink` command.
+
+**Sounds**
+Sounds are the main feature of Esefex.
+You can play sounds by using the Web UI or Desktop Client.
+Sounds can be added, removed, and edited using the `/sound` commands.
+
+**Permissions**
+Esefex uses a permission system to determine what you can and cannot do.
+As the slash commands are rather limited, you will need to use the `/permisssion` commands to change permissions.

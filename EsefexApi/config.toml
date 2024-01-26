@@ -1,12 +1,14 @@
+verification_expiry = 5.0 # minutes
+
 [http_api]
 port = 8080
 custom_protocol = "esefex"
 
-[file_sound_database]
-location = "./data/sounds"
-
-[file_user_database]
-location = "./data/users/users.json"
+[database]
+sounddb_location = "./data/sounds"
+userdb_location = "./data/users/users.json"
+permissiondb_location = "./data/permissions/permissions.json"
+cmd_hash_store_location = "./data/commands/cmd_hash.json"
 
 [bot]
 use_timeouts = false

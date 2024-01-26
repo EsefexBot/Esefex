@@ -6,6 +6,8 @@ import (
 )
 
 // /
-func (h *RouteHandlers) GetIndex(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Index!\n")
+func (h *RouteHandlers) GetIndex() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "Index!\n")
+	})
 }
