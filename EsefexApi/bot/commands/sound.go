@@ -103,6 +103,9 @@ func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.Interac
 		return nil, errors.Wrap(err, "Error adding sound")
 	}
 
+	guildID := types.GuildID(i.GuildID)
+	c.cn.UpdateNotificationGuilds(guildID)
+
 	log.Printf("Uploaded sound effect %v to guild %v", uid.SoundID, i.GuildID)
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

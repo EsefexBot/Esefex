@@ -2,6 +2,7 @@ package bot
 
 import (
 	"esefexapi/bot/commands"
+	"esefexapi/clientnotifiy"
 	"esefexapi/db"
 	"esefexapi/service"
 
@@ -16,14 +17,16 @@ var _ service.IService = &DiscordBot{}
 type DiscordBot struct {
 	ds    *discordgo.Session
 	cmdh  *commands.CommandHandlers
+	cn    clientnotifiy.IClientNotifier
 	stop  chan struct{}
 	ready chan struct{}
 }
 
-func NewDiscordBot(ds *discordgo.Session, dbs *db.Databases, domain string) *DiscordBot {
+func NewDiscordBot(ds *discordgo.Session, dbs *db.Databases, domain string, cn clientnotifiy.IClientNotifier) *DiscordBot {
 	return &DiscordBot{
 		ds:    ds,
-		cmdh:  commands.NewCommandHandlers(ds, dbs, domain),
+		cmdh:  commands.NewCommandHandlers(ds, dbs, domain, cn),
+		cn:    cn,
 		stop:  make(chan struct{}, 1),
 		ready: make(chan struct{}),
 	}
@@ -40,6 +43,7 @@ func (b *DiscordBot) run() {
 	ready := b.WaitReady()
 
 	b.cmdh.RegisterComandHandlers()
+	b.RegisterClientUpdateHandlers()
 
 	err := ds.Open()
 	if err != nil {

@@ -27,12 +27,13 @@ require (
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	go.mongodb.org/mongo-driver v1.13.1 // indirect
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
+	golang.org/x/net v0.17.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
-	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/jedib0t/go-pretty/v6 v6.5.3
 	github.com/pkg/errors v0.9.1
