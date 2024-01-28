@@ -6,7 +6,7 @@ import (
 	"esefexapi/util/dcgoutil"
 	"esefexapi/util/refl"
 	"fmt"
-	"log"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -151,8 +151,6 @@ func (c *CommandHandlers) PermissionSet(s *discordgo.Session, i *discordgo.Inter
 
 	guildID := types.GuildID(i.GuildID)
 
-	log.Printf("Permissiondb is nul? %v", c.dbs.PermissionDB == nil)
-
 	switch ty.PermissionType {
 	case permissions.User:
 		err = c.dbs.PermissionDB.UpdateUser(guildID, types.UserID(ty.ID), p)
@@ -169,7 +167,12 @@ func (c *CommandHandlers) PermissionSet(s *discordgo.Session, i *discordgo.Inter
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Set %s for %s to %s", ppath, id, ps.String()),
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Updated Permissions",
+					Description: fmt.Sprintf("Set %s for %s to %s", ppath, id, ps.String()),
+				},
+			},
 		},
 	}, nil
 }
@@ -226,12 +229,14 @@ func (c *CommandHandlers) PermissionGet(s *discordgo.Session, i *discordgo.Inter
 		return nil, errors.Wrap(err, "Error getting name")
 	}
 
-	// TODO: add name display here
-	resp := fmt.Sprintf("%s for %s: %s", ppath, name, ps.String())
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: resp,
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: fmt.Sprintf("`%s` for %s: `%s`", ppath, name, ps.String()),
+				},
+			},
 		},
 	}, nil
 }
@@ -274,6 +279,11 @@ func (c *CommandHandlers) PermissionClear(s *discordgo.Session, i *discordgo.Int
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: fmt.Sprintf("Cleared permissions for %s %s", strings.ToLower(fmt.Sprint(ty.PermissionType)), name),
+				},
+			},
 			Content: fmt.Sprintf("Cleared permissions for %s %s", ty.PermissionType, name),
 		},
 	}, nil
@@ -285,11 +295,6 @@ func (c *CommandHandlers) PermissionList(s *discordgo.Session, i *discordgo.Inte
 	p, err := getPermissions(s, c.dbs, types.GuildID(i.GuildID), id)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting permissions")
-	}
-
-	pstr, err := formatPermissions(p)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error formatting permissions")
 	}
 
 	ty, err := extractTypeFromString(s, types.GuildID(i.GuildID), id)
@@ -310,13 +315,17 @@ func (c *CommandHandlers) PermissionList(s *discordgo.Session, i *discordgo.Inte
 		return nil, errors.Wrap(err, "Error getting name")
 	}
 
-	resp := fmt.Sprintf("Permissions for %s:\n", name)
-	resp += pstr
+	emb, err := formatPermissionsAsEmbed(p, name)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error formatting permissions as embed")
+	}
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: resp,
+			Embeds: []*discordgo.MessageEmbed{
+				emb,
+			},
 		},
 	}, nil
 }

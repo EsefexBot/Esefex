@@ -81,7 +81,28 @@ func (c *CommandHandlers) BotInvite(s *discordgo.Session, i *discordgo.Interacti
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Invite me to your server with this link: \n%s", inviteUrl),
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: "Invite to your server",
+				},
+			},
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.Button{
+							Style: discordgo.LinkButton,
+							Label: "Invite",
+							URL:   inviteUrl,
+							// TODO: For some reason, you need to set the emoji to something, otherwise the request will fail
+							// This is a bug in the discordgo library
+							// I should probably make a PR to fix this
+							Emoji: discordgo.ComponentEmoji{
+								Name: "🤖",
+							},
+						},
+					},
+				},
+			},
 		},
 	}, nil
 }
@@ -91,7 +112,11 @@ func (c *CommandHandlers) BotPing(s *discordgo.Session, i *discordgo.Interaction
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Pong! %dms", s.HeartbeatLatency().Milliseconds()),
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: fmt.Sprintf("Pong! `%dms`", s.HeartbeatLatency().Milliseconds()),
+				},
+			},
 		},
 	}, nil
 }
@@ -145,6 +170,9 @@ func (c *CommandHandlers) BotDebug(s *discordgo.Session, i *discordgo.Interactio
 		return nil, errors.Wrap(err, "Error getting CommandHandlersHash")
 	}
 	resp += fmt.Sprintf("CommandHandlersHash: %s\n", hash)
+
+	// bot ping
+	resp += fmt.Sprintf("Bot ping: %dms\n", s.HeartbeatLatency().Milliseconds())
 
 	// get ps output
 	// using the following command:

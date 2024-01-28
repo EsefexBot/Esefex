@@ -78,7 +78,13 @@ func WithErrorHandling(h cmdhandler.CommandHandlerWithErr) func(s *discordgo.Ses
 			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("An error has occurred while executing the command: \n```%+v```", errors.Cause(err)),
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "An error has occured while executing the command",
+							Color:       0xff0000,
+							Description: fmt.Sprintf("```%+v```", errors.Cause(err)),
+						},
+					},
 				},
 			})
 			if err != nil {

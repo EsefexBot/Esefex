@@ -110,7 +110,23 @@ func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.Interac
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Uploaded sound effect %s %s", uid.SoundID, icon.Name),
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: "Sound Effect Uploaded",
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:   "Name",
+							Value:  fmt.Sprintf("%s %s", options["name"].Value, icon.String()),
+							Inline: true,
+						},
+						{
+							Name:   "Sound ID",
+							Value:  uid.SoundID.String(),
+							Inline: true,
+						},
+					},
+				},
+			},
 		},
 	}, nil
 }
@@ -126,12 +142,7 @@ func (c *CommandHandlers) SoundDelete(s *discordgo.Session, i *discordgo.Interac
 		return nil, errors.Wrap(err, "Error checking if sound exists")
 	}
 	if !exists {
-		return &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Sound effect `%s` does not exist", soundID.Value),
-			},
-		}, nil
+		return nil, errors.Wrap(fmt.Errorf("Sound effect %s does not exist", soundID.Value), "Error deleting sound")
 	}
 
 	log.Print("a")
@@ -147,6 +158,11 @@ func (c *CommandHandlers) SoundDelete(s *discordgo.Session, i *discordgo.Interac
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: fmt.Sprintf("Deleted sound effect `%s`", soundID.Value),
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: fmt.Sprintf("Deleted sound effect `%s`", soundID.Value),
+				},
+			},
 		},
 	}, nil
 }
@@ -171,7 +187,11 @@ func (c *CommandHandlers) SoundList(s *discordgo.Session, i *discordgo.Interacti
 		return &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "There are no sounds in this guild",
+				Embeds: []*discordgo.MessageEmbed{
+					{
+						Title: "There are no sounds in this guild",
+					},
+				},
 			},
 		}, nil
 	}

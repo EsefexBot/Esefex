@@ -104,19 +104,11 @@ func extractTypeFromString(s *discordgo.Session, g types.GuildID, str string) (P
 	return PermissionSet{}, errors.Wrap(fmt.Errorf("Invalid id %s", str), "Error extracting type from string")
 }
 
+var permissionMDLang = "yaml"
+
 func formatPermissions(p permissions.Permissions) (string, error) {
-	// b, err := toml.Marshal(p)
-	// if err != nil {
-	// 	return "", errors.Wrap(err, "Error marshalling permissions")
-	// }
-
-	// resp := string(b)
-	// log.Println(resp)
-
-	mdlang := "yaml"
-
 	resp := "**Sound**\n"
-	resp += fmt.Sprintf("```%s\n", mdlang)
+	resp += fmt.Sprintf("```%s\n", permissionMDLang)
 	resp += fmt.Sprintf("Sound.Play:       %s\n", p.Sound.Play.String())
 	resp += fmt.Sprintf("Sound.Upload:     %s\n", p.Sound.Upload.String())
 	resp += fmt.Sprintf("Sound.Modify:     %s\n", p.Sound.Modify.String())
@@ -124,18 +116,39 @@ func formatPermissions(p permissions.Permissions) (string, error) {
 	resp += "```"
 
 	resp += "\n**Bot**\n"
-	resp += fmt.Sprintf("```%s\n", mdlang)
+	resp += fmt.Sprintf("```%s\n", permissionMDLang)
 	resp += fmt.Sprintf("Bot.Join:         %s\n", p.Bot.Join.String())
 	resp += fmt.Sprintf("Bot.Leave:        %s\n", p.Bot.Leave.String())
 	resp += "```"
 
 	resp += "\n**Guild**\n"
-	resp += fmt.Sprintf("```%s\n", mdlang)
+	resp += fmt.Sprintf("```%s\n", permissionMDLang)
 	resp += fmt.Sprintf("Guild.BotManage:  %s\n", p.Guild.BotManage.String())
 	resp += fmt.Sprintf("Guild.UserManage: %s\n", p.Guild.UserManage.String())
 	resp += "```"
 
 	return resp, nil
+}
+
+func formatPermissionsAsEmbed(p permissions.Permissions, id string) (*discordgo.MessageEmbed, error) {
+	return &discordgo.MessageEmbed{
+		Title: fmt.Sprintf("Permissions for %s", id),
+		Fields: []*discordgo.MessageEmbedField{
+			&discordgo.MessageEmbedField{
+				Name:  "Sound",
+				Value: fmt.Sprintf("```%s\nSound.Play:       %s\nSound.Upload:     %s\nSound.Modify:     %s\nSound.Delete:     %s\n```", permissionMDLang, p.Sound.Play.String(), p.Sound.Upload.String(), p.Sound.Modify.String(), p.Sound.Delete.String()),
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "Bot",
+				Value: fmt.Sprintf("```%s\nBot.Join:         %s\nBot.Leave:        %s\n```", permissionMDLang, p.Bot.Join.String(), p.Bot.Leave.String()),
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "Guild",
+				Value: fmt.Sprintf("```%s\nGuild.BotManage:  %s\nGuild.UserManage: %s\n```", permissionMDLang, p.Guild.BotManage.String(), p.Guild.UserManage.String()),
+			},
+		},
+	}, nil
+
 }
 
 func formatPermissionsCompact(p permissions.Permissions) (string, error) {
