@@ -12,8 +12,8 @@ type Databases struct {
 	SoundDB        sounddb.ISoundDB
 	UserDB         userdb.IUserDB
 	LinkTokenStore linktokenstore.ILinkTokenStore
-	PermissionDB   permissiondb.PermissionDB
-	CmdHashStore   cmdhashstore.CommandHashStore
+	PermissionDB   permissiondb.IPermissionDB
+	CmdHashStore   cmdhashstore.ICommandHashStore
 }
 
 // func CreateDatabases(cfg *config.Config, ds *discordgo.Session) (*Databases, error) {

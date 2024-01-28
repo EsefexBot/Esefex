@@ -29,8 +29,10 @@ func (m *Middleware) Auth(next http.Handler) http.Handler {
 			return
 		}
 
+		userID := Ouser.Unwrap().ID
+
 		// Inject the user into the request context
-		ctx := context.WithValue(r.Context(), "user", Ouser)
+		ctx := context.WithValue(r.Context(), "user", userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

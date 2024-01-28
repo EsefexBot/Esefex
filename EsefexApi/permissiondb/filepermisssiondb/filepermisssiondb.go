@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var _ permissiondb.PermissionDB = &FilePermissionDB{}
+var _ permissiondb.IPermissionDB = &FilePermissionDB{}
 
 type FilePermissionDB struct {
 	file   *os.File

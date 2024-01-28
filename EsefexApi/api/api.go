@@ -4,6 +4,7 @@ import (
 	"esefexapi/api/middleware"
 	"esefexapi/api/routes"
 	"esefexapi/audioplayer"
+	"esefexapi/clientnotifiy"
 	"esefexapi/db"
 	"esefexapi/service"
 
@@ -22,19 +23,21 @@ type HttpApi struct {
 	handlers *routes.RouteHandlers
 	mw       *middleware.Middleware
 	a        audioplayer.IAudioPlayer
-	apiPort  int
+	port     int
 	cProto   string
+	domain   string
 	stop     chan struct{}
 	ready    chan struct{}
 }
 
-func NewHttpApi(dbs *db.Databases, plr audioplayer.IAudioPlayer, ds *discordgo.Session, apiPort int, cProto string) *HttpApi {
+func NewHttpApi(dbs *db.Databases, plr audioplayer.IAudioPlayer, ds *discordgo.Session, apiPort int, cProto string, wsCN *clientnotifiy.WsClientNotifier, domain string) *HttpApi {
 	return &HttpApi{
-		handlers: routes.NewRouteHandlers(dbs, plr, ds, cProto),
+		handlers: routes.NewRouteHandlers(dbs, plr, ds, cProto, wsCN),
 		mw:       middleware.NewMiddleware(dbs, ds),
 		a:        plr,
-		apiPort:  apiPort,
+		port:     apiPort,
 		cProto:   cProto,
+		domain:   domain,
 		stop:     make(chan struct{}, 1),
 		ready:    make(chan struct{}),
 	}
@@ -67,10 +70,12 @@ func (api *HttpApi) run() {
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./api/public/"))))
 
-	log.Printf("Webserver started on port %d (http://localhost:%d)\n", api.apiPort, api.apiPort)
+	router.Handle("/api/ws", cors(auth(h.GetWs()))).Methods("GET")
+
+	log.Printf("Webserver started on port %d (%s)\n", api.port, api.domain)
 
 	// nolint:errcheck
-	go http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", api.apiPort), router)
+	go http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", api.port), router)
 
 	close(api.ready)
 	<-api.stop

@@ -5,7 +5,7 @@ import (
 	"esefexapi/types"
 )
 
-type PermissionDB interface {
+type IPermissionDB interface {
 	GetUser(guild types.GuildID, userID types.UserID) (permissions.Permissions, error)
 	GetRole(guild types.GuildID, roleID types.RoleID) (permissions.Permissions, error)
 	GetChannel(guild types.GuildID, channelID types.ChannelID) (permissions.Permissions, error)

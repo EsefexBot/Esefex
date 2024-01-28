@@ -167,3 +167,31 @@ func UserIsOwner(ds *discordgo.Session, guildID types.GuildID, userID types.User
 
 	return guild.OwnerID == userID.String(), nil
 }
+
+func ChannelUserIDs(ds *discordgo.Session, channelID types.ChannelID) ([]types.UserID, error) {
+	channel, err := ds.State.Channel(channelID.String())
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting channel members")
+	}
+
+	userIDs := []types.UserID{}
+	for _, member := range channel.Members {
+		userIDs = append(userIDs, types.UserID(member.UserID))
+	}
+
+	return userIDs, nil
+}
+
+func GuildUserIDs(ds *discordgo.Session, guildID types.GuildID) ([]types.UserID, error) {
+	guild, err := ds.State.Guild(guildID.String())
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting guild members")
+	}
+
+	userIDs := []types.UserID{}
+	for _, member := range guild.Members {
+		userIDs = append(userIDs, types.UserID(member.User.ID))
+	}
+
+	return userIDs, nil
+}

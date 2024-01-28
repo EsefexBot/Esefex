@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"esefexapi/bot/commands/cmdhandler"
 	"esefexapi/bot/commands/middleware"
+	"esefexapi/clientnotifiy"
 	"esefexapi/db"
 	"fmt"
 	"log"
@@ -29,16 +30,18 @@ type CommandHandlers struct {
 	dbs      *db.Databases
 	domain   string
 	mw       *middleware.CommandMiddleware
+	cn       clientnotifiy.IClientNotifier
 	Commands map[string]*discordgo.ApplicationCommand
 	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-func NewCommandHandlers(ds *discordgo.Session, dbs *db.Databases, domain string) *CommandHandlers {
+func NewCommandHandlers(ds *discordgo.Session, dbs *db.Databases, domain string, cn clientnotifiy.IClientNotifier) *CommandHandlers {
 	c := &CommandHandlers{
 		ds:       ds,
 		dbs:      dbs,
 		domain:   domain,
 		mw:       middleware.NewCommandMiddleware(dbs),
+		cn:       cn,
 		Commands: map[string]*discordgo.ApplicationCommand{},
 		Handlers: map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
 	}

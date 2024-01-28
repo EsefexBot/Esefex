@@ -1,4 +1,18 @@
 async function init() {
+    // create a websocket connection to the server
+    let socket = new WebSocket(`ws://${window.location.host}/api/ws`);
+    socket.onopen = () => {
+        console.log('websocket connection established');
+    };
+    socket.addEventListener('message', async (event) => {
+        if (event.data != 'update') {
+            return;
+        }
+
+        // reload the page
+        window.location.reload();
+    });
+
     const soundsDiv = document.getElementById('sounds');
 
     let guildRequest = await fetch('/api/guild', {

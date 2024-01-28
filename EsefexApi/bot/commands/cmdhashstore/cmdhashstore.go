@@ -4,9 +4,11 @@ import (
 	"esefexapi/util"
 	"io"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
-type CommandHashStore interface {
+type ICommandHashStore interface {
 	GetCommandHash() (string, error)
 	SetCommandHash(hash string) error
 }
@@ -39,13 +41,13 @@ func (f *FileCmdHashStore) GetCommandHash() (string, error) {
 func (f *FileCmdHashStore) SetCommandHash(hash string) error {
 	file, err := os.Create(f.FilePath)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error creating file")
 	}
 	defer file.Close()
 
 	_, err = file.WriteString(hash)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error writing to file")
 	}
 
 	return nil

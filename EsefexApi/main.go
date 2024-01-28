@@ -5,6 +5,7 @@ import (
 	"esefexapi/audioplayer/discordplayer"
 	"esefexapi/bot"
 	"esefexapi/bot/commands/cmdhashstore"
+	"esefexapi/clientnotifiy"
 	"esefexapi/config"
 	"esefexapi/db"
 	"esefexapi/linktokenstore/memorylinktokenstore"
@@ -69,8 +70,10 @@ func main() {
 	botT := time.Duration(cfg.Bot.Timeout * float32(time.Minute))
 	plr := discordplayer.NewDiscordPlayer(ds, dbs, cfg.Bot.UseTimeouts, botT)
 
-	api := api.NewHttpApi(dbs, plr, ds, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
-	bot := bot.NewDiscordBot(ds, dbs, domain)
+	wsCN := clientnotifiy.NewWsClientNotifier(ds)
+
+	api := api.NewHttpApi(dbs, plr, ds, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol, wsCN, domain)
+	bot := bot.NewDiscordBot(ds, dbs, domain, wsCN)
 
 	log.Println("Components bootstraped, starting...")
 
