@@ -33,6 +33,7 @@ require (
 )
 
 require (
+	github.com/glendc/go-external-ip v0.1.0
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/jedib0t/go-pretty/v6 v6.5.3

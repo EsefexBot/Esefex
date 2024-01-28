@@ -26,24 +26,26 @@ type SubcommandGroup struct {
 }
 
 type CommandHandlers struct {
-	ds       *discordgo.Session
-	dbs      *db.Databases
-	domain   string
-	mw       *middleware.CommandMiddleware
-	cn       clientnotifiy.IClientNotifier
-	Commands map[string]*discordgo.ApplicationCommand
-	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
+	ds                *discordgo.Session
+	dbs               *db.Databases
+	domain            string
+	permissionInteger int64
+	mw                *middleware.CommandMiddleware
+	cn                clientnotifiy.IClientNotifier
+	Commands          map[string]*discordgo.ApplicationCommand
+	Handlers          map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-func NewCommandHandlers(ds *discordgo.Session, dbs *db.Databases, domain string, cn clientnotifiy.IClientNotifier) *CommandHandlers {
+func NewCommandHandlers(ds *discordgo.Session, dbs *db.Databases, domain string, cn clientnotifiy.IClientNotifier, permissionInteger int64) *CommandHandlers {
 	c := &CommandHandlers{
-		ds:       ds,
-		dbs:      dbs,
-		domain:   domain,
-		mw:       middleware.NewCommandMiddleware(dbs),
-		cn:       cn,
-		Commands: map[string]*discordgo.ApplicationCommand{},
-		Handlers: map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
+		ds:                ds,
+		dbs:               dbs,
+		domain:            domain,
+		permissionInteger: permissionInteger,
+		mw:                middleware.NewCommandMiddleware(dbs),
+		cn:                cn,
+		Commands:          map[string]*discordgo.ApplicationCommand{},
+		Handlers:          map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
 	}
 
 	c.Commands["bot"] = BotCommand
@@ -60,6 +62,9 @@ func NewCommandHandlers(ds *discordgo.Session, dbs *db.Databases, domain string,
 
 	c.Commands["user"] = UserCommand
 	c.Handlers["user"] = WithErrorHandling(c.mw.CheckPerms(c.User, "Guild.UseSlashCommands"))
+
+	c.Commands["webui"] = WebUICommand
+	c.Handlers["webui"] = WithErrorHandling(c.mw.CheckPerms(c.WebUI, "Guild.UseSlashCommands"))
 
 	return c
 }

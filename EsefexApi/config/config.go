@@ -28,8 +28,9 @@ type Database struct {
 }
 
 type Bot struct {
-	UseTimeouts bool    `toml:"use_timeouts"`
-	Timeout     float32 `toml:"timeout"`
+	UseTimeouts        bool    `toml:"use_timeouts"`
+	Timeout            float32 `toml:"timeout"`
+	PermissionsInteger int64   `toml:"permissions_integer"`
 }
 
 func LoadConfig(path string) (*Config, error) {

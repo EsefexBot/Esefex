@@ -2,8 +2,13 @@ package commands
 
 import (
 	"fmt"
+	"net"
+	"os"
+	"os/exec"
+	"strconv"
 
 	"github.com/bwmarrin/discordgo"
+	externalip "github.com/glendc/go-external-ip"
 	"github.com/pkg/errors"
 )
 
@@ -41,6 +46,11 @@ var BotCommand = &discordgo.ApplicationCommand{
 			Description: "All commands related to the configuration of the bot.",
 			Type:        discordgo.ApplicationCommandOptionSubCommandGroup,
 		},
+		{
+			Name:        "debug",
+			Description: "Prints debug information about the bot.",
+			Type:        discordgo.ApplicationCommandOptionSubCommand,
+		},
 	},
 }
 
@@ -58,14 +68,15 @@ func (c *CommandHandlers) Bot(s *discordgo.Session, i *discordgo.InteractionCrea
 		return c.BotLeave(s, i)
 	case "config":
 		return c.BotConfig(s, i)
+	case "debug":
+		return c.BotDebug(s, i)
 	default:
 		return nil, errors.Wrap(fmt.Errorf("Unknown subcommand %s", i.ApplicationCommandData().Options[0].Name), "Error handling user command")
 	}
 }
 
 func (c *CommandHandlers) BotInvite(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	permissions := 8
-	inviteUrl := fmt.Sprintf("https://discord.com/api/oauth2/authorize?client_id=%s&permissions=%d&scope=bot%%20applications.commands", s.State.User.ID, permissions)
+	inviteUrl := fmt.Sprintf("https://discord.com/api/oauth2/authorize?client_id=%s&permissions=%d&scope=bot%%20applications.commands", s.State.User.ID, c.permissionInteger)
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -103,4 +114,53 @@ func (c *CommandHandlers) BotLeave(s *discordgo.Session, i *discordgo.Interactio
 // TODO: Implement BotConfig
 func (c *CommandHandlers) BotConfig(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	return nil, errors.Wrap(fmt.Errorf("Not implemented"), "BotConfig")
+}
+
+func (c *CommandHandlers) BotDebug(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
+	resp := "Debug information:\n```js\n"
+
+	resp += fmt.Sprintf("Domain: %s\n", c.domain)
+	resp += fmt.Sprintf("Guilds: %d\n", len(s.State.Guilds))
+
+	// log local ipLoc
+	ipLoc, err := net.InterfaceAddrs()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting local ip")
+	}
+	resp += fmt.Sprintf("Local IP: %s\n", ipLoc)
+
+	// log public ip
+	ipPub, err := externalip.DefaultConsensus(nil, nil).ExternalIP()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting public ip")
+	}
+	resp += fmt.Sprintf("Public IP: %s\n", ipPub)
+
+	// log PID
+	resp += fmt.Sprintf("PID: %d\n", os.Getpid())
+
+	// log CommandHandlersHash
+	hash, err := c.ApplicationCommandsHash()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting CommandHandlersHash")
+	}
+	resp += fmt.Sprintf("CommandHandlersHash: %s\n", hash)
+
+	// get ps output
+	// using the following command:
+	// ps -p <pid> -o uid,pid,ppid,c,systime,tty,time,stat,euid,ruid,tpgid,sess,pgrp,pcpu,comm,cmd
+	out, err := exec.Command("ps", "-p", strconv.Itoa(os.Getpid()), "-o", "uid,pid,ppid,pcpu,c,time,pmem,nlwp,tname,stat,lstart,cmd").Output()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting info of current process")
+	}
+	resp += fmt.Sprintf("Process info:\n%s\n", out)
+
+	resp += "```"
+
+	return &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: resp,
+		},
+	}, nil
 }

@@ -13,3 +13,4 @@ cmd_hash_store_location = "./data/commands/cmd_hash.json"
 [bot]
 use_timeouts = false
 timeout = 60.0 # minutes
+permissions_integer = 137475934272

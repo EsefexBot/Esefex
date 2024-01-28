@@ -73,7 +73,7 @@ func main() {
 	wsCN := clientnotifiy.NewWsClientNotifier(ds)
 
 	api := api.NewHttpApi(dbs, plr, ds, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol, wsCN, domain)
-	bot := bot.NewDiscordBot(ds, dbs, domain, wsCN)
+	bot := bot.NewDiscordBot(ds, dbs, domain, wsCN, cfg.Bot.PermissionsInteger)
 
 	log.Println("Components bootstraped, starting...")
 
