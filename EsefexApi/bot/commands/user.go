@@ -63,14 +63,24 @@ func (c *CommandHandlers) UserStats(s *discordgo.Session, i *discordgo.Interacti
 		user = i.ApplicationCommandData().Options[0].Options[0].UserValue(s)
 	}
 
-	stats := fmt.Sprintf("Stats for %s:\n", user.Username)
-	stats += fmt.Sprintf("ID: %s\n", user.ID)
-	stats += "No more stats for now... :("
-
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: stats,
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: fmt.Sprintf("Stats for @%s", user.Username),
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:   "ID",
+							Value:  user.ID,
+							Inline: true,
+						},
+					},
+					Footer: &discordgo.MessageEmbedFooter{
+						Text: "No more stats for now :(",
+					},
+				},
+			},
 		},
 	}, nil
 }
@@ -81,23 +91,40 @@ func (c *CommandHandlers) UserLink(s *discordgo.Session, i *discordgo.Interactio
 		return nil, errors.Wrap(err, "Error creating link token")
 	}
 
-	channel, err := s.UserChannelCreate(i.Member.User.ID)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error creating DM channel")
-	}
-
 	// https://esefex.com/link?<linktoken>
 	linkUrl := fmt.Sprintf("%s/link?t=%s", c.domain, linkToken.Token)
 	expiresIn := time.Until(linkToken.Expiry)
-	_, err = s.ChannelMessageSend(channel.ID, fmt.Sprintf("Click this link to link your Discord account to Esefex (expires in %d Minutes): \n%s", int(expiresIn.Minutes()), linkUrl))
-	if err != nil {
-		return nil, errors.Wrap(err, "Error sending DM message")
-	}
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Please check your DMs for a link to link your Discord account to Esefex",
+			Flags: discordgo.MessageFlagsEphemeral,
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: "Open the link to connect your Discord account to Esefex",
+					URL:   linkUrl,
+					Footer: &discordgo.MessageEmbedFooter{
+						Text: fmt.Sprintf("Expires in %s", expiresIn.String()),
+					},
+				},
+			},
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.Button{
+							Style: discordgo.LinkButton,
+							Label: "Link Your Account",
+							URL:   linkUrl,
+							// TODO: For some reason, you need to set the emoji to something, otherwise the request will fail
+							// This is a bug in the discordgo library
+							// I should probably make a PR to fix this
+							Emoji: discordgo.ComponentEmoji{
+								Name: "🤖",
+							},
+						},
+					},
+				},
+			},
 		},
 	}, nil
 }
@@ -119,7 +146,13 @@ func (c *CommandHandlers) UserUnlink(s *discordgo.Session, i *discordgo.Interact
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Your account has been unlinked from Esefex. You can now link your account again.",
+			Flags: discordgo.MessageFlagsEphemeral,
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Unlinked your account from Esefex",
+					Description: "Your account has been unlinked from Esefex. You can now link your account again.",
+				},
+			},
 		},
 	}, nil
 }

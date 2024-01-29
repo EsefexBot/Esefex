@@ -5,6 +5,7 @@ import (
 	"esefexapi/permissions"
 	"esefexapi/sounddb"
 	"esefexapi/types"
+	"esefexapi/util"
 	"esefexapi/util/refl"
 	"fmt"
 	"regexp"
@@ -15,14 +16,41 @@ import (
 )
 
 func fmtMetaList(metas []sounddb.SoundMeta) string {
-	// log.Printf("fmtMetaList: %v", metas)
 	var str string
 	for _, meta := range metas {
 		str += fmt.Sprintf("- %s %s `%s`\n", meta.Icon.String(), meta.Name, meta.SoundID)
 	}
 
-	// log.Println(str)
 	return str
+}
+
+func fmtMetaListAsEmbed(metas []sounddb.SoundMeta) *discordgo.MessageEmbed {
+	var title string
+
+	switch len(metas) {
+	case 0:
+		return &discordgo.MessageEmbed{
+			Title: "There are no sounds in this guild",
+		}
+	case 1:
+		title = "There is 1 sound in this guild"
+	default:
+		title = fmt.Sprintf("There are %d sounds in this guild", len(metas))
+	}
+
+	embed := &discordgo.MessageEmbed{
+		Title:  title,
+		Fields: []*discordgo.MessageEmbedField{},
+	}
+
+	for _, meta := range metas {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+			Name:  fmt.Sprintf("%s %s", meta.Name, meta.Icon.String()),
+			Value: fmt.Sprintf("ID:`%s` Length: `%s`", meta.SoundID, util.FmtFloatTime(meta.Length)),
+		})
+	}
+
+	return embed
 }
 
 // checks if its a user, role or channel

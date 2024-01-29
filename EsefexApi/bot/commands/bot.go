@@ -84,6 +84,7 @@ func (c *CommandHandlers) BotInvite(s *discordgo.Session, i *discordgo.Interacti
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Title: "Invite to your server",
+					URL:   inviteUrl,
 				},
 			},
 			Components: []discordgo.MessageComponent{

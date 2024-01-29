@@ -121,7 +121,7 @@ func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.Interac
 						},
 						{
 							Name:   "Sound ID",
-							Value:  uid.SoundID.String(),
+							Value:  fmt.Sprintf("`%s`", uid.SoundID),
 							Inline: true,
 						},
 					},
@@ -157,7 +157,6 @@ func (c *CommandHandlers) SoundDelete(s *discordgo.Session, i *discordgo.Interac
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Deleted sound effect `%s`", soundID.Value),
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Title: fmt.Sprintf("Deleted sound effect `%s`", soundID.Value),
@@ -183,32 +182,12 @@ func (c *CommandHandlers) SoundList(s *discordgo.Session, i *discordgo.Interacti
 		metas = append(metas, meta)
 	}
 
-	if len(metas) == 0 {
-		return &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{
-					{
-						Title: "There are no sounds in this guild",
-					},
-				},
-			},
-		}, nil
-	}
-
-	if len(metas) == 1 {
-		return &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("There is 1 sound in this guild: \n%s", fmtMetaList(metas)),
-			},
-		}, nil
-	}
-
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("There are %d sounds in this guild: \n%s", len(metas), fmtMetaList(metas)),
+			Embeds: []*discordgo.MessageEmbed{
+				fmtMetaListAsEmbed(metas),
+			},
 		},
 	}, nil
 }

@@ -47,6 +47,9 @@ func (c *SoundDBCache) AddSound(guildID types.GuildID, name string, icon sounddb
 		return sounddb.SoundURI{}, errors.Wrap(err, "Error adding sound")
 	}
 
+	bitrate := 48000
+	channels := 2
+
 	c.sounds[uid] = &CachedSound{
 		Data: &pcm,
 		Meta: sounddb.SoundMeta{
@@ -54,6 +57,7 @@ func (c *SoundDBCache) AddSound(guildID types.GuildID, name string, icon sounddb
 			GuildID: guildID,
 			Name:    name,
 			Icon:    icon,
+			Length:  float32(len(pcm)) / float32(bitrate*channels),
 		},
 	}
 

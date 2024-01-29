@@ -22,4 +22,5 @@ type SoundMeta struct {
 	GuildID types.GuildID `json:"guildId"`
 	Name    string        `json:"name"`
 	Icon    Icon          `json:"icon"`
+	Length  float32       `json:"length"`
 }

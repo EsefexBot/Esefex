@@ -42,12 +42,7 @@ func (m *CommandMiddleware) CheckPerms(next cmdhandler.CommandHandlerWithErr, pe
 			}
 
 			if !ps.(permissions.PermissionState).Allowed() {
-				return &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &discordgo.InteractionResponseData{
-						Content: fmt.Sprintf("You do not have the required permissions to use this command (missing `%s`)", permission),
-					},
-				}, nil
+				return nil, errors.Wrap(fmt.Errorf("You do not have the required permissions to use this command (missing `%s`)", permission), "Error checking permissions")
 			}
 		}
 
