@@ -1,6 +1,7 @@
 package filesounddb
 
 import (
+	"esefexapi/config"
 	"esefexapi/sounddb"
 	"esefexapi/types"
 	"fmt"
@@ -25,17 +26,22 @@ func TestFileDB(t *testing.T) {
 	soundName := "sound1"
 	soundPcm := []int16{115, 117, 115}
 
-	location := fmt.Sprintf("./dbtest_%d", rand.Intn(1000000))
-	db, err := NewFileDB(location)
+	config.InjectConfig(&config.Config{
+		Database: config.Database{
+			SounddbLocation: fmt.Sprintf("./dbtest_%d", rand.Intn(1000000)),
+		},
+	})
+
+	db, err := NewFileDB()
 	assert.Nil(t, err)
 
 	// Test that we can add a sound
 	uid, err := db.AddSound(guildID, soundName, icon, soundPcm)
 	assert.Nil(t, err)
 
-	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_meta.json", location, guildID, uid.SoundID))
+	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_meta.json", config.Get().Database.SounddbLocation, guildID, uid.SoundID))
 	assert.Nil(t, err)
-	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_sound.s16le", location, guildID, uid.SoundID))
+	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_sound.s16le", config.Get().Database.SounddbLocation, guildID, uid.SoundID))
 	assert.Nil(t, err)
 
 	// Test that the sound exists
@@ -86,6 +92,6 @@ func TestFileDB(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// delete the db folder location
-	err = os.RemoveAll(location)
+	err = os.RemoveAll(config.Get().Database.SounddbLocation)
 	assert.Nil(t, err)
 }

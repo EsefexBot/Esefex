@@ -22,10 +22,10 @@ type DiscordBot struct {
 	ready chan struct{}
 }
 
-func NewDiscordBot(ds *discordgo.Session, dbs *db.Databases, domain string, cn clientnotifiy.IClientNotifier, permissionsInteger int64) *DiscordBot {
+func NewDiscordBot(ds *discordgo.Session, dbs *db.Databases, domain string, cn clientnotifiy.IClientNotifier) *DiscordBot {
 	return &DiscordBot{
 		ds:    ds,
-		cmdh:  commands.NewCommandHandlers(ds, dbs, domain, cn, permissionsInteger),
+		cmdh:  commands.NewCommandHandlers(ds, dbs, domain, cn),
 		cn:    cn,
 		stop:  make(chan struct{}, 1),
 		ready: make(chan struct{}),

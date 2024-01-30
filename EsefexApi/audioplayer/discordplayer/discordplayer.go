@@ -2,6 +2,7 @@ package discordplayer
 
 import (
 	"esefexapi/audioplayer/discordplayer/vcon"
+	"esefexapi/config"
 	"esefexapi/db"
 	"esefexapi/types"
 	"esefexapi/util/dcgoutil"
@@ -36,14 +37,14 @@ type VconData struct {
 	vcon         *vcon.VCon
 }
 
-func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, useTimeouts bool, timeout time.Duration) *DiscordPlayer {
+func NewDiscordPlayer(ds *discordgo.Session, dbs *db.Databases, timeout time.Duration) *DiscordPlayer {
 	dp := &DiscordPlayer{
 		vds:         make(map[types.ChannelID]*VconData),
 		ds:          ds,
 		dbs:         *dbs,
 		stop:        make(chan struct{}),
 		ready:       make(chan struct{}),
-		useTimeouts: useTimeouts,
+		useTimeouts: config.Get().Bot.UseTimeouts,
 		timeout:     timeout,
 	}
 

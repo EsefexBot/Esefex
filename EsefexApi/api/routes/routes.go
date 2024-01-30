@@ -3,6 +3,7 @@ package routes
 import (
 	"esefexapi/audioplayer"
 	"esefexapi/clientnotifiy"
+	"esefexapi/config"
 	"esefexapi/db"
 
 	"github.com/bwmarrin/discordgo"
@@ -16,12 +17,12 @@ type RouteHandlers struct {
 	cProto string
 }
 
-func NewRouteHandlers(dbs *db.Databases, a audioplayer.IAudioPlayer, ds *discordgo.Session, cProto string, wsCN *clientnotifiy.WsClientNotifier) *RouteHandlers {
+func NewRouteHandlers(dbs *db.Databases, a audioplayer.IAudioPlayer, ds *discordgo.Session, wsCN *clientnotifiy.WsClientNotifier) *RouteHandlers {
 	return &RouteHandlers{
 		a:      a,
 		dbs:    dbs,
 		ds:     ds,
-		cProto: cProto,
+		cProto: config.Get().HttpApi.CustomProtocol,
 		wsCN:   wsCN,
 	}
 }

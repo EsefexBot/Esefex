@@ -8,14 +8,9 @@ import (
 )
 
 func main() {
-	cfg, err := config.LoadConfig("config.toml")
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Printf("Config: %+v", config.Get())
 
-	log.Printf("Config: %+v", cfg)
-
-	cfg = &config.Config{
+	cfg := &config.Config{
 		HttpApi: config.HttpApi{
 			Port:           8080,
 			CustomProtocol: "esefex",

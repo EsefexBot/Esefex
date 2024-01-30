@@ -34,30 +34,27 @@ func main() {
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	cfg, err := config.LoadConfig("config.toml")
-	Must(err)
-
 	domain := os.Getenv("DOMAIN")
 
 	ds, err := bot.CreateSession()
 	Must(err)
 
-	sdb, err := filesounddb.NewFileDB(cfg.Database.SounddbLocation)
+	sdb, err := filesounddb.NewFileDB()
 	Must(err)
 
 	sdbc, err := dbcache.NewSoundDBCache(sdb)
 	Must(err)
 
-	udb, err := fileuserdb.NewFileUserDB(cfg.Database.UserdbLocation)
+	udb, err := fileuserdb.NewFileUserDB()
 	Must(err)
 
-	fpdb, err := filepermisssiondb.NewFilePermissionDB(cfg.Database.Permissiondblocation, ds)
+	fpdb, err := filepermisssiondb.NewFilePermissionDB(ds)
 	Must(err)
 
-	verT := time.Duration(cfg.VerificationExpiry * float32(time.Minute))
+	verT := time.Duration(config.Get().VerificationExpiry * float32(time.Minute))
 	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(verT)
 
-	fcmhs := cmdhashstore.NewFileCmdHashStore(cfg.Database.CmdHashStoreLocation)
+	fcmhs := cmdhashstore.NewFileCmdHashStore()
 
 	dbs := &db.Databases{
 		SoundDB:        sdbc,
@@ -67,13 +64,13 @@ func main() {
 		CmdHashStore:   fcmhs,
 	}
 
-	botT := time.Duration(cfg.Bot.Timeout * float32(time.Minute))
-	plr := discordplayer.NewDiscordPlayer(ds, dbs, cfg.Bot.UseTimeouts, botT)
+	botT := time.Duration(config.Get().Bot.Timeout * float32(time.Minute))
+	plr := discordplayer.NewDiscordPlayer(ds, dbs, botT)
 
 	wsCN := clientnotifiy.NewWsClientNotifier(ds)
 
-	api := api.NewHttpApi(dbs, plr, ds, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol, wsCN, domain)
-	bot := bot.NewDiscordBot(ds, dbs, domain, wsCN, cfg.Bot.PermissionsInteger)
+	api := api.NewHttpApi(dbs, plr, ds, wsCN, domain)
+	bot := bot.NewDiscordBot(ds, dbs, domain, wsCN)
 
 	log.Println("Components bootstraped, starting...")
 

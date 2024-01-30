@@ -3,6 +3,7 @@ package config
 import (
 	"io"
 	"os"
+	"sync"
 
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
@@ -33,7 +34,32 @@ type Bot struct {
 	PermissionsInteger int64   `toml:"permissions_integer"`
 }
 
-func LoadConfig(path string) (*Config, error) {
+var lock = sync.Mutex{}
+var instance *Config
+
+func Get() Config {
+	if instance == nil {
+		lock.Lock()
+		defer lock.Unlock()
+		if instance == nil {
+			cfgPath := os.Getenv("ESEFEX_CONFIG_PATH")
+			if cfgPath == "" {
+				cfgPath = "./config.toml"
+			}
+
+			cfg, err := loadConfig(cfgPath)
+			if err != nil {
+				panic(err)
+			}
+
+			instance = cfg
+		}
+	}
+
+	return *instance
+}
+
+func loadConfig(path string) (*Config, error) {
 	// load config from file
 	f, err := os.Open(path)
 	if err != nil {
@@ -56,4 +82,13 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+// InjectConfig is used for testing purposes only
+// It allows us to inject a config into the singleton
+func InjectConfig(cfg *Config) {
+	lock.Lock()
+	defer lock.Unlock()
+
+	instance = cfg
 }

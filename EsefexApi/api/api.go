@@ -5,6 +5,7 @@ import (
 	"esefexapi/api/routes"
 	"esefexapi/audioplayer"
 	"esefexapi/clientnotifiy"
+	"esefexapi/config"
 	"esefexapi/db"
 	"esefexapi/service"
 
@@ -30,13 +31,13 @@ type HttpApi struct {
 	ready    chan struct{}
 }
 
-func NewHttpApi(dbs *db.Databases, plr audioplayer.IAudioPlayer, ds *discordgo.Session, apiPort int, cProto string, wsCN *clientnotifiy.WsClientNotifier, domain string) *HttpApi {
+func NewHttpApi(dbs *db.Databases, plr audioplayer.IAudioPlayer, ds *discordgo.Session, wsCN *clientnotifiy.WsClientNotifier, domain string) *HttpApi {
 	return &HttpApi{
-		handlers: routes.NewRouteHandlers(dbs, plr, ds, cProto, wsCN),
+		handlers: routes.NewRouteHandlers(dbs, plr, ds, wsCN),
 		mw:       middleware.NewMiddleware(dbs, ds),
 		a:        plr,
-		port:     apiPort,
-		cProto:   cProto,
+		port:     config.Get().HttpApi.Port,
+		cProto:   config.Get().HttpApi.CustomProtocol,
 		domain:   domain,
 		stop:     make(chan struct{}, 1),
 		ready:    make(chan struct{}),

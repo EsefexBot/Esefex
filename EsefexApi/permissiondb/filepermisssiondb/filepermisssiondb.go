@@ -2,6 +2,7 @@ package filepermisssiondb
 
 import (
 	"encoding/json"
+	"esefexapi/config"
 	"esefexapi/permissiondb"
 	"esefexapi/permissions"
 	"esefexapi/types"
@@ -23,7 +24,9 @@ type FilePermissionDB struct {
 	ds     *discordgo.Session
 }
 
-func NewFilePermissionDB(path string, ds *discordgo.Session) (*FilePermissionDB, error) {
+func NewFilePermissionDB(ds *discordgo.Session) (*FilePermissionDB, error) {
+	path := config.Get().Database.Permissiondblocation
+
 	log.Printf("Creating FileDB at %s", path)
 	file, err := util.EnsureFile(path)
 	if err != nil {

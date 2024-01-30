@@ -3,8 +3,10 @@ package dcgoutil
 import (
 	// "log"
 
+	"esefexapi/config"
 	"esefexapi/opt"
 	"esefexapi/types"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 
@@ -194,4 +196,8 @@ func GuildUserIDs(ds *discordgo.Session, guildID types.GuildID) ([]types.UserID,
 	}
 
 	return userIDs, nil
+}
+
+func GetInviteLink(appID string) string {
+	return fmt.Sprintf("https://discord.com/api/oauth2/authorize?client_id=%s&permissions=%d&scope=bot%%20applications.commands", appID, config.Get().Bot.PermissionsInteger)
 }

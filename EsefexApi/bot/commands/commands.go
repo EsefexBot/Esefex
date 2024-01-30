@@ -3,15 +3,13 @@ package commands
 import (
 	"crypto/sha256"
 	"encoding/json"
-	"esefexapi/bot/commands/cmdhandler"
 	"esefexapi/bot/commands/middleware"
 	"esefexapi/clientnotifiy"
+	"esefexapi/config"
 	"esefexapi/db"
 	"fmt"
-	"log"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/pkg/errors"
 )
 
 type Command struct {
@@ -36,69 +34,41 @@ type CommandHandlers struct {
 	Handlers          map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-func NewCommandHandlers(ds *discordgo.Session, dbs *db.Databases, domain string, cn clientnotifiy.IClientNotifier, permissionInteger int64) *CommandHandlers {
+func NewCommandHandlers(ds *discordgo.Session, dbs *db.Databases, domain string, cn clientnotifiy.IClientNotifier) *CommandHandlers {
 	c := &CommandHandlers{
 		ds:                ds,
 		dbs:               dbs,
 		domain:            domain,
-		permissionInteger: permissionInteger,
+		permissionInteger: config.Get().Bot.PermissionsInteger,
 		mw:                middleware.NewCommandMiddleware(dbs),
 		cn:                cn,
 		Commands:          map[string]*discordgo.ApplicationCommand{},
 		Handlers:          map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){},
 	}
 
+	eh := c.mw.WithErrorHandling
+	rdm := c.mw.RejectDMs
+	cp := c.mw.CheckPerms
+
 	c.Commands["bot"] = BotCommand
-	c.Handlers["bot"] = WithErrorHandling(c.mw.CheckPerms(c.Bot, "Guild.UseSlashCommands"))
+	c.Handlers["bot"] = eh(rdm(cp(c.Bot, "Guild.UseSlashCommands")))
 
 	c.Commands["help"] = HelpCommand
-	c.Handlers["help"] = WithErrorHandling(c.mw.CheckPerms(c.Help, "Guild.UseSlashCommands"))
+	c.Handlers["help"] = eh(rdm(cp(c.Help, "Guild.UseSlashCommands")))
 
 	c.Commands["permission"] = PermissionCommand
-	c.Handlers["permission"] = WithErrorHandling(c.mw.CheckPerms(c.Permission, "Guild.UseSlashCommands", "Guild.ManageUser"))
+	c.Handlers["permission"] = eh(rdm(cp(c.Permission, "Guild.UseSlashCommands", "Guild.ManageUser")))
 
 	c.Commands["sound"] = SoundCommand
-	c.Handlers["sound"] = WithErrorHandling(c.mw.CheckPerms(c.Sound, "Guild.UseSlashCommands"))
+	c.Handlers["sound"] = eh(rdm(cp(c.Sound, "Guild.UseSlashCommands")))
 
 	c.Commands["user"] = UserCommand
-	c.Handlers["user"] = WithErrorHandling(c.mw.CheckPerms(c.User, "Guild.UseSlashCommands"))
+	c.Handlers["user"] = eh(rdm(cp(c.User, "Guild.UseSlashCommands")))
 
 	c.Commands["webui"] = WebUICommand
-	c.Handlers["webui"] = WithErrorHandling(c.mw.CheckPerms(c.WebUI, "Guild.UseSlashCommands"))
+	c.Handlers["webui"] = eh(rdm(cp(c.WebUI, "Guild.UseSlashCommands")))
 
 	return c
-}
-
-func WithErrorHandling(h cmdhandler.CommandHandlerWithErr) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		r, err := h(s, i)
-		if err != nil {
-			log.Printf("Cannot execute command: %+v", err)
-
-			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Embeds: []*discordgo.MessageEmbed{
-						{
-							Title:       "An error has occured while executing the command",
-							Color:       0xff0000,
-							Description: fmt.Sprintf("```%+v```", errors.Cause(err)),
-						},
-					},
-				},
-			})
-			if err != nil {
-				log.Printf("Cannot respond to interaction: %+v", err)
-			}
-		}
-
-		if r != nil {
-			err = s.InteractionRespond(i.Interaction, r)
-			if err != nil {
-				log.Printf("Cannot respond to interaction: %+v", err)
-			}
-		}
-	}
 }
 
 func OptionsMap(options []*discordgo.ApplicationCommandInteractionDataOption) map[string]*discordgo.ApplicationCommandInteractionDataOption {

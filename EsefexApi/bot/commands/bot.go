@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"esefexapi/util/dcgoutil"
 	"fmt"
 	"net"
 	"os"
@@ -76,7 +77,7 @@ func (c *CommandHandlers) Bot(s *discordgo.Session, i *discordgo.InteractionCrea
 }
 
 func (c *CommandHandlers) BotInvite(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	inviteUrl := fmt.Sprintf("https://discord.com/api/oauth2/authorize?client_id=%s&permissions=%d&scope=bot%%20applications.commands", s.State.User.ID, c.permissionInteger)
+	inviteUrl := dcgoutil.GetInviteLink(s.State.User.ID)
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

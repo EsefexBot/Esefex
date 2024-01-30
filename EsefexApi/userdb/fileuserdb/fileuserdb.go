@@ -2,6 +2,7 @@ package fileuserdb
 
 import (
 	"encoding/json"
+	"esefexapi/config"
 	"esefexapi/types"
 	"esefexapi/userdb"
 	"log"
@@ -20,7 +21,9 @@ type FileUserDB struct {
 	fileLock sync.Mutex
 }
 
-func NewFileUserDB(filePath string) (*FileUserDB, error) {
+func NewFileUserDB() (*FileUserDB, error) {
+	filePath := config.Get().Database.UserdbLocation
+
 	// get file handle
 	err := os.MkdirAll(path.Dir(filePath), os.ModePerm)
 	if err != nil {

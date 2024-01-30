@@ -1,6 +1,7 @@
 package filesounddb
 
 import (
+	"esefexapi/config"
 	"esefexapi/sounddb"
 	"log"
 	"os"
@@ -16,7 +17,9 @@ type FileDB struct {
 }
 
 // NewFileDB returns a new FileDB
-func NewFileDB(location string) (*FileDB, error) {
+func NewFileDB() (*FileDB, error) {
+	location := config.Get().Database.SounddbLocation
+
 	log.Printf("Creating FileDB at %s", location)
 	err := os.MkdirAll(location, os.ModePerm)
 	if err != nil {

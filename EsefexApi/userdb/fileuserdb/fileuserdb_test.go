@@ -1,6 +1,7 @@
 package fileuserdb
 
 import (
+	"esefexapi/config"
 	"esefexapi/userdb"
 	"os"
 	"testing"
@@ -9,7 +10,13 @@ import (
 )
 
 func TestFileUserDB(t *testing.T) {
-	udb, err := NewFileUserDB("./testdata/users.json")
+	config.InjectConfig(&config.Config{
+		Database: config.Database{
+			UserdbLocation: "./testdata/users.json",
+		},
+	})
+
+	udb, err := NewFileUserDB()
 	assert.Nil(t, err)
 
 	defer func() {

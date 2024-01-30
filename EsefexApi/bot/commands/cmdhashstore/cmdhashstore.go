@@ -1,6 +1,7 @@
 package cmdhashstore
 
 import (
+	"esefexapi/config"
 	"esefexapi/util"
 	"io"
 	"os"
@@ -17,9 +18,9 @@ type FileCmdHashStore struct {
 	FilePath string
 }
 
-func NewFileCmdHashStore(filePath string) *FileCmdHashStore {
+func NewFileCmdHashStore() *FileCmdHashStore {
 	return &FileCmdHashStore{
-		FilePath: filePath,
+		FilePath: config.Get().Database.CmdHashStoreLocation,
 	}
 }
 
