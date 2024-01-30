@@ -1,29 +1,10 @@
-import {
-  ActionIcon,
-  Button,
-  Flex,
-  Grid,
-  Group,
-  Image,
-  Text,
-} from '@mantine/core';
-import { FC } from 'react';
-import { Sound } from '../../models/Sound';
-import './SoundButton.css';
-import { IconPlayerPlay } from '@tabler/icons-react';
-import axios from 'axios';
-import config from '../../config.json';
-import {
-  showErrorNotification,
-  showSuccessNotification,
-} from '../notifications';
-import axios from 'axios';
+import { ThemeIcon } from '@mantine/core';
 import {
   IconCircleFilled,
   IconPlayerPlayFilled,
   IconStarFilled,
 } from '@tabler/icons-react';
-import { ThemeIcon } from '@mantine/core';
+import axios from 'axios';
 import { Sound } from '../../models/Sound';
 import './SoundButton.css';
 import config from '../../config.json';
