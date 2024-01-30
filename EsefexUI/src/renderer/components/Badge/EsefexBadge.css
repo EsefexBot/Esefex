@@ -1,0 +1,10 @@
+.badge-type-key-bind {
+  background-color: red;
+  border-radius: 50px;
+  display: flex;
+  padding: 0 8px 0 2px;
+  box-sizing: border-box;
+  font-size: 80%;
+  align-items: center;
+  justify-content: center;
+}

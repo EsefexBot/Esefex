@@ -1,8 +1,8 @@
-type Sound = {
-    id: string;
-    serverId: string;
-    name: string;
-    icon: string;
-};
+// use interfaes not types
 
-export type { Sound };
+export interface Sound {
+  id: string;
+  serverId: string;
+  name: string;
+  icon: string;
+}

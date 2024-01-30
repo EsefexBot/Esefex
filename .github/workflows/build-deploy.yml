@@ -1,0 +1,41 @@
+name: Go Backend CI/CD
+
+on: 
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Prod Docker Image
+        run: docker build -t jokil/esefexapi:latest -f EsefexApi/Dockerfile EsefexApi
+
+      - name: Push Docker Image
+        run: docker push jokil/esefexapi:latest
+                    
+      - name: Deploy to production     
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd api
+            docker compose down
+            > .env.github
+            echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env.github
+            echo DOMAIN=${{ vars.DOMAIN }} >> .env.github
+            docker compose pull
+            docker compose up -d
+            

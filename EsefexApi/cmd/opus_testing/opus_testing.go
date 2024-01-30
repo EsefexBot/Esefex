@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"time"
-	// "io"
 	"os"
 	"os/exec"
 	"sync"
+	"time"
 )
 
 func main() {

@@ -2,61 +2,85 @@ package main
 
 import (
 	"esefexapi/api"
-	"esefexapi/appcontext"
-	"esefexapi/audioprocessing"
+	"esefexapi/audioplayer/discordplayer"
 	"esefexapi/bot"
-	"esefexapi/msg"
+	"esefexapi/config"
+	"esefexapi/db"
+	"esefexapi/linktokenstore/memorylinktokenstore"
+	"esefexapi/sounddb/dbcache"
+	"esefexapi/sounddb/filesounddb"
+	"esefexapi/userdb/fileuserdb"
+	"esefexapi/util"
 
-	// "esefexapi/msg"
 	"log"
 	"os"
-	"os/signal"
-	"sync"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
 func init() {
 	godotenv.Load()
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Printf("Starting Esefex API with PID: %d", os.Getpid())
 
-	c := appcontext.Context{
-		Channels: appcontext.Channels{
-			// A2B:  make(chan msg.MessageA2B),
-			// B2A:  make(chan msg.MessageB2A),
-			PlaySound: make(chan msg.PlaySound),
-			Stop:      make(chan struct{}, 1),
-		},
-		DiscordSession: bot.CreateSession(),
-		CustomProtocol: "esefexapi",
-		ApiPort:        "8080",
-		AudioCache:     audioprocessing.NewAudioCache(),
+	cfg, err := config.LoadConfig("config.toml")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+	domain := os.Getenv("DOMAIN")
 
-	go func() {
-		defer wg.Done()
-		bot.Run(&c)
-	}()
+	ds, err := bot.CreateSession()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	go func() {
-		defer wg.Done()
-		api.Run(&c)
-	}()
+	sdb, err := filesounddb.NewFileDB(cfg.FileSoundDB.Location)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
+	sdbc := dbcache.NewSoundDBCache(sdb)
+
+	udb, err := fileuserdb.NewFileUserDB(cfg.FileUserDB.Location)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ldb := memorylinktokenstore.NewMemoryLinkTokenStore(time.Minute * 5)
+
+	dbs := &db.Databases{
+		SoundDB:        sdbc,
+		UserDB:         udb,
+		LinkTokenStore: ldb,
+	}
+
+	plr := discordplayer.NewDiscordPlayer(ds, dbs, cfg.Bot.UseTimeouts, time.Duration(cfg.Bot.Timeout)*time.Second)
+
+	api := api.NewHttpApi(dbs, plr, ds, cfg.HttpApi.Port, cfg.HttpApi.CustomProtocol)
+	bot := bot.NewDiscordBot(ds, dbs, domain)
+
+	log.Println("Components bootstraped, starting...")
+
+	<-api.Start()
+	<-bot.Start()
+	<-plr.Start()
+
+	log.Println("All components started successfully :)")
 	log.Println("Press Ctrl+C to exit")
-	<-stop
+	<-util.Interrupt()
+	println()
+	log.Println("Gracefully shutting down...")
 
-	print("\n")
-	log.Println("Stopping...")
+	<-api.Stop()
+	<-bot.Stop()
+	<-plr.Stop()
 
-	close(c.Channels.Stop)
-	wg.Wait()
+	udb.Close()
+
+	log.Println("All components stopped, exiting...")
 }
