@@ -3,6 +3,8 @@ package filesounddb
 import (
 	"esefexapi/config"
 	"esefexapi/sounddb"
+	"esefexapi/types"
+	"fmt"
 	"log"
 	"os"
 
@@ -14,6 +16,28 @@ var _ sounddb.ISoundDB = &FileDB{}
 // FileDB implements SoundDB
 type FileDB struct {
 	location string
+}
+
+// Gets the sound Name from the sound ID
+// GetSoundNameByID implements sounddb.ISoundDB.
+func (f *FileDB) GetSoundNameByID(guildID types.GuildID, ID types.SoundID) (types.SoundName, error) {
+	soundUIDs, err := f.GetSoundUIDs(guildID)
+	if err != nil {
+		return "", errors.Wrap(err, "Error getting sound UIDs")
+	}
+
+	for _, soundUID := range soundUIDs {
+		meta, err := f.GetSoundMeta(soundUID)
+		if err != nil {
+			return "", errors.Wrap(err, "Error getting sound meta")
+		}
+
+		if meta.SoundID == ID {
+			return types.SoundName(meta.Name), nil
+		}
+	}
+
+	return "", errors.Wrap(fmt.Errorf("Sound not found"), "Error getting sound name by ID")
 }
 
 // NewFileDB returns a new FileDB

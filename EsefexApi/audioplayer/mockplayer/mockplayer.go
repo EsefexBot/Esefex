@@ -19,7 +19,7 @@ func NewMockPlayer() *MockPlayer {
 }
 
 // PlaySoundInsecure implements audioplayer.AudioPlayer.
-func (*MockPlayer) PlaySoundInsecure(uid sounddb.SoundURI, guildID types.GuildID, userID types.UserID) error {
+func (*MockPlayer) PlaySoundInsecure(uid sounddb.SoundUID, guildID types.GuildID, userID types.UserID) error {
 	log.Printf("MockPlayer: Playing sound insecurely '%v' on guild '%v' for user '%v'", uid, guildID, userID)
 	return nil
 }

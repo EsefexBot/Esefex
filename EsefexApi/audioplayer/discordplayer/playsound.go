@@ -31,7 +31,17 @@ func (c *DiscordPlayer) PlaySound(soundID types.SoundID, userID types.UserID) er
 
 	timer.MessageElapsed("Got voice connection")
 
-	vd.vcon.PlaySound(sounddb.SuidFromStrings(userVC.GuildID, soundID.String()))
+	soundName, err := c.dbs.SoundDB.GetSoundNameByID(types.GuildID(userVC.GuildID), soundID)
+	if err != nil {
+		return errors.Wrap(err, "Error getting sound name")
+	}
+
+	soundUID := sounddb.SoundUID{
+		GuildID:   types.GuildID(userVC.GuildID),
+		SoundName: soundName,
+	}
+
+	vd.vcon.PlaySound(soundUID)
 	vd.AfkTimeoutIn = vd.AfkTimeoutIn.Add(c.timeout)
 
 	return nil

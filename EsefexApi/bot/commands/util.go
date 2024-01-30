@@ -46,7 +46,7 @@ func fmtMetaListAsEmbed(metas []sounddb.SoundMeta) *discordgo.MessageEmbed {
 	for _, meta := range metas {
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 			Name:  fmt.Sprintf("%s %s", meta.Name, meta.Icon.String()),
-			Value: fmt.Sprintf("ID:`%s` Length: `%s`", meta.SoundID, util.FmtFloatTime(meta.Length)),
+			Value: fmt.Sprintf("Length: `%s`", util.FmtFloatTime(meta.Length)),
 		})
 	}
 

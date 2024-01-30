@@ -3,6 +3,7 @@ package dbcache
 import (
 	"esefexapi/sounddb"
 	"esefexapi/types"
+	"fmt"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -13,9 +14,23 @@ var _ sounddb.ISoundDB = &SoundDBCache{}
 // DB Cache loads all sounds into memory and caches them.
 // SoundDBCache implements db.SoundDB
 type SoundDBCache struct {
-	sounds map[sounddb.SoundURI]*CachedSound
+	sounds map[sounddb.SoundUID]*CachedSound
 	db     sounddb.ISoundDB
 	rw     sync.RWMutex
+}
+
+// GetSoundNameByID implements sounddb.ISoundDB.
+func (c *SoundDBCache) GetSoundNameByID(guildID types.GuildID, ID types.SoundID) (types.SoundName, error) {
+	c.rw.RLock()
+	defer c.rw.RUnlock()
+
+	for _, sound := range c.sounds {
+		if sound.Meta.SoundID == ID && sound.Meta.GuildID == guildID {
+			return sound.Meta.Name, nil
+		}
+	}
+
+	return "", errors.Wrap(fmt.Errorf("Sound with ID '%s' not found", ID), "Error getting sound name by ID")
 }
 
 type CachedSound struct {
@@ -26,7 +41,7 @@ type CachedSound struct {
 // NewSoundDBCache creates a new DBCache.
 func NewSoundDBCache(db sounddb.ISoundDB) (*SoundDBCache, error) {
 	c := &SoundDBCache{
-		sounds: make(map[sounddb.SoundURI]*CachedSound),
+		sounds: make(map[sounddb.SoundUID]*CachedSound),
 		db:     db,
 	}
 	err := c.CacheAll()
@@ -38,13 +53,13 @@ func NewSoundDBCache(db sounddb.ISoundDB) (*SoundDBCache, error) {
 }
 
 // AddSound implements db.SoundDB.
-func (c *SoundDBCache) AddSound(guildID types.GuildID, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundURI, error) {
+func (c *SoundDBCache) AddSound(guildID types.GuildID, name types.SoundName, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
 	uid, err := c.db.AddSound(guildID, name, icon, pcm)
 	if err != nil {
-		return sounddb.SoundURI{}, errors.Wrap(err, "Error adding sound")
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error adding sound")
 	}
 
 	bitrate := 48000
@@ -53,7 +68,7 @@ func (c *SoundDBCache) AddSound(guildID types.GuildID, name string, icon sounddb
 	c.sounds[uid] = &CachedSound{
 		Data: &pcm,
 		Meta: sounddb.SoundMeta{
-			SoundID: uid.SoundID,
+			SoundID: uid.SoundName.GetSoundID(),
 			GuildID: guildID,
 			Name:    name,
 			Icon:    icon,
@@ -65,7 +80,7 @@ func (c *SoundDBCache) AddSound(guildID types.GuildID, name string, icon sounddb
 }
 
 // DeleteSound implements db.SoundDB.
-func (c *SoundDBCache) DeleteSound(uid sounddb.SoundURI) error {
+func (c *SoundDBCache) DeleteSound(uid sounddb.SoundUID) error {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
@@ -99,7 +114,7 @@ func (c *SoundDBCache) GetGuildIDs() ([]types.GuildID, error) {
 }
 
 // GetSoundMeta implements db.SoundDB.
-func (c *SoundDBCache) GetSoundMeta(uid sounddb.SoundURI) (sounddb.SoundMeta, error) {
+func (c *SoundDBCache) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
 	c.rw.RLock()
 
 	if sound, ok := c.sounds[uid]; ok {
@@ -119,7 +134,7 @@ func (c *SoundDBCache) GetSoundMeta(uid sounddb.SoundURI) (sounddb.SoundMeta, er
 }
 
 // GetSoundPcm implements db.SoundDB.
-func (c *SoundDBCache) GetSoundPcm(uid sounddb.SoundURI) (*[]int16, error) {
+func (c *SoundDBCache) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	c.rw.RLock()
 
 	if sound, ok := c.sounds[uid]; ok {
@@ -141,11 +156,11 @@ func (c *SoundDBCache) GetSoundPcm(uid sounddb.SoundURI) (*[]int16, error) {
 }
 
 // GetSoundUIDs implements db.SoundDB.
-func (c *SoundDBCache) GetSoundUIDs(guildID types.GuildID) ([]sounddb.SoundURI, error) {
+func (c *SoundDBCache) GetSoundUIDs(guildID types.GuildID) ([]sounddb.SoundUID, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 
-	uids := make([]sounddb.SoundURI, 0)
+	uids := make([]sounddb.SoundUID, 0)
 
 	for uid := range c.sounds {
 		if uid.GuildID == guildID {
@@ -179,7 +194,7 @@ func (c *SoundDBCache) CacheAll() error {
 	return nil
 }
 
-func (c *SoundDBCache) LoadSound(uid sounddb.SoundURI) (*CachedSound, error) {
+func (c *SoundDBCache) LoadSound(uid sounddb.SoundUID) (*CachedSound, error) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
 
@@ -208,7 +223,7 @@ func (c *SoundDBCache) LoadSound(uid sounddb.SoundURI) (*CachedSound, error) {
 
 }
 
-func (c *SoundDBCache) SoundExists(uid sounddb.SoundURI) (bool, error) {
+func (c *SoundDBCache) SoundExists(uid sounddb.SoundUID) (bool, error) {
 	c.rw.RLock()
 	defer c.rw.RUnlock()
 

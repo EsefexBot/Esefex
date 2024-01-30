@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 )
 
 // api/playsound/<user_id>/<guild_id>/<sound_id>
@@ -21,7 +22,18 @@ func (h *RouteHandlers) PostPlaySoundInsecure() http.Handler {
 		guild_id := types.GuildID(vars["guild_id"])
 		sound_id := types.SoundID(vars["sound_id"])
 
-		err := h.a.PlaySoundInsecure(sounddb.New(guild_id, sound_id), guild_id, user_id)
+		soundName, err := h.dbs.SoundDB.GetSoundNameByID(guild_id, sound_id)
+		if err != nil {
+			errorMsg := errors.Wrap(err, "Error getting sound name")
+			log.Println(errorMsg)
+		}
+
+		soundUID := sounddb.SoundUID{
+			GuildID:   guild_id,
+			SoundName: soundName,
+		}
+
+		err = h.a.PlaySoundInsecure(soundUID, guild_id, user_id)
 		if err != nil {
 			errorMsg := fmt.Sprintf("Error playing sound: %+v", err)
 			log.Println(errorMsg)

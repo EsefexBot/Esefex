@@ -15,7 +15,7 @@ import (
 )
 
 type VCon struct {
-	playSound chan sounddb.SoundURI
+	playSound chan sounddb.SoundUID
 	stop      chan struct{}
 	mixer     *audioprocessing.S16leMixReader
 	enc       *audioprocessing.GopusEncoder
@@ -38,7 +38,7 @@ func NewVCon(ds *discordgo.Session, db sounddb.ISoundDB, guildID types.GuildID, 
 	}
 
 	return &VCon{
-		playSound: make(chan sounddb.SoundURI),
+		playSound: make(chan sounddb.SoundUID),
 		stop:      make(chan struct{}),
 		mixer:     mixer,
 		enc:       enc,
@@ -48,7 +48,7 @@ func NewVCon(ds *discordgo.Session, db sounddb.ISoundDB, guildID types.GuildID, 
 	}, nil
 }
 
-func (a *VCon) PlaySound(uid sounddb.SoundURI) {
+func (a *VCon) PlaySound(uid sounddb.SoundUID) {
 	// log.Printf("channel: %s\n", a.vc.ChannelID)
 	// log.Print(a.playSound)
 	a.playSound <- uid

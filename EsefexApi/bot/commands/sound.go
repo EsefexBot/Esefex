@@ -47,7 +47,7 @@ var SoundCommand = &discordgo.ApplicationCommand{
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "sound-id",
+					Name:        "sound-name",
 					Description: "The sound effect to delete",
 					Required:    true,
 				},
@@ -90,15 +90,17 @@ func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.Interac
 		return nil, errors.Wrap(err, "Error extracting icon")
 	}
 
-	soundFile := options["sound-file"]
-	soundFileUrl := i.ApplicationCommandData().Resolved.Attachments[fmt.Sprint(soundFile.Value)].URL
+	soundFile := fmt.Sprint(options["sound-file"].Value)
+	soundFileUrl := i.ApplicationCommandData().Resolved.Attachments[soundFile].URL
 
 	pcm, err := util.Download2PCM(soundFileUrl)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error downloading sound file")
 	}
 
-	uid, err := c.dbs.SoundDB.AddSound(types.GuildID(i.GuildID), fmt.Sprint(options["name"].Value), icon, pcm)
+	soundName := types.SoundName(fmt.Sprint(options["name"].Value))
+
+	uid, err := c.dbs.SoundDB.AddSound(types.GuildID(i.GuildID), soundName, icon, pcm)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error adding sound")
 	}
@@ -106,7 +108,7 @@ func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.Interac
 	guildID := types.GuildID(i.GuildID)
 	c.cn.UpdateNotificationGuilds(guildID)
 
-	log.Printf("Uploaded sound effect %v to guild %v", uid.SoundID, i.GuildID)
+	log.Printf("Uploaded sound effect %v to guild %v", uid.SoundName, i.GuildID)
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -119,11 +121,6 @@ func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.Interac
 							Value:  fmt.Sprintf("%s %s", options["name"].Value, icon.String()),
 							Inline: true,
 						},
-						{
-							Name:   "Sound ID",
-							Value:  fmt.Sprintf("`%s`", uid.SoundID),
-							Inline: true,
-						},
 					},
 				},
 			},
@@ -133,16 +130,19 @@ func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.Interac
 
 func (c *CommandHandlers) SoundDelete(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	options := OptionsMap(i.ApplicationCommandData().Options[0].Options)
-	soundID := options["sound-id"]
+	soundName := types.SoundName(fmt.Sprint(options["sound-name"].Value))
 
-	uid := sounddb.SuidFromStrings(i.GuildID, fmt.Sprint(soundID.Value))
+	uid := sounddb.SoundUID{
+		GuildID:   types.GuildID(i.GuildID),
+		SoundName: soundName,
+	}
 
 	exists, err := c.dbs.SoundDB.SoundExists(uid)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error checking if sound exists")
 	}
 	if !exists {
-		return nil, errors.Wrap(fmt.Errorf("Sound effect %s does not exist", soundID.Value), "Error deleting sound")
+		return nil, errors.Wrap(fmt.Errorf("Sound effect %s does not exist", soundName), "Error deleting sound")
 	}
 
 	log.Print("a")
@@ -152,14 +152,14 @@ func (c *CommandHandlers) SoundDelete(s *discordgo.Session, i *discordgo.Interac
 		return nil, errors.Wrap(err, "Error deleting sound")
 	}
 
-	log.Printf("Deleted sound effect %v from guild %v", soundID.Value, i.GuildID)
+	log.Printf("Deleted sound effect %v from guild %v", soundName, i.GuildID)
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
 				{
-					Title: fmt.Sprintf("Deleted sound effect `%s`", soundID.Value),
+					Title: fmt.Sprintf("Deleted sound effect `%s`", soundName),
 				},
 			},
 		},

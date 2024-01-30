@@ -2,16 +2,16 @@ package filesounddb
 
 import (
 	"esefexapi/sounddb"
-	"slices"
-
-	"github.com/pkg/errors"
+	"esefexapi/util"
+	"fmt"
 )
 
-func (f *FileDB) SoundExists(uid sounddb.SoundURI) (bool, error) {
-	uids, err := f.GetSoundUIDs(uid.GuildID)
+func (f *FileDB) SoundExists(uid sounddb.SoundUID) (bool, error) {
+	path := fmt.Sprintf("%s/%s/%s_meta.json", f.location, uid.GuildID, uid.SoundName.GetSoundID())
+	exists, err := util.PathExists(path)
 	if err != nil {
-		return false, errors.Wrap(err, "Error getting sound uids")
+		return false, err
 	}
 
-	return slices.Contains(uids, uid), nil
+	return exists, nil
 }

@@ -11,8 +11,8 @@ import (
 )
 
 // GetSoundPcm implements sounddb.SoundDB.
-func (f *FileDB) GetSoundPcm(uid sounddb.SoundURI) (*[]int16, error) {
-	path := fmt.Sprintf("%s/%s/%s_sound.s16le", f.location, uid.GuildID, uid.SoundID)
+func (f *FileDB) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
+	path := fmt.Sprintf("%s/%s/%s_sound.s16le", f.location, uid.GuildID, uid.SoundName.GetSoundID())
 	sf, err := os.Open(path)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error opening sound file")

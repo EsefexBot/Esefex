@@ -7,7 +7,7 @@ import (
 )
 
 type IAudioPlayer interface {
-	PlaySoundInsecure(uid sounddb.SoundURI, guildID types.GuildID, userID types.UserID) error
+	PlaySoundInsecure(uid sounddb.SoundUID, guildID types.GuildID, userID types.UserID) error
 	PlaySound(soundID types.SoundID, userID types.UserID) error
 }
 

@@ -57,17 +57,22 @@ var _ sounddb.ISoundDB = &ApiMockDB{}
 // ApiMockDB implements ISoundDB
 type ApiMockDB struct{}
 
+// GetSoundNameByID implements sounddb.ISoundDB.
+func (*ApiMockDB) GetSoundNameByID(guildID types.GuildID, ID types.SoundID) (types.SoundName, error) {
+	panic("unimplemented")
+}
+
 func NewApiMockDB() *ApiMockDB {
 	return &ApiMockDB{}
 }
 
 // AddSound implements sounddb.ISoundDB.
-func (*ApiMockDB) AddSound(guildID types.GuildID, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundURI, error) {
+func (*ApiMockDB) AddSound(guildID types.GuildID, name types.SoundName, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
 	panic("unimplemented")
 }
 
 // DeleteSound implements sounddb.ISoundDB.
-func (*ApiMockDB) DeleteSound(uid sounddb.SoundURI) error {
+func (*ApiMockDB) DeleteSound(uid sounddb.SoundUID) error {
 	panic("unimplemented")
 }
 
@@ -81,29 +86,34 @@ func (*ApiMockDB) GetGuildIDs() ([]types.GuildID, error) {
 }
 
 // GetSoundMeta implements sounddb.ISoundDB.
-func (*ApiMockDB) GetSoundMeta(uid sounddb.SoundURI) (sounddb.SoundMeta, error) {
-	return mockData[uid.GuildID.String()][uid.SoundID.String()], nil
+func (*ApiMockDB) GetSoundMeta(uid sounddb.SoundUID) (sounddb.SoundMeta, error) {
+	return mockData[uid.GuildID.String()][uid.SoundName.GetSoundID().String()], nil
 }
 
 // GetSoundPcm implements sounddb.ISoundDB.
-func (*ApiMockDB) GetSoundPcm(uid sounddb.SoundURI) (*[]int16, error) {
+func (*ApiMockDB) GetSoundPcm(uid sounddb.SoundUID) (*[]int16, error) {
 	panic("unimplemented")
 }
 
 // GetSoundUIDs implements sounddb.ISoundDB.
-func (*ApiMockDB) GetSoundUIDs(guildID types.GuildID) ([]sounddb.SoundURI, error) {
-	uids := make([]sounddb.SoundURI, 0, len(mockData[guildID.String()]))
+func (m *ApiMockDB) GetSoundUIDs(guildID types.GuildID) ([]sounddb.SoundUID, error) {
+	uids := make([]sounddb.SoundUID, 0, len(mockData[guildID.String()]))
 	for id := range mockData[guildID.String()] {
-		uids = append(uids, sounddb.SoundURI{
-			GuildID: guildID,
-			SoundID: types.SoundID(id),
+		name, err := m.GetSoundNameByID(guildID, types.SoundID(id))
+		if err != nil {
+			return nil, err
+		}
+
+		uids = append(uids, sounddb.SoundUID{
+			GuildID:   guildID,
+			SoundName: name,
 		})
 	}
 	return uids, nil
 }
 
 // SoundExists implements sounddb.ISoundDB.
-func (*ApiMockDB) SoundExists(uid sounddb.SoundURI) (bool, error) {
-	_, ok := mockData[uid.GuildID.String()][uid.SoundID.String()]
+func (*ApiMockDB) SoundExists(uid sounddb.SoundUID) (bool, error) {
+	_, ok := mockData[uid.GuildID.String()][uid.SoundName.GetSoundID().String()]
 	return ok, nil
 }

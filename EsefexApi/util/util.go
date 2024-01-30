@@ -13,9 +13,13 @@ import (
 	"github.com/samber/lo"
 )
 
-func PathExists(path string) bool {
+func PathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
+	if err != nil && !os.IsNotExist(err) {
+		return false, errors.Wrap(err, "Error checking if path exists")
+	}
+
+	return !os.IsNotExist(err), nil
 }
 
 func ExtractIconUrl(icon *discordgo.ApplicationCommandInteractionDataOption) string {

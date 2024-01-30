@@ -19,9 +19,6 @@ go.work
 
 .env
 
-sounds/
-testsounds/
 data/
-database/
 
 log.*

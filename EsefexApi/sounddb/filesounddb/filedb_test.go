@@ -36,12 +36,13 @@ func TestFileDB(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Test that we can add a sound
-	uid, err := db.AddSound(guildID, soundName, icon, soundPcm)
+	uid, err := db.AddSound(guildID, types.SoundName(soundName), icon, soundPcm)
 	assert.Nil(t, err)
 
-	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_meta.json", config.Get().Database.SounddbLocation, guildID, uid.SoundID))
+	path := fmt.Sprintf("%s/%s/%s_meta.json", config.Get().Database.SounddbLocation, guildID, uid.SoundName.GetSoundID())
+	_, err = os.Stat(path)
 	assert.Nil(t, err)
-	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_sound.s16le", config.Get().Database.SounddbLocation, guildID, uid.SoundID))
+	_, err = os.Stat(fmt.Sprintf("%s/%s/%s_sound.s16le", config.Get().Database.SounddbLocation, guildID, uid.SoundName.GetSoundID()))
 	assert.Nil(t, err)
 
 	// Test that the sound exists
@@ -52,12 +53,12 @@ func TestFileDB(t *testing.T) {
 	// Test that we can get the sound
 	sound, err := db.GetSoundMeta(uid)
 	assert.Nil(t, err)
-	assert.Equal(t, sound, sounddb.SoundMeta{
-		SoundID: uid.SoundID,
+	assert.Equal(t, sounddb.SoundMeta{
+		SoundID: uid.SoundName.GetSoundID(),
 		GuildID: guildID,
-		Name:    soundName,
+		Name:    types.SoundName(soundName),
 		Icon:    icon,
-	})
+	}, sound)
 
 	// Test that we can get the sound pcm
 	soundPcm2, err := db.GetSoundPcm(uid)
@@ -72,7 +73,7 @@ func TestFileDB(t *testing.T) {
 	// Test that we can get the sound uids
 	uids, err := db.GetSoundUIDs(guildID)
 	assert.Nil(t, err)
-	assert.Equal(t, []sounddb.SoundURI{uid}, uids)
+	assert.Equal(t, []sounddb.SoundUID{uid}, uids)
 
 	// Test that we can delete the sound
 	err = db.DeleteSound(uid)

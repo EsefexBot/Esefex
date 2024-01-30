@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *DiscordPlayer) PlaySoundInsecure(uid sounddb.SoundURI, guildID types.GuildID, userID types.UserID) error {
+func (c *DiscordPlayer) PlaySoundInsecure(uid sounddb.SoundUID, guildID types.GuildID, userID types.UserID) error {
 	log.Printf("Playing sound %s\n", uid)
 
 	vd, err := c.ensureVCon(guildID, userID)

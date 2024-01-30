@@ -13,14 +13,24 @@ import (
 )
 
 // AddSound implements sounddb.SoundDB.
-func (f *FileDB) AddSound(guildID types.GuildID, name string, icon sounddb.Icon, pcm []int16) (sounddb.SoundURI, error) {
-	sid, err := f.generateSoundID(guildID)
+func (f *FileDB) AddSound(guildID types.GuildID, name types.SoundName, icon sounddb.Icon, pcm []int16) (sounddb.SoundUID, error) {
+	// check if sound already exists
+	suid := sounddb.SoundUID{
+		GuildID:   guildID,
+		SoundName: name,
+	}
+
+	exists, err := f.SoundExists(suid)
 	if err != nil {
-		return sounddb.SoundURI{}, errors.Wrap(err, "Error generating sound ID")
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error checking if sound exists")
+	}
+
+	if exists {
+		return sounddb.SoundUID{}, errors.Wrap(fmt.Errorf("Sound already exists, pick a different name or delete the existing sound"), "Sound already exists")
 	}
 
 	sound := sounddb.SoundMeta{
-		SoundID: sid,
+		SoundID: name.GetSoundID(),
 		GuildID: guildID,
 		Name:    name,
 		Icon:    icon,
@@ -31,7 +41,7 @@ func (f *FileDB) AddSound(guildID types.GuildID, name string, icon sounddb.Icon,
 	err = os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		log.Printf("Error creating guild folder: %+v", err)
-		return sounddb.SoundURI{}, errors.Wrap(err, "Error creating guild folder")
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error creating guild folder")
 	}
 
 	// write meta file
@@ -39,19 +49,19 @@ func (f *FileDB) AddSound(guildID types.GuildID, name string, icon sounddb.Icon,
 	metaFile, err := os.Create(path)
 	if err != nil {
 		log.Printf("Error creating meta file: %+v", err)
-		return sounddb.SoundURI{}, errors.Wrap(err, "Error creating meta file")
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error creating meta file")
 	}
 
 	metaJson, err := json.Marshal(sound)
 	if err != nil {
 		log.Printf("Error marshalling meta: %+v", err)
-		return sounddb.SoundURI{}, errors.Wrap(err, "Error marshalling meta")
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error marshalling meta")
 	}
 
 	_, err = metaFile.Write(metaJson)
 	if err != nil {
 		log.Printf("Error writing meta file: %+v", err)
-		return sounddb.SoundURI{}, errors.Wrap(err, "Error writing meta file")
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error writing meta file")
 	}
 	metaFile.Close()
 
@@ -62,13 +72,13 @@ func (f *FileDB) AddSound(guildID types.GuildID, name string, icon sounddb.Icon,
 	soundFile, err := os.Create(path)
 	if err != nil {
 		log.Printf("Error creating sound file: %+v", err)
-		return sounddb.SoundURI{}, errors.Wrap(err, "Error creating sound file")
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error creating sound file")
 	}
 
 	err = binary.Write(soundFile, binary.LittleEndian, pcm)
 	if err != nil {
 		log.Printf("Error writing sound file: %+v", err)
-		return sounddb.SoundURI{}, errors.Wrap(err, "Error writing sound file")
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error writing sound file")
 	}
 
 	return sound.GetUID(), nil

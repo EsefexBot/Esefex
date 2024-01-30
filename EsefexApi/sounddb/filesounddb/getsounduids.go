@@ -1,6 +1,7 @@
 package filesounddb
 
 import (
+	"encoding/json"
 	"esefexapi/sounddb"
 	"esefexapi/types"
 	"esefexapi/util"
@@ -13,10 +14,16 @@ import (
 )
 
 // GetSoundUIDs implements sounddb.SoundDB.
-func (f *FileDB) GetSoundUIDs(guildID types.GuildID) ([]sounddb.SoundURI, error) {
+func (f *FileDB) GetSoundUIDs(guildID types.GuildID) ([]sounddb.SoundUID, error) {
 	path := fmt.Sprintf("%s/%s", f.location, guildID)
-	if !util.PathExists(path) {
-		return make([]sounddb.SoundURI, 0), nil
+
+	pathExists, err := util.PathExists(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error checking if path exists")
+	}
+
+	if !pathExists {
+		return make([]sounddb.SoundUID, 0), nil
 	}
 
 	files, err := os.ReadDir(path)
@@ -25,14 +32,29 @@ func (f *FileDB) GetSoundUIDs(guildID types.GuildID) ([]sounddb.SoundURI, error)
 		return nil, errors.Wrap(err, "Error reading directory")
 	}
 
-	uids := make([]sounddb.SoundURI, 0)
+	uids := make([]sounddb.SoundUID, 0)
 
 	for _, file := range files {
 		name := file.Name()
-		nameSplits := strings.Split(name, "_")
+		// if its a meta file parse to json
+		if strings.HasSuffix(name, "_meta.json") {
+			// read the file
+			file, err := os.ReadFile(fmt.Sprintf("%s/%s", path, name))
+			if err != nil {
+				return nil, errors.Wrap(err, "Error reading meta file")
+			}
 
-		if len(nameSplits) == 2 && nameSplits[1] == "meta.json" {
-			uids = append(uids, sounddb.SuidFromStrings(guildID.String(), nameSplits[0]))
+			soundMeta := sounddb.SoundMeta{}
+
+			err = json.Unmarshal(file, &soundMeta)
+			if err != nil {
+				return nil, errors.Wrap(err, "Error reading meta file")
+			}
+
+			uids = append(uids, sounddb.SoundUID{
+				GuildID:   guildID,
+				SoundName: soundMeta.Name,
+			})
 		}
 	}
 
