@@ -20,5 +20,6 @@ go.work
 .env
 
 data/
+testsounds/
 
 log.*
