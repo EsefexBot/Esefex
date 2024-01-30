@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"esefexapi/sounddb"
 	"esefexapi/types"
+	"esefexapi/util/dcgoutil"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,9 +16,28 @@ import (
 func (h *RouteHandlers) GetSounds() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		guild_id := types.GuildID(vars["guild_id"])
+		guildId := types.GuildID(vars["guild_id"])
+		userID := r.Context().Value("user").(types.UserID)
 
-		uids, err := h.dbs.SoundDB.GetSoundUIDs(guild_id)
+		// check that the user is in the guild
+		inGuild, err := dcgoutil.UserInGuild(h.ds, guildId, userID)
+		if err != nil {
+			errorMsg := fmt.Sprintf("Error checking if user is in guild: %+v", err)
+
+			log.Println(errorMsg)
+			http.Error(w, errorMsg, http.StatusInternalServerError)
+			return
+		}
+
+		if !inGuild {
+			errorMsg := fmt.Sprintf("User is not in guild %s", guildId)
+
+			log.Println(errorMsg)
+			http.Error(w, errorMsg, http.StatusForbidden)
+			return
+		}
+
+		uids, err := h.dbs.SoundDB.GetSoundUIDs(guildId)
 		if err != nil {
 			errorMsg := fmt.Sprintf("Error getting sound uids: %+v", err)
 
@@ -55,7 +75,5 @@ func (h *RouteHandlers) GetSounds() http.Handler {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-
-		// log.Println("got /sounds request")
 	})
 }

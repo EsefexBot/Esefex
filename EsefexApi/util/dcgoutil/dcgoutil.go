@@ -201,3 +201,14 @@ func GuildUserIDs(ds *discordgo.Session, guildID types.GuildID) ([]types.UserID,
 func GetInviteLink(appID string) string {
 	return fmt.Sprintf("https://discord.com/api/oauth2/authorize?client_id=%s&permissions=%d&scope=bot%%20applications.commands", appID, config.Get().Bot.PermissionsInteger)
 }
+
+func UserInGuild(ds *discordgo.Session, guildID types.GuildID, userID types.UserID) (bool, error) {
+	member, err := ds.State.Member(guildID.String(), userID.String())
+	if err == discordgo.ErrStateNotFound {
+		return false, nil
+	} else if err != nil {
+		return false, errors.Wrap(err, "Error getting member")
+	}
+
+	return member.User.ID == userID.String(), nil
+}

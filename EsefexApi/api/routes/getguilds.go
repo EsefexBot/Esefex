@@ -13,6 +13,7 @@ type GuildInfo struct {
 	GuildName string `json:"guildName"`
 }
 
+// api/guilds
 func (h *RouteHandlers) GetGuilds() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value("user").(types.UserID)

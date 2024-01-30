@@ -59,10 +59,8 @@ func (api *HttpApi) run() {
 	router.Handle("/api/guild", cors(auth(h.GetGuild()))).Methods("GET").Headers("Cookie", "")
 	router.Handle("/api/guilds", cors(auth(h.GetGuilds()))).Methods("GET").Headers("Cookie", "")
 
-	router.Handle("/api/playsound/{user_id}/{guild_id}/{sound_id}", cors(h.PostPlaySoundInsecure())).Methods("POST")
 	router.Handle("/api/playsound/{sound_id}", cors(auth(h.PostPlaySound()))).Methods("POST").Headers("Cookie", "")
 
-	router.Handle("/joinsession/{guild_id}", cors(h.GetJoinSession())).Methods("GET")
 	router.Handle("/link", cors(h.GetLinkDefer())).Methods("GET").Queries("t", "{t}")
 	router.Handle("/api/link", cors(h.GetLinkRedirect())).Methods("GET").Queries("t", "{t}")
 
