@@ -6,6 +6,7 @@ import (
 	"esefexapi/util"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -63,6 +64,19 @@ var SoundCommand = &discordgo.ApplicationCommand{
 			Description: "Play a sound effect",
 			Type:        discordgo.ApplicationCommandOptionSubCommand,
 		},
+		{
+			Name:        "manage",
+			Description: "Manage sound effects",
+			Type:        discordgo.ApplicationCommandOptionSubCommand,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "sound-name",
+					Description: "The sound effect to manage",
+					Required:    true,
+				},
+			},
+		},
 	},
 }
 
@@ -76,6 +90,8 @@ func (c *CommandHandlers) Sound(s *discordgo.Session, i *discordgo.InteractionCr
 		return c.SoundList(s, i)
 	case "play":
 		return c.mw.CheckPerms(c.SoundPlay, "Sound.Play")(s, i)
+	case "manage":
+		return c.mw.CheckPerms(c.SoundManage, "Sound.Modify")(s, i)
 	default:
 		return nil, errors.Wrap(fmt.Errorf("Unknown subcommand %s", i.ApplicationCommandData().Options[0].Name), "Error handling user command")
 	}
@@ -129,37 +145,24 @@ func (c *CommandHandlers) SoundUpload(s *discordgo.Session, i *discordgo.Interac
 }
 
 func (c *CommandHandlers) SoundDelete(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
-	options := OptionsMap(i.ApplicationCommandData().Options[0].Options)
-	soundName := types.SoundName(fmt.Sprint(options["sound-name"].Value))
-
-	uid := sounddb.SoundUID{
-		GuildID:   types.GuildID(i.GuildID),
-		SoundName: soundName,
-	}
-
-	exists, err := c.dbs.SoundDB.SoundExists(uid)
+	uid, err := c.getSoundUIDfrominteraction(i, "sound-name")
 	if err != nil {
-		return nil, errors.Wrap(err, "Error checking if sound exists")
+		return nil, errors.Wrap(err, "Error getting sound UID")
 	}
-	if !exists {
-		return nil, errors.Wrap(fmt.Errorf("Sound effect %s does not exist", soundName), "Error deleting sound")
-	}
-
-	log.Print("a")
 
 	err = c.dbs.SoundDB.DeleteSound(uid)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error deleting sound")
 	}
 
-	log.Printf("Deleted sound effect %v from guild %v", soundName, i.GuildID)
+	log.Printf("Deleted sound effect %v from guild %v", uid.SoundName, i.GuildID)
 
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
 				{
-					Title: fmt.Sprintf("Deleted sound effect `%s`", soundName),
+					Title: fmt.Sprintf("Deleted sound effect `%s`", uid.SoundName),
 				},
 			},
 		},
@@ -171,7 +174,6 @@ func (c *CommandHandlers) SoundList(s *discordgo.Session, i *discordgo.Interacti
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting sound UIDs")
 	}
-	// log.Printf("List: %v", uids)
 
 	var metas = make([]sounddb.SoundMeta, 0, len(uids))
 	for _, uid := range uids {
@@ -192,7 +194,102 @@ func (c *CommandHandlers) SoundList(s *discordgo.Session, i *discordgo.Interacti
 	}, nil
 }
 
-// TODO: Implement SoundPlay
 func (c *CommandHandlers) SoundPlay(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
 	return nil, errors.Wrap(fmt.Errorf("Not implemented"), "Sound")
+}
+
+func (c *CommandHandlers) SoundManage(s *discordgo.Session, i *discordgo.InteractionCreate) (*discordgo.InteractionResponse, error) {
+	uid, err := c.getSoundUIDfrominteraction(i, "sound-name")
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting sound UID")
+	}
+
+	meta, err := c.dbs.SoundDB.GetSoundMeta(uid)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting sound meta")
+	}
+
+	return &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title: fmt.Sprintf("Manage sound effect `%s`", uid.SoundName),
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:   "Name",
+							Value:  meta.Name.String(),
+							Inline: true,
+						},
+						{
+							Name:   "Icon",
+							Value:  meta.Icon.String(),
+							Inline: true,
+						},
+						{
+							Name:   "Length",
+							Value:  util.FmtFloatDuration(meta.Length),
+							Inline: true,
+						},
+						{
+							Name:   "Created",
+							Value:  time.Unix(meta.Created, 0).Format(time.RFC1123),
+							Inline: true,
+						},
+					},
+				},
+			},
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.Button{
+							Label:    "Change Name",
+							Style:    discordgo.PrimaryButton,
+							CustomID: fmt.Sprintf("button.modify.name.%s.%s", i.GuildID, uid.SoundName),
+							Emoji: discordgo.ComponentEmoji{
+								Name: "📝",
+							},
+						},
+						discordgo.Button{
+							Label:    "Change Icon",
+							Style:    discordgo.PrimaryButton,
+							CustomID: fmt.Sprintf("button.modify.icon.%s.%s", i.GuildID, uid.SoundName),
+							Emoji: discordgo.ComponentEmoji{
+								Name: "🖼️",
+							},
+						},
+						discordgo.Button{
+							Label:    "Delete",
+							Style:    discordgo.DangerButton,
+							CustomID: fmt.Sprintf("button.modify.delete.%s.%s", i.GuildID, uid.SoundName),
+							Emoji: discordgo.ComponentEmoji{
+								Name: "🗑️",
+							},
+						},
+					},
+				},
+			},
+		},
+	}, nil
+}
+
+func (c *CommandHandlers) getSoundUIDfrominteraction(i *discordgo.InteractionCreate, opName string) (sounddb.SoundUID, error) {
+	options := OptionsMap(i.ApplicationCommandData().Options[0].Options)
+	soundName := types.SoundName(fmt.Sprint(options[opName].Value))
+
+	uid := sounddb.SoundUID{
+		GuildID:   types.GuildID(i.GuildID),
+		SoundName: soundName,
+	}
+
+	exists, err := c.dbs.SoundDB.SoundExists(uid)
+	if err != nil {
+		return sounddb.SoundUID{}, errors.Wrap(err, "Error checking if sound exists")
+	}
+
+	if !exists {
+		return sounddb.SoundUID{}, errors.Wrap(fmt.Errorf("Sound effect %s does not exist", soundName), "Sound does not exist")
+	}
+
+	return uid, nil
 }

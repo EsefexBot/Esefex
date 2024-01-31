@@ -96,10 +96,14 @@ func FirstNRunes(s string, n int) string {
 
 // inputs a float like 83.232 (seconds)
 // outputs a string like "1:23.23"
-func FmtFloatTime(t float32) string {
+func FmtFloatDuration(t float32) string {
 	minutes := int(t) / 60
 	seconds := int(t) % 60
 	millis := int(t*100) % 100
 
 	return fmt.Sprintf("%d:%02d.%02d", minutes, seconds, millis)
+}
+
+func Ptr[T any](v T) *T {
+	return &v
 }

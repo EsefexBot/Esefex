@@ -42,7 +42,7 @@ func (b *DiscordBot) run() {
 
 	ready := b.WaitReady()
 
-	b.cmdh.RegisterComandHandlers()
+	b.cmdh.RegisterApplicationComandHandlers()
 	b.RegisterClientUpdateHandlers()
 
 	err := ds.Open()

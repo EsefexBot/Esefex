@@ -97,6 +97,7 @@ Body: []{
         url: string // The url of the emoji image
     },
     length: float32 // The length of the sound in seconds
+    created: int64 // The unix timestamp of when the sound was created
 } | error
 Cross Origin: *
 Authorization Required: true

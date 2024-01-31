@@ -40,6 +40,22 @@ func (m *CommandMiddleware) WithErrorHandling(next cmdhandler.CommandHandlerWith
 			err = s.InteractionRespond(i.Interaction, r)
 			if err != nil {
 				log.Printf("Cannot respond to interaction: %+v", err)
+
+				err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{
+							{
+								Title:       "Could not send response to interaction",
+								Color:       0xff0000,
+								Description: fmt.Sprintf("```%+v```", errors.Cause(err)),
+							},
+						},
+					},
+				})
+				if err != nil {
+					log.Printf("Cannot respond to interaction: %+v", err)
+				}
 			}
 		}
 	}

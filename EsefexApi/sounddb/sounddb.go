@@ -24,4 +24,5 @@ type SoundMeta struct {
 	Name    types.SoundName `json:"name"`
 	Icon    Icon            `json:"icon"`
 	Length  float32         `json:"length"`
+	Created int64           `json:"created"`
 }
